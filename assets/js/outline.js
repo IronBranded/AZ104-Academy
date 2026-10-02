@@ -1,4 +1,4 @@
-/* outline.js - SC-500 guide
+/* outline.js - Academy engine
    In-page navigation for long modules.
 
    03-04 carries nine sub-objectives and runs to a dozen sections; 03-05's lab
@@ -30,9 +30,14 @@
 
       /* tabs.js may have folded an h2 into a <summary>; handle both. */
       var label = h.textContent.trim();
-      var id = slug(label) || 'section-' + i;
-      if (seen[id]) { id = id + '-' + (++seen[id]); } else { seen[id] = 1; }
-      h.id = id;
+      /* Keep an id another component set on purpose: lesson.js names the
+         Exam Lens heading so its aside can point aria-labelledby at it, and
+         overwriting it left that label pointing at nothing. */
+      var id = h.id || slug(label) || 'section-' + i;
+      if (!h.id) {
+        if (seen[id]) { id = id + '-' + (++seen[id]); } else { seen[id] = 1; }
+        h.id = id;
+      }
 
       if (h.querySelector('.anchor')) continue;
       var a = document.createElement('a');
@@ -156,5 +161,5 @@
     watch(items);
   }
 
-  global.SC500Outline = { mount: mount };
+  global.AcademyOutline = { mount: mount };
 })(window);

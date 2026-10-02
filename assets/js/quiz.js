@@ -1,4 +1,4 @@
-/* quiz.js - SC-500 guide
+/* quiz.js - Academy engine
    Knowledge checks.
 
    Quiz data lives in quizzes/<module-id>.json, deliberately separate from the
@@ -33,8 +33,8 @@
 (function (global) {
   'use strict';
 
-  var P = function () { return global.SC500Progress; };
-  var D = function () { return global.SC500Domains; };
+  var P = function () { return global.AcademyProgress; };
+  var D = function () { return global.AcademyDomains; };
   var seq = 0;
 
   function node(tag, cls, text) {
@@ -298,7 +298,7 @@
 
   function mount(root, route) {
     if (route.kind !== 'module' || !route.moduleId) return;
-    var C = global.SC500Curriculum;
+    var C = global.AcademyCurriculum;
 
     var ready = C ? C.load().catch(function () { return null; }) : Promise.resolve(null);
     ready.then(function (model) {
@@ -351,7 +351,7 @@
     renderSet(host, recs, {
       model: model,
       onAnswer: function (rec, ok, t) {
-        if (global.SC500Lesson && global.SC500Lesson.refresh) global.SC500Lesson.refresh();
+        if (global.AcademyLesson && global.AcademyLesson.refresh) global.AcademyLesson.refresh();
         if (t.count < t.total) return;
         /* Everything answered once: store the whole-quiz record the older
            views (Readiness, practice review) still read. */
@@ -372,12 +372,12 @@
         } else {
           summary.appendChild(node('p', null, 'Knowledge check complete for this lesson.'));
         }
-        if (global.SC500Nav) global.SC500Nav.refreshProgress();
-        if (global.SC500Lesson && global.SC500Lesson.refresh) global.SC500Lesson.refresh();
+        if (global.AcademyNav) global.AcademyNav.refreshProgress();
+        if (global.AcademyLesson && global.AcademyLesson.refresh) global.AcademyLesson.refresh();
       }
     });
     host.appendChild(summary);
   }
 
-  global.SC500Quiz = { mount: mount, renderSet: renderSet, questionCard: questionCard };
+  global.AcademyQuiz = { mount: mount, renderSet: renderSet, questionCard: questionCard };
 })(window);

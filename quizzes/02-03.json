@@ -1,124 +1,273 @@
 {
-  "module": "02-03",
-  "title": "Network Segmentation and Connectivity",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "02-03-q1",
-      "sub_skill": "Implement and configure network access policies by using Azure Virtual Network Manager",
-      "prompt": "A central team needs a rule denying inbound RDP from the internet that no application team can override with their own NSG. Which action on a Virtual Network Manager security admin rule achieves this?",
-      "options": [
-        "Allow, because it takes precedence over NSG rules",
-        "AlwaysAllow, because it stops further evaluation",
-        "Deny, because no NSG can permit traffic an admin rule has denied",
-        "Any action, because admin rules always override NSGs"
-      ],
-      "answer": 2,
-      "explanation": "Security admin rules are evaluated before NSGs. Deny blocks and stops evaluation, so the NSG never runs. Allow permits evaluation to continue, meaning an NSG can still deny. AlwaysAllow stops evaluation in the other direction - use it for traffic that must survive an over-broad local deny.",
-      "why_not": [
-        "Allow lets evaluation continue to the NSG, which can still decide the outcome - including permitting RDP.",
-        "AlwaysAllow ends evaluation by guaranteeing traffic is permitted - the opposite of the requirement.",
-        null,
-        "Only Deny and AlwaysAllow end evaluation. Allow hands the decision to the NSG."
-      ]
-    },
-    {
-      "id": "02-03-q2",
-      "sub_skill": "Implement and configure network access policies by using Azure Virtual Network Manager",
-      "prompt": "A security admin configuration is saved with the correct rules targeting the correct network group, and has no effect on any virtual network. What is missing?",
-      "options": [
-        "The rule collection priority is above 4096",
-        "The configuration was never deployed to a region",
-        "The network group uses static rather than dynamic membership",
-        "The virtual networks lack an NSG for the admin rules to override"
-      ],
-      "answer": 1,
-      "explanation": "Nothing takes effect until you deploy the configuration to the regions in use. A saved-but-undeployed configuration produces no enforcement, no error and no clue in the rule view, which makes it the classic 'why isn't my rule working' answer.",
-      "why_not": [
-        "Rule priority orders rules within a configuration that is in force. It cannot explain a configuration having no effect at all.",
-        null,
-        "Static and dynamic membership only change how virtual networks join the group. With the right members, either works.",
-        "Security admin rules do not need an NSG to exist. They are evaluated whether or not one is present."
-      ]
-    },
-    {
-      "id": "02-03-q3",
-      "sub_skill": "Implement and manage network security groups (NSGs) and application security groups (ASGs)",
-      "prompt": "A NIC has an NSG allowing TCP 443 inbound at priority 200 and denying it at priority 150. The subnet NSG allows 443 at priority 100. Does traffic on 443 reach the VM?",
-      "options": [
-        "Yes - the subnet NSG allows it and subnet rules take precedence",
-        "Yes - the lowest priority number across both NSGs wins",
-        "No - traffic must pass both NSGs, and the NIC NSG denies at 150 before reaching 200",
-        "No - NSGs are stateless, so a matching outbound rule is also required"
-      ],
-      "answer": 2,
-      "explanation": "Inbound traffic is evaluated against the subnet NSG first, then the NIC NSG, and must pass both. Within the NIC NSG, first match wins and 150 is evaluated before 200. NSGs are stateful, so no outbound rule is needed for return traffic.",
-      "why_not": [
-        "Subnet rules do not take precedence. Inbound traffic must pass the subnet NSG and then the NIC NSG.",
-        "Priority numbers are compared only within one NSG. Each NSG is evaluated on its own, and both must allow.",
-        null,
-        "NSGs are stateful, so return traffic needs no outbound rule."
-      ]
-    },
-    {
-      "id": "02-03-q4",
-      "sub_skill": "Implement and manage network security groups (NSGs) and application security groups (ASGs)",
-      "prompt": "You need flow-level logging for traffic allowed and denied across your virtual networks. What should you configure?",
-      "options": [
-        "NSG flow logs, with traffic analytics enabled",
-        "Virtual network flow logs",
-        "Diagnostic settings on each network security group",
-        "Connection monitor in Network Watcher"
-      ],
-      "answer": 1,
-      "explanation": "NSG flow logs cannot be created - new ones have been unavailable since 30 June 2025 - and the feature retires on 30 September 2027. Virtual network flow logs replace them, and they are also the only place traffic allowed or denied by Virtual Network Manager security admin rules is visible.",
-      "why_not": [
-        "New NSG flow logs cannot be created since 30 June 2025, and the feature retires on 30 September 2027.",
-        null,
-        "Diagnostic settings on an NSG do not produce flow-level records. Flow logging is a Network Watcher feature, and virtual network flow logs are its current form.",
-        "Connection monitor tests reachability between endpoints. It does not log the flows passing through your networks."
-      ]
-    },
-    {
-      "id": "02-03-q5",
-      "sub_skill": "Implement and configure security for virtual private network (VPN) connections",
-      "prompt": "Remote users connecting over point-to-site VPN must be subject to Conditional Access and MFA. Which configuration is required?",
-      "options": [
-        "IKEv2 with certificate authentication",
-        "SSTP with RADIUS authentication",
-        "OpenVPN with Microsoft Entra ID authentication",
-        "Any tunnel type, with Entra ID authentication selected"
-      ],
-      "answer": 2,
-      "explanation": "Microsoft Entra ID authentication for point-to-site requires the OpenVPN tunnel type. IKEv2 and SSTP support certificate and RADIUS authentication only, neither of which brings the connection under Conditional Access.",
-      "why_not": [
-        "IKEv2 supports certificate and RADIUS authentication only, neither of which brings the connection under Conditional Access.",
-        "SSTP supports certificate and RADIUS authentication only. Entra ID authentication needs OpenVPN.",
-        null,
-        "Entra ID authentication is available only with the OpenVPN tunnel type."
-      ]
-    },
-    {
-      "id": "02-03-q6",
-      "sub_skill": "Configure security for an Azure Virtual WAN",
-      "prompt": "Your Virtual WAN hub connects spoke virtual networks and branch offices. Traffic between any two spokes, and between branches and spokes, must be inspected by Azure Firewall in the hub. Internet-bound traffic must also be inspected, and must then leave through the on-premises default route rather than directly from Azure. What should you configure?",
-      "options": [
-        "Deploy Azure Firewall in the hub, and configure routing intent with a private routing policy and an internet routing policy in Forced Tunnel mode",
-        "Deploy Azure Firewall in the hub, and configure routing intent with a private routing policy and an internet routing policy in Direct Access mode",
-        "Deploy Azure Firewall in the hub, and configure routing intent with only an internet routing policy in Forced Tunnel mode",
-        "Deploy Azure Firewall in the hub, and add a user-defined route sending 0.0.0.0/0 to the firewall on every spoke subnet"
-      ],
-      "answer": 0,
-      "explanation": "A secured virtual hub inspects what routing intent sends through it. The private routing policy covers traffic between virtual networks, branches and ExpressRoute; the internet routing policy covers internet-bound traffic, and Forced Tunnel mode sends it on through a 0.0.0.0/0 next hop learnt from on-premises instead of straight out. If no such route exists, Forced Tunnel blocks internet-bound traffic rather than falling back.",
-      "why_not": [
-        null,
-        "Direct Access sends internet traffic straight out to the internet after inspection, not through on-premises.",
-        "Without a private routing policy, traffic between spokes and between branches and spokes is not sent through the firewall.",
-        "Spoke route tables only affect traffic leaving the spokes. They do not bring branch traffic through the firewall or send internet traffic via on-premises; routing intent is the hub's own mechanism for both."
-      ],
-      "difficulty": "scenario",
-      "concept": "Secured virtual hub and routing intent",
-      "misconception": "An internet routing policy also covers private traffic"
-    }
-  ]
+ "module": "02-03",
+ "title": "Azure Files and Blob Storage",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "02-03-q1",
+   "sub_skill": "Create and configure a file share in Azure Files",
+   "prompt": "You're creating a new Azure file share and have no specific reason to choose otherwise. Which billing model does Microsoft recommend?",
+   "options": [
+    "Pay-as-you-go, transaction optimized",
+    "Provisioned v1",
+    "Provisioned v2",
+    "Pay-as-you-go, cool"
+   ],
+   "answer": 2,
+   "explanation": "Microsoft recommends the provisioned v2 model for all new Azure Files deployments: you provision storage, IOPS and throughput independently.",
+   "why_not": [
+    "Microsoft recommends provisioned v2 unless you have a specific reason for pay-as-you-go.",
+    "Microsoft recommends v2 unless you have a specific reason for v1.",
+    null,
+    "Cool suits rarely accessed data; it isn't the general recommendation for new deployments."
+   ]
+  },
+  {
+   "id": "02-03-q2",
+   "sub_skill": "Create and configure a file share in Azure Files",
+   "prompt": "A pay-as-you-go file share is about to receive a large migration with millions of small writes. Which access tier should it start in?",
+   "options": [
+    "Transaction optimized",
+    "Cool",
+    "Hot",
+    "Archive"
+   ],
+   "answer": 0,
+   "explanation": "Transaction optimized has the lowest transaction prices. Microsoft suggests creating the share there for migration, then re-evaluating.",
+   "why_not": [
+    null,
+    "Cool has the highest transaction prices, the worst choice for a write-heavy migration.",
+    "Hot has higher transaction prices than transaction optimized.",
+    "Azure Files pay-as-you-go tiers are transaction optimized, hot and cool; there's no archive tier."
+   ]
+  },
+  {
+   "id": "02-03-q3",
+   "sub_skill": "Create and configure a container in Azure Blob Storage",
+   "prompt": "Anonymous users must be able to list the blobs in a container and read them. The account allows anonymous blob access. Which container access level do you set?",
+   "options": [
+    "Blob",
+    "Private",
+    "Hot",
+    "Container"
+   ],
+   "answer": 3,
+   "explanation": "The Container level allows anonymous read of blobs and of the container's listing. Blob allows blob reads only.",
+   "why_not": [
+    "Blob allows anonymous reads of blobs but not listing the container.",
+    "Private allows no anonymous access.",
+    "Hot is an access tier, not an access level.",
+    null
+   ]
+  },
+  {
+   "id": "02-03-q4",
+   "sub_skill": "Create and configure a container in Azure Blob Storage",
+   "prompt": "Which is a valid blob container name?",
+   "options": [
+    "Finance_Reports",
+    "finance-reports-2026",
+    "fr",
+    "finance--reports"
+   ],
+   "answer": 1,
+   "explanation": "Container names are 3-63 characters of lowercase letters, numbers and single hyphens, starting with a letter or number.",
+   "why_not": [
+    "Container names can't contain uppercase letters or underscores.",
+    null,
+    "Container names must be at least 3 characters.",
+    "Consecutive hyphens aren't allowed."
+   ]
+  },
+  {
+   "id": "02-03-q5",
+   "sub_skill": "Configure storage tiers",
+   "prompt": "Compliance data must be kept for seven years, is almost never read, and retrieval within several hours is acceptable. The account is LRS. Which tier minimises storage cost?",
+   "options": [
+    "Cold",
+    "Cool",
+    "Archive",
+    "Hot"
+   ],
+   "answer": 2,
+   "explanation": "Archive has the lowest storage cost, is offline, and suits data that can wait hours to be read. LRS accounts support it.",
+   "why_not": [
+    "Cold is online and costs more per GB than archive; immediate access isn't needed.",
+    "Cool costs more per GB than cold and archive.",
+    null,
+    "Hot has the highest storage cost."
+   ]
+  },
+  {
+   "id": "02-03-q6",
+   "sub_skill": "Configure storage tiers",
+   "prompt": "You must read an archived 2 GB blob urgently, but not pay an early-deletion fee, because it was archived only 40 days ago. What should you do?",
+   "options": [
+    "Copy the blob to a new blob in the hot tier with High rehydration priority",
+    "Set the blob's tier to Hot with High priority",
+    "Create a lifecycle rule to move it to hot",
+    "Download it directly with AzCopy"
+   ],
+   "answer": 0,
+   "explanation": "Copy Blob to a new name leaves the source in archive, so no early-deletion fee applies. High priority can complete in under an hour for blobs under 10 GB.",
+   "why_not": [
+    null,
+    "Changing the archived blob's tier before 180 days incurs the early-deletion fee.",
+    "Lifecycle management can't rehydrate archived blobs.",
+    "Archived blobs are offline and can't be read until rehydrated."
+   ]
+  },
+  {
+   "id": "02-03-q7",
+   "sub_skill": "Configure soft delete for blobs and containers",
+   "prompt": "Blob soft delete is enabled with 14 days' retention. A user deletes the whole container projects. What happens?",
+   "options": [
+    "You can undelete the container for 14 days",
+    "Each blob can be undeleted individually for 14 days",
+    "The container is locked and can't be deleted",
+    "The container and its blobs are gone; blob soft delete doesn't restore containers, only container soft delete does"
+   ],
+   "answer": 3,
+   "explanation": "Microsoft notes that restoring a container and its contents requires container soft delete to be enabled as well.",
+   "why_not": [
+    "Blob soft delete protects individual blobs, not containers.",
+    "Deleting the container removes its blobs; blob soft delete doesn't cover container deletion.",
+    "Soft delete doesn't prevent deletion.",
+    null
+   ]
+  },
+  {
+   "id": "02-03-q8",
+   "sub_skill": "Configure soft delete for blobs and containers",
+   "prompt": "Container soft delete is on. Container billing was deleted, and a script immediately created a new empty container named billing. What is true?",
+   "options": [
+    "You can restore it under a different name",
+    "You can't restore the soft-deleted container while a container with its original name exists",
+    "The two containers are merged on restore",
+    "The new container is automatically replaced by the old one"
+   ],
+   "answer": 1,
+   "explanation": "A soft-deleted container must be restored under its original name. If a new container with that name has been created, the old one can't be restored.",
+   "why_not": [
+    "Containers must be restored to their original name.",
+    null,
+    "There's no merge; the name conflict prevents the restore.",
+    "Nothing is replaced automatically."
+   ]
+  },
+  {
+   "id": "02-03-q9",
+   "sub_skill": "Configure snapshots and soft delete for Azure Files",
+   "prompt": "A user deleted one folder from an Azure file share. Share soft delete is enabled, and nightly share snapshots exist. How do you recover the folder?",
+   "options": [
+    "Undelete it with share soft delete",
+    "Use blob versioning",
+    "Restore it from a share snapshot",
+    "Enable container soft delete"
+   ],
+   "answer": 2,
+   "explanation": "Share snapshots are read-only point-in-time copies from which you can restore individual files and folders, in the portal or with File Explorer Previous Versions.",
+   "why_not": [
+    "Share soft delete works only at share level; it restores deleted shares, not files or folders.",
+    "Versioning applies to blobs, not Azure Files.",
+    null,
+    "That's a Blob Storage feature, not Azure Files."
+   ]
+  },
+  {
+   "id": "02-03-q10",
+   "sub_skill": "Configure snapshots and soft delete for Azure Files",
+   "prompt": "A nightly job takes a share snapshot. One night it fails with error 409. What is the most likely cause?",
+   "options": [
+    "The share already has 200 snapshots, the maximum",
+    "Share soft delete is enabled",
+    "The share is in the transaction optimized tier",
+    "Snapshots only work on NFS shares"
+   ],
+   "answer": 0,
+   "explanation": "Azure Files supports up to 200 snapshots per share. Creating more returns 409 until older snapshots are deleted.",
+   "why_not": [
+    null,
+    "Soft delete doesn't block snapshots.",
+    "Every tier supports snapshots.",
+    "Snapshots work for SMB and NFS shares."
+   ]
+  },
+  {
+   "id": "02-03-q11",
+   "sub_skill": "Configure blob lifecycle management",
+   "prompt": "A lifecycle rule moves blobs to archive 90 days after modification. An administrator rehydrates one to hot, and the next day it's back in archive. How do you prevent this in the rule?",
+   "options": [
+    "Enable access time tracking",
+    "Set the rule to run weekly",
+    "Add enableAutoTierToHotFromCool",
+    "Add daysAfterLastTierChangeGreaterThan to the tierToArchive action"
+   ],
+   "answer": 3,
+   "explanation": "Rehydration doesn't update the last-modified time, so the archive rule matches again. daysAfterLastTierChangeGreaterThan keeps rehydrated blobs online for a minimum period.",
+   "why_not": [
+    "It changes nothing for a rule based on modification time.",
+    "Lifecycle policies run once a day; you can't change the schedule.",
+    "That moves cool blobs to hot on access; it doesn't stop re-archiving.",
+    null
+   ]
+  },
+  {
+   "id": "02-03-q12",
+   "sub_skill": "Configure blob lifecycle management",
+   "prompt": "You need blobs that haven't been READ for 60 days to move to cool automatically. What must be configured?",
+   "options": [
+    "A rule using daysAfterModificationGreaterThan 60",
+    "Access time tracking on the account, and a rule using daysAfterLastAccessTimeGreaterThan",
+    "Blob versioning",
+    "A rule using daysAfterCreationGreaterThan 60"
+   ],
+   "answer": 1,
+   "explanation": "daysAfterLastAccessTimeGreaterThan uses the LastAccessTime property, which is maintained only when access time tracking is enabled.",
+   "why_not": [
+    "Modification time doesn't reflect reads.",
+    null,
+    "Versioning doesn't record access times.",
+    "Creation time doesn't reflect reads either."
+   ]
+  },
+  {
+   "id": "02-03-q13",
+   "sub_skill": "Configure blob versioning",
+   "prompt": "Blob versioning and soft delete are enabled. A blob is deleted. An administrator clicks Undelete, but the blob still has no current version. What should they do?",
+   "options": [
+    "Promote a previous version to current (Make current version, or copy the version over the base blob)",
+    "Wait for the soft delete retention to finish",
+    "Disable versioning, then Undelete again",
+    "Rehydrate the blob"
+   ],
+   "answer": 0,
+   "explanation": "With versioning enabled, deleting a blob makes the current version a previous version. Undelete restores soft-deleted versions but not the current one; you promote a previous version.",
+   "why_not": [
+    null,
+    "That would permanently delete soft-deleted versions, not restore anything.",
+    "Disabling versioning doesn't restore the current version.",
+    "Rehydration applies to the archive tier, not deleted blobs."
+   ]
+  },
+  {
+   "id": "02-03-q14",
+   "sub_skill": "Configure blob versioning",
+   "prompt": "After enabling blob versioning on a busy account, storage costs grow every week. What is the recommended way to control them?",
+   "options": [
+    "Disable soft delete",
+    "Move the account to ZRS",
+    "A lifecycle rule that deletes previous versions after a set number of days",
+    "Reduce the container soft delete retention"
+   ],
+   "answer": 2,
+   "explanation": "Versions are kept until explicitly deleted. Lifecycle management can delete previous versions by age.",
+   "why_not": [
+    "Soft delete isn't what's accumulating; versions are kept until deleted.",
+    "Redundancy doesn't reduce the number of stored versions.",
+    null,
+    "That doesn't affect blob versions."
+   ]
+  }
+ ]
 }

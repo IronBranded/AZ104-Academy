@@ -1,4 +1,4 @@
-/* sections.js - SC-500 guide
+/* sections.js - Academy engine
    Section silhouettes.
 
    Every module is built from the same six or seven shapes, and right now they
@@ -111,11 +111,11 @@
 
      The content already writes its warnings as blockquotes opening with a bold
      lead - "**Cost warning, read before clicking.**", "**Licensing gate.**",
-     "**AZ-500 divergence.**". Rather than asking 27 files to adopt a new syntax,
+     "**Exam note.**" (and the SC-500 era "**AZ-500 divergence.**"). Rather than asking every file to adopt a new syntax,
      detect the lead and colour-code what is already there. */
   var CALLOUTS = [
     { kind: 'warn',     test: /^(cost|warning|caution|danger|licensing gate|cost gate|cost warning|cost box|mandatory|do not|never)\b/i },
-    { kind: 'exam',     test: /^(az-500 divergence|exam|on the exam|changing default|dated change|naming|status:|portal transition)\b/i },
+    { kind: 'exam',     test: /^(az-500 divergence|exam note|exam|on the exam|changing default|dated change|naming|status:|portal transition)\b/i },
     { kind: 'tactical', test: /^(forensic|in an investigation|tactical|note that|detail worth|one-glance)\b/i }
   ];
 
@@ -169,5 +169,5 @@
     tagCallouts(root);
   }
 
-  global.SC500Sections = { mount: mount, shapes: SHAPES, tagCallouts: tagCallouts, tagTables: tagTables, tagTeardown: tagTeardown };
+  global.AcademySections = { mount: mount, shapes: SHAPES, tagCallouts: tagCallouts, tagTables: tagTables, tagTeardown: tagTeardown };
 })(window);

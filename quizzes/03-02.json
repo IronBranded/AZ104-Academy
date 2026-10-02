@@ -1,102 +1,311 @@
 {
-  "module": "03-02",
-  "title": "AI Agent Identity and Governance",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "03-02-q1",
-      "sub_skill": "Implement conditional access for Microsoft Entra Agent ID",
-      "prompt": "Your tenant requires MFA for All users. You deploy your first autonomous agent and it fails to acquire a token. What is the cause and the fix?",
-      "options": [
-        "The agent's blueprint lacks a client secret; issue one",
-        "Agents cannot satisfy interactive controls such as MFA — exclude agent identities from the broad policy and write dedicated agent policies using identity filters, risk and named locations",
-        "Conditional Access does not apply to agents at all; the failure is unrelated",
-        "The agent needs a Global Secure Access licence before it can acquire tokens"
-      ],
-      "answer": 1,
-      "explanation": "There is no human to complete an MFA challenge. Microsoft's guidance is to audit broad policies for agent impact, exclude agents, and build dedicated policies from controls agents can actually satisfy. Conditional Access does apply to agent identities requesting tokens for a resource.",
-      "why_not": [
-        "A client secret does not help. The failure is the MFA requirement, which no credential lets an agent satisfy.",
-        null,
-        "Conditional Access does apply to agent identities requesting tokens for a resource - that is exactly why the broad MFA policy caught the agent.",
-        "No licence lets an agent complete an MFA challenge. There is no human to complete it."
-      ]
-    },
-    {
-      "id": "03-02-q2",
-      "sub_skill": "Analyze blast radius for security risks related to Entra Agent ID by using Defender XDR",
-      "prompt": "Two agents have identical tools and grounding sources. One runs on-behalf-of a signed-in user; the other is autonomous. How do their blast radii compare?",
-      "options": [
-        "Identical, because the tools are identical",
-        "The autonomous agent's is larger in every case",
-        "The on-behalf-of agent's varies with whoever is talking to it, because it acts with that user's permissions; the autonomous agent's is fixed at whatever its own identity holds",
-        "Neither has a blast radius until a credential is compromised"
-      ],
-      "answer": 2,
-      "explanation": "An on-behalf-of agent acts with the signed-in user's identity and permissions, so its reach changes per user. An autonomous agent has no user context, so its own assignments are the whole of its reach. Blast radius here is about subversion of instructions, not credential theft.",
-      "why_not": [
-        "Identical tools do not mean identical reach. The on-behalf-of agent acts with each user's permissions, so its reach changes per user.",
-        "Not in every case. An on-behalf-of agent serving a highly privileged user can reach more than an autonomous agent with narrow assignments.",
-        null,
-        "Blast radius here is about subverting the agent's instructions, not stealing a credential. It exists as soon as the agent can act."
-      ]
-    },
-    {
-      "id": "03-02-q3",
-      "sub_skill": "Enable and configure real-time protection for Microsoft Copilot Studio agents",
-      "prompt": "You enable advanced real-time protection in the Microsoft Defender portal. Agents remain unprotected. What is missing, and what would have told you?",
-      "options": [
-        "A Copilot Studio licence; the agent would show as Unlicensed",
-        "The corresponding Power Platform administrator step; a protected agent shows as Connected in the Security for AI settings",
-        "An Entra Agent ID blueprint; the agent would not appear in the inventory",
-        "A Defender for Cloud Apps connector; the agent would show as Discovered"
-      ],
-      "answer": 1,
-      "explanation": "Advanced real-time protection is a two-sided configuration. The Defender portal step and the Power Platform step are both required, and the indicator that protection is live is the agent showing as Connected in the Security for AI settings.",
-      "why_not": [
-        "Licensing is not the missing piece. Advanced real-time protection needs both the Defender portal step and the Power Platform step.",
-        null,
-        "An agent's identity blueprint is not what enables runtime protection. The missing half is the Power Platform administrator step.",
-        "A Defender for Cloud Apps connector is not what is missing. The configuration needs the Power Platform step, and the agent showing as Connected in the Security for AI settings confirms it."
-      ]
-    },
-    {
-      "id": "03-02-q4",
-      "sub_skill": "Manage Entra Agent ID access",
-      "prompt": "An agent created eight months ago by a departed employee still runs nightly with nobody accountable. Which mechanisms should have prevented this?",
-      "options": [
-        "A Conditional Access policy blocking high-risk agent identities",
-        "An entitlement management access package with an expiry, plus a sponsorship lifecycle workflow that transfers sponsorship when a sponsor leaves",
-        "Advanced real-time protection on the agent's runtime",
-        "Assigning the agent to a dedicated Security Copilot workspace"
-      ],
-      "answer": 1,
-      "explanation": "Access packages make an agent's access expire unless someone re-confirms it, and lifecycle workflow templates for sponsorship transfer exist specifically to prevent orphaned agents. Conditional Access governs how an agent gets tokens, not who is accountable for it.",
-      "why_not": [
-        "Conditional Access governs how an agent gets tokens, not who is accountable for it.",
-        null,
-        "Runtime protection inspects what an agent does while it runs. It does not expire access or transfer ownership.",
-        "A Security Copilot workspace has nothing to do with an agent's ownership or access expiry."
-      ]
-    },
-    {
-      "id": "03-02-q5",
-      "sub_skill": "Manage agents in Microsoft 365 admin center",
-      "prompt": "Any licensed user in your tenant can build a Copilot Studio agent. Where do you take a tenant-wide inventory and block ones you do not want?",
-      "options": [
-        "Entra admin center, under Agent ID blueprints",
-        "Microsoft 365 admin center agent management",
-        "Defender portal, under Security for AI agents",
-        "Power Platform admin center environments only"
-      ],
-      "answer": 1,
-      "explanation": "The Microsoft 365 admin center provides the tenant-wide agent inventory with ownership, risk indicators, and the ability to block or disable. Shadow agents are the governance problem here, and you cannot govern an inventory you have not taken.",
-      "why_not": [
-        "Agent ID blueprints are identity constructs in Entra. The tenant-wide agent inventory with block and disable is in the Microsoft 365 admin center.",
-        null,
-        "The Defender portal is where runtime protection is configured, not where the tenant-wide inventory with block and disable lives.",
-        "Power Platform environments are only part of the picture. The tenant-wide inventory is in the Microsoft 365 admin center."
-      ]
-    }
-  ]
+ "module": "03-02",
+ "title": "Virtual Machines",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "03-02-q1",
+   "sub_skill": "Create a virtual machine",
+   "prompt": "An administrator shuts down a VM from inside Windows. The portal shows it as Stopped. Is the VM still billed for compute?",
+   "options": [
+    "No, a stopped VM never incurs compute charges",
+    "Yes; only a Stopped (deallocated) VM stops compute billing",
+    "Only if it has a public IP",
+    "No, but the temporary disk is billed"
+   ],
+   "answer": 1,
+   "explanation": "A VM stopped from the guest OS is still allocated and billed for compute. Deallocate it with the portal, CLI, PowerShell or API.",
+   "why_not": [
+    "Stopped from within the OS, the compute stays allocated and billed.",
+    null,
+    "Public IPs are billed separately; the question is the compute.",
+    "The temporary disk isn't billed separately; compute is."
+   ]
+  },
+  {
+   "id": "03-02-q2",
+   "sub_skill": "Create a virtual machine",
+   "prompt": "An application writes its cache to the VM's temporary disk. After a deallocation and restart, the cache is empty. What explains this?",
+   "options": [
+    "The OS disk was reimaged",
+    "Server-side encryption cleared the disk",
+    "The disk exceeded its quota",
+    "The temporary disk isn't persistent; its data can be lost on deallocation, redeploy or maintenance"
+   ],
+   "answer": 3,
+   "explanation": "The temporary disk isn't a managed disk. Its contents aren't guaranteed to survive deallocation, redeployment or host maintenance.",
+   "why_not": [
+    "Deallocation doesn't reimage the OS disk.",
+    "Encryption doesn't erase data.",
+    "Quota isn't involved; the temporary disk is ephemeral by design.",
+    null
+   ]
+  },
+  {
+   "id": "03-02-q3",
+   "sub_skill": "Configure encryption at host for Azure virtual machines",
+   "prompt": "Security requires that a VM's temporary disk and disk caches are encrypted, without using the VM's CPU and without Azure Disk Encryption. What should you enable?",
+   "options": [
+    "Encryption at host",
+    "Server-side encryption with platform-managed keys",
+    "Azure Disk Encryption",
+    "Infrastructure encryption on a storage account"
+   ],
+   "answer": 0,
+   "explanation": "Encryption at host encrypts the temporary disk and caches on the host and sends data encrypted to storage, using no VM CPU.",
+   "why_not": [
+    null,
+    "SSE is always on but doesn't encrypt the temporary disk or caches.",
+    "It uses the VM's CPU, and it retires on September 15, 2028.",
+    "That applies to storage accounts, not VM disks."
+   ]
+  },
+  {
+   "id": "03-02-q4",
+   "sub_skill": "Configure encryption at host for Azure virtual machines",
+   "prompt": "You try to enable encryption at host on an existing running VM and it fails. Which two conditions are required?",
+   "options": [
+    "A Premium SSD OS disk and a public IP",
+    "Azure Disk Encryption enabled first",
+    "The EncryptionAtHost feature registered on the subscription, and the VM deallocated",
+    "A disk encryption set and a running VM"
+   ],
+   "answer": 2,
+   "explanation": "Register the EncryptionAtHost feature for the subscription, then deallocate the VM before updating its EncryptionAtHost setting.",
+   "why_not": [
+    "Disk type and public IP aren't prerequisites.",
+    "Microsoft's direction is to move off ADE onto encryption at host, not to layer them.",
+    null,
+    "A disk encryption set is only for customer-managed keys, and the VM must be deallocated."
+   ]
+  },
+  {
+   "id": "03-02-q5",
+   "sub_skill": "Move a virtual machine to another resource group, subscription, or region",
+   "prompt": "You must move VM1 from East US to West Europe along with its disks and network resources. Which service is designed for this?",
+   "options": [
+    "Move-AzResource with a new location",
+    "Change the VM's location property",
+    "Azure Migrate's on-premises assessment",
+    "Azure Resource Mover"
+   ],
+   "answer": 3,
+   "explanation": "Cross-region moves of Azure VMs use Azure Resource Mover, which also handles the VM's dependencies.",
+   "why_not": [
+    "Resource moves change the group or subscription, not the region.",
+    "A resource's region can't be changed in place.",
+    "Assessment plans migrations from on-premises; Resource Mover moves Azure resources between regions.",
+    null
+   ]
+  },
+  {
+   "id": "03-02-q6",
+   "sub_skill": "Move a virtual machine to another resource group, subscription, or region",
+   "prompt": "VM1 is attached to VNet-A. It must be attached to VNet-B instead. What must you do?",
+   "options": [
+    "Re-create VM1 in VNet-B, for example from a snapshot or copy of its OS disk",
+    "Move the VM's NIC to VNet-B",
+    "Use Azure Resource Mover",
+    "Move VM1 to VNet-B's resource group"
+   ],
+   "answer": 0,
+   "explanation": "The move API doesn't support changing a VM's virtual network. Re-create the VM in the target network from its OS disk.",
+   "why_not": [
+    null,
+    "A NIC can't be moved to another virtual network.",
+    "Resource Mover moves across regions; it doesn't change a VM's virtual network.",
+    "Changing resource group doesn't change the VNet attachment."
+   ]
+  },
+  {
+   "id": "03-02-q7",
+   "sub_skill": "Manage virtual machine sizes",
+   "prompt": "You need to resize a running VM to a size that doesn't appear in its list of available sizes. What should you do?",
+   "options": [
+    "Delete and re-create the VM",
+    "Stop (deallocate) the VM, then resize it",
+    "Detach all data disks first",
+    "Resize it while running; the list is only advisory"
+   ],
+   "answer": 1,
+   "explanation": "The available list reflects the current hardware cluster. Deallocating lets the VM be allocated on any cluster in the region that offers the size.",
+   "why_not": [
+    "Deallocating lets Azure place the VM on hardware that offers the size.",
+    null,
+    "Disks don't decide which sizes are available.",
+    "Sizes not offered on the current cluster need deallocation."
+   ]
+  },
+  {
+   "id": "03-02-q8",
+   "sub_skill": "Manage virtual machine sizes",
+   "prompt": "After you resize a VM, users report its public IP changed. Why?",
+   "options": [
+    "Resizing always assigns a new static IP",
+    "The VM moved to another region",
+    "Deallocating the VM released a dynamic public IP address",
+    "The NIC was recreated during the resize"
+   ],
+   "answer": 2,
+   "explanation": "Deallocating releases dynamic IP addresses. Use a static public IP if the address must not change.",
+   "why_not": [
+    "Static IPs persist; the change came from a dynamic address.",
+    "Resizing doesn't change the region.",
+    null,
+    "The NIC persists; dynamic addresses are released on deallocation."
+   ]
+  },
+  {
+   "id": "03-02-q9",
+   "sub_skill": "Manage virtual machine disks",
+   "prompt": "A 1 TiB Premium SSD data disk must grow to 2 TiB, and the VM can't go offline. What can you do?",
+   "options": [
+    "Deallocate the VM, expand, then start it",
+    "Detach the disk and expand it",
+    "Create a 2 TiB disk and copy the data",
+    "Expand the data disk while the VM runs, then extend the partition in the OS"
+   ],
+   "answer": 3,
+   "explanation": "Data disks can be expanded without deallocating the VM. The exception applies only when growing a disk of 4 TiB or less beyond 4 TiB.",
+   "why_not": [
+    "Data disks under this size can be expanded online.",
+    "Not needed: the 4 TiB rule only applies when growing beyond 4 TiB.",
+    "Expanding in place is supported.",
+    null
+   ]
+  },
+  {
+   "id": "03-02-q10",
+   "sub_skill": "Manage virtual machine disks",
+   "prompt": "You need a disk for a database's data that delivers very high IOPS, with performance adjustable without restarting the VM. Which disk type, and can it be the OS disk?",
+   "options": [
+    "Ultra Disk, used as a data disk; it can't be an OS disk",
+    "Ultra Disk as the OS disk",
+    "Standard SSD as the OS disk",
+    "Premium SSD v2 as the OS disk"
+   ],
+   "answer": 0,
+   "explanation": "Ultra Disk offers the highest performance, with parameters adjustable without restart, but must be used as a data disk.",
+   "why_not": [
+    null,
+    "Ultra Disks can only be data disks.",
+    "Standard SSD isn't designed for very high IOPS.",
+    "Premium SSD v2 can't be an OS disk either."
+   ]
+  },
+  {
+   "id": "03-02-q11",
+   "sub_skill": "Manage virtual machine disks",
+   "prompt": "You must convert a VM's Standard SSD OS disk to Premium SSD. What is required?",
+   "options": [
+    "Nothing; change it while the VM runs",
+    "Stop the VM, ensure its size supports Premium storage, then change the disk type",
+    "Snapshot and re-create the disk",
+    "Detach the OS disk first"
+   ],
+   "answer": 1,
+   "explanation": "Changing a managed disk's type requires the VM to be stopped. Premium SSD also requires a size that supports Premium storage.",
+   "why_not": [
+    "The VM must be stopped to change disk type.",
+    null,
+    "Direct conversion is supported between these types.",
+    "You can't detach an OS disk; stop the VM instead."
+   ]
+  },
+  {
+   "id": "03-02-q12",
+   "sub_skill": "Deploy virtual machines to availability zones and availability sets",
+   "prompt": "VM3 is running. It must join availability set AS1, which holds VM1 and VM2. What must you do?",
+   "options": [
+    "Add VM3 to AS1 on its Availability page",
+    "Deallocate VM3 and change its availability set",
+    "Delete VM3 and re-create it in AS1, reusing its disks",
+    "Move VM3 to AS1's resource group"
+   ],
+   "answer": 2,
+   "explanation": "To add an existing VM to an availability set, or change its set, the VM must be deleted and re-created.",
+   "why_not": [
+    "A VM can only be added to an availability set at creation.",
+    "Deallocation doesn't allow joining a set.",
+    null,
+    "Resource group membership doesn't affect availability sets."
+   ]
+  },
+  {
+   "id": "03-02-q13",
+   "sub_skill": "Deploy virtual machines to availability zones and availability sets",
+   "prompt": "An application must survive the failure of an entire datacenter within a region, with the highest VM SLA. Which deployment fits?",
+   "options": [
+    "VMs across two or more availability zones (99.99%)",
+    "An availability set with 3 fault domains (99.95%)",
+    "A single VM with Premium SSD",
+    "An availability set spread across zones"
+   ],
+   "answer": 0,
+   "explanation": "Spreading VMs across availability zones survives a zone or datacenter failure and carries the 99.99% SLA.",
+   "why_not": [
+    null,
+    "Availability sets protect against rack-level failures within a datacenter, not datacenter loss.",
+    "A single VM in one zone doesn't survive that zone failing.",
+    "Availability sets don't support availability zones."
+   ]
+  },
+  {
+   "id": "03-02-q14",
+   "sub_skill": "Deploy and configure an Azure Virtual Machine Scale Sets",
+   "prompt": "A scale set has two scale-in rules: average CPU below 30% and network-in below 10 MB. Current CPU is 20% and network-in is 50 MB. What happens?",
+   "options": [
+    "It scales in, because one scale-in rule is met",
+    "It scales out, because network-in is high",
+    "It scales to the minimum instance count",
+    "Nothing; autoscale scales in only when all scale-in rules are triggered"
+   ],
+   "answer": 3,
+   "explanation": "Autoscale scales in only if all the scale-in rules are triggered; any single scale-out rule can trigger scale-out.",
+   "why_not": [
+    "Scale-in requires every scale-in rule to trigger.",
+    "High network-in doesn't trigger a scale-in rule, and there's no scale-out rule in the question.",
+    "Instance limits bound scaling; they don't force it.",
+    null
+   ]
+  },
+  {
+   "id": "03-02-q15",
+   "sub_skill": "Deploy and configure an Azure Virtual Machine Scale Sets",
+   "prompt": "You're deploying a new scale set that must mix VM sizes and Spot with on-demand instances, using Microsoft's recommended orchestration mode. What must you remember about outbound internet access?",
+   "options": [
+    "Choose Uniform; it supports mixing sizes and Spot",
+    "Choose Flexible; outbound access is enabled by default",
+    "Choose Flexible orchestration, and configure explicit outbound connectivity, because Flexible has no default outbound access",
+    "Choose Flexible now and switch to Uniform later if needed"
+   ],
+   "answer": 2,
+   "explanation": "Flexible orchestration is recommended and supports mixing VM types and Spot. It requires explicit outbound connectivity, such as a NAT gateway.",
+   "why_not": [
+    "Mixing VM types and Spot with on-demand is a Flexible feature.",
+    "Flexible scale sets don't have default outbound access.",
+    null,
+    "The orchestration mode can't be changed after creation."
+   ]
+  },
+  {
+   "id": "03-02-q16",
+   "sub_skill": "Deploy and configure an Azure Virtual Machine Scale Sets",
+   "prompt": "An autoscale profile has minimum 2, maximum 40 and default 2, and the scale set currently runs 20 instances. Two scale-out rules trigger: one asks for +3 instances, the other for +20%. What does autoscale do?",
+   "options": [
+    "Scales out by 3, the first rule",
+    "Scales out by 4, the larger of the two",
+    "Scales out by 7, the sum of both",
+    "Nothing, because the two rules conflict"
+   ],
+   "answer": 1,
+   "explanation": "If more than one scale-out rule triggers, autoscale scales to the highest specified capacity: 20% of 20 is 4, more than 3.",
+   "why_not": [
+    "When several scale-out rules trigger, autoscale uses the highest capacity.",
+    null,
+    "Rules aren't added together.",
+    "Triggered scale-out rules don't cancel each other; autoscale uses the one that asks for the most capacity."
+   ]
+  }
+ ]
 }

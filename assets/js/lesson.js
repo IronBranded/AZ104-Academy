@@ -1,4 +1,4 @@
-/* lesson.js - SC-500 guide
+/* lesson.js - Academy engine
    Lesson anatomy and lab mode.
 
    Every exam module is written to the same skeleton (Sub-objectives covered,
@@ -23,7 +23,7 @@
      with whether each has been studied
    - IMPORTANT DISTINCTIONS: the appendix A6 comparisons that name this module,
      rendered inline with the trap visible and the full table one click away
-   - the SC-500 EXAM LENS: "How this is tested", framed as one recognisable
+   - the EXAM LENS: "How this is tested", framed as one recognisable
      component
    - a PRACTICE card for the lab, or an explicit "no lab for this objective"
    - NEXT STEP: previous, recommended next, related, and the domain review
@@ -35,8 +35,8 @@
 (function (global) {
   'use strict';
 
-  var MODE_KEY = 'sc500:readmode:v1';     // shared with tabs.js
-  var LABPOS_KEY = 'sc500:labpos:v1';
+  var MODE_KEY = (window.AcademyExam.slug + ':readmode:v1');     // shared with tabs.js
+  var LABPOS_KEY = (window.AcademyExam.slug + ':labpos:v1');
 
   var current = null;   // { root, route, refs } for refresh()
 
@@ -53,9 +53,9 @@
     a.href = href;
     return a;
   }
-  function D() { return global.SC500Domains; }
-  function P() { return global.SC500Progress; }
-  function C() { return global.SC500Curriculum; }
+  function D() { return global.AcademyDomains; }
+  function P() { return global.AcademyProgress; }
+  function C() { return global.AcademyCurriculum; }
   function key(el) { return (el.textContent || '').replace(/§$/, '').trim().toLowerCase(); }
 
   var STAGES = [
@@ -171,7 +171,7 @@
     orient.appendChild(need);
     if (byPlace.orient) {
       orient.appendChild(node('p', 'lede',
-        'After this lesson you should be able to do each of the following. The wording is Microsoft\u2019s own, from the SC-500 skills outline.'));
+        'After this lesson you should be able to do each of the following. The wording is Microsoft\u2019s own, from the ' + window.AcademyExam.code + ' skills outline.'));
       orient.appendChild(outcomes);
       /* Carry over the list items verbatim, then any notes after the list. */
       var ul = byPlace.orient.nodes.filter(function (n) { return n.nodeType === 1 && (n.tagName === 'UL' || n.tagName === 'OL'); })[0];
@@ -235,10 +235,11 @@
       lens.setAttribute('aria-labelledby', 'exam-lens-title');
       var lh = byPlace.lens.head;
       lh.id = 'exam-lens-title';
-      lh.textContent = 'SC-500 Exam Lens';
+      lh.textContent = 'Exam Lens';
+      lh.dataset.exam = window.AcademyExam.code;   // shown as the chip before the title
       lens.appendChild(lh);
       lens.appendChild(node('p', 'exam-lens__sub',
-        'How this is tested. For SC-500, make sure you can recognise the deciding constraint in a scenario and select the control it points to.'));
+        'How this is tested. For ' + window.AcademyExam.code + ', make sure you can recognise the deciding constraint in a scenario and select the control it points to.'));
       byPlace.lens.nodes.forEach(function (n) { lens.appendChild(n); });
       dist.appendChild(lens);
     }
@@ -288,9 +289,9 @@
     if (byPlace.sources) append(review, byPlace.sources);
     if (fm && fm.forensic_relevance) {
       var beyond = node('details', 'beyond');
-      var sum = node('summary', null, 'Beyond the exam: how this shows up in an investigation');
+      var sum = node('summary', null, 'Beyond the exam');
       beyond.appendChild(sum);
-      beyond.appendChild(node('p', 'field__note', 'Not measured by SC-500. Kept for context.'));
+      beyond.appendChild(node('p', 'field__note', 'Not measured by ' + window.AcademyExam.code + '. Kept for context.'));
       beyond.appendChild(node('p', null, String(fm.forensic_relevance)));
       review.appendChild(beyond);
     }
@@ -431,13 +432,13 @@
       if (strip && strip.parentNode !== refs.actions) refs.actions.insertBefore(strip, refs.actions.firstChild);
       D().paint(header.parentNode, L.domainId);   // the whole article
 
-      /* Breadcrumbs: SC-500 > Domain > Objective > Lesson */
+      /* Breadcrumbs: <exam code> > Domain > Objective > Lesson */
       var c = refs.crumbs;
       c.textContent = '';
       c.appendChild(node('span', 'crumbs__label', 'You are here'));
       var ol = node('ol');
       function crumb(el) { var li = node('li'); li.appendChild(el); ol.appendChild(li); }
-      crumb(link('SC-500', '#/'));
+      crumb(link(window.AcademyExam.code, '#/'));
       if (L.exam) crumb(link(D().info(L.domainId).short, '#/domain/' + L.domainId));
       else crumb(link('Lab safety', '#/'));
       var obj = L.objectiveId ? model.objectiveById[L.objectiveId] : null;
@@ -516,7 +517,7 @@
       for (var k = 0; k < old.length; k++) old[k].remove();
       if (!b) continue;
       var chip = node('span', 'obj-chip', b.id);
-      chip.title = 'Position in the SC-500 skills outline';
+      chip.title = 'Position in the ' + window.AcademyExam.code + ' skills outline';
       li.insertBefore(chip, li.firstChild);
       li.appendChild(stateChip(P().bulletCheck(b.questionIds, b.lessonIds, b.text)));
     }
@@ -544,7 +545,7 @@
   }
 
   /* Microsoft's own training for this lesson's objective: the Microsoft Learn
-     learning path from Course SC-500T00-A, and Microsoft's lab exercises.
+     learning path from the official course, and Microsoft's lab exercises.
      From content/official-training.json; nothing here is inferred. */
   function extLink(text, href) {
     var a = link(text, href);
@@ -661,7 +662,7 @@
     more.appendChild(body);
     art.appendChild(more);
 
-    if (global.SC500App && global.SC500App.enhance) global.SC500App.enhance(body, model.a6Path);
+    if (global.AcademyApp && global.AcademyApp.enhance) global.AcademyApp.enhance(body, model.a6Path);
 
     if (model.a6Index >= 0) {
       art.appendChild(link('Open in appendix A6 \u2192', '#/appendix/a6', 'cmp__src'));
@@ -698,7 +699,7 @@
     card.appendChild(t);
 
     var meta = node('ul', 'facts');
-    var FM = global.SC500FrontMatter;
+    var FM = global.AcademyFrontMatter;
     if (L.fm.lab_cost_estimate && FM) {
       var li = node('li');
       var chip = node('span', 'cost', FM.costLabel(L.fm.lab_cost_estimate));
@@ -819,7 +820,7 @@
     var parts = heads.filter(function (h) { return /^part\s+\d/i.test(key(h)); });
     var hasTeardown = heads.some(function (h) { return key(h) === 'teardown'; });
 
-    var FM = global.SC500FrontMatter;
+    var FM = global.AcademyFrontMatter;
     if (fm && fm.lab_cost_estimate && FM) {
       var li = node('li');
       var chip = node('span', 'cost', FM.costLabel(fm.lab_cost_estimate));
@@ -955,7 +956,7 @@
     return comparison(x, model, { id: null }, parse);
   }
 
-  global.SC500Lesson = {
+  global.AcademyLesson = {
     distinction: distinction,
     mountModule: mountModule,
     mountLab: mountLab,

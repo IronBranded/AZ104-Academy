@@ -1,4 +1,4 @@
-/* learn.css - SC-500 guide
+/* learn.css - Academy engine
    Components for the certification-first redesign: domain marks, the learning
    dashboard, lesson anatomy, the Exam Lens, comparisons, knowledge checks, lab
    mode, domain review, coverage and exam prep.
@@ -150,6 +150,13 @@
 
 .dash-head h1 { margin-bottom: var(--s-2); }
 .dash-head__sub { max-width: var(--measure); color: var(--ink-soft); margin-top: 0; }
+/* Outline version badge: neutral on purpose. It is not a domain and not a status. */
+.outline-badge {
+  display: inline-block; margin-top: var(--s-2, 0.5rem); padding: 0.2em 0.7em;
+  border: 1px solid var(--rule); border-radius: 999px;
+  color: var(--ink-soft); font-size: var(--t-xs, 0.8rem); text-decoration: none;
+}
+a.outline-badge:hover, a.outline-badge:focus-visible { color: var(--ink); border-color: var(--ink-faint); }
 
 .continue {
   display: grid;
@@ -517,7 +524,7 @@
   border: 0;
 }
 .exam-lens > h2::before {
-  content: "SC-500";
+  content: attr(data-exam);   /* the exam code, set from data/exam.js */
   padding: 0.05em 0.45em;
   font-size: var(--t-xs);
   font-weight: 700;

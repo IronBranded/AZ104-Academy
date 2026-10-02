@@ -1,11 +1,11 @@
 ---
-objective: "(Project prerequisite - not an SC-500 exam objective)"
+objective: "(Project prerequisite - not an AZ-104 exam objective)"
 sub_objectives: []
 domain: "Lab Safety and Environment Setup"
 domain_weight: "n/a"
 status: GA
 prerequisites: ["00-00"]
-ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500"
+ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/tutorial-acm-create-budgets"
   - "https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups"
@@ -13,19 +13,18 @@ product_docs:
   - "https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/understand-cost-mgt-data"
 last_verified: "2026-09-15"
 portal: "Cost Management + Billing > Budgets; Monitor > Alerts > Action groups"
-powershell_module: "Az.Billing, Az.Monitor, Az.Security"
+powershell_module: "Az.Billing, Az.Monitor, Az.Automation, Az.Compute"
 az_cli_command: "az consumption budget create"
 kql_tables: []
 licensing: "None. Cost Management is free for Azure resource usage."
 azure_resources: ["Microsoft.Consumption/budgets", "microsoft.insights/actionGroups", "Microsoft.Automation/automationAccounts"]
 lab_cost_estimate: "$0 - budgets, action groups, and an Automation account free tier cost nothing"
 free_practice_available: true
-forensic_relevance: "Cost anomalies are a detection signal. Cryptomining after a subscription compromise shows up in Cost Management hours before it shows up anywhere else if nobody is watching compute metrics."
 ---
 
 # Cost Guardrails and Budget Alerts
 
-> **Objective:** (Project prerequisite - not an SC-500 exam objective)
+> **Objective:** (Project prerequisite - not an AZ-104 exam objective)
 > **Run this before creating any billable resource.**
 
 ## Why this exists
@@ -86,7 +85,7 @@ code.
 That chain is the whole trick:
 
 ```
-meters → cost pipeline → budget threshold → action group → runbook → Set-AzSecurityPricing -PricingTier Free
+meters → cost pipeline → budget threshold → action group → runbook → Stop-AzVM / Stop-AzVmss (deallocate)
          (hours of lag)   (notification)    (the only part that acts)
 ```
 
@@ -108,7 +107,7 @@ meters → cost pipeline → budget threshold → action group → runbook → S
 | --- | --- | --- | --- |
 | `warn-forecast-80` | Forecasted | 80 | Email only. "Your run rate is wrong." |
 | `warn-actual-90` | Actual | 90 | Email + push. "Finish and tear down today." |
-| `brake-actual-100` | Actual | 100 | Action group → runbook that disables every Defender plan and stops every lab VM. |
+| `brake-actual-100` | Actual | 100 | Action group → runbook that deallocates every lab VM and scale set. |
 
 ## Common failure modes
 
@@ -121,12 +120,12 @@ The underlying API defines the value as a percentage between 0 and 1000.
 because the portal experience actively encourages the mistake: the budget
 creation wizard's default is an email recipient, and it looks finished.
 
-**Deleting the resource group does not stop Defender plans.** Defender for
-Cloud workload protection plans are enabled at **subscription** scope. Delete
-every resource in the subscription and a plan stays on, ready to bill the moment
-you create a new resource of that type. This is the single most common surprise
-bill in a security lab, and it is why the brake script targets pricing tiers
-rather than resources.
+**A stopped VM is not a deallocated VM.** Shut a VM down from inside its operating
+system and Azure shows it as **Stopped**: the compute is still reserved and still
+billed. Only **Stopped (deallocated)**, reached through the portal, CLI,
+PowerShell or API, releases the compute. Disks keep billing in both states. This
+is why the brake deallocates rather than powers off, and why a lab's teardown
+deletes rather than stops.
 
 **Forecasted alerts need history.** In a brand new subscription there is not
 enough data for a forecast, so the forecasted notification stays quiet for the
@@ -142,13 +141,14 @@ what you are actually afraid of.
 This is the part worth building properly, because it is the only component with
 teeth. Two layers:
 
-**Layer 1 — the runbook.** An Azure Automation account (free tier covers the
-minutes you need) running a PowerShell runbook under a system-assigned managed
-identity holding Contributor on the subscription. The runbook:
+**Layer 1 — the runbook.** An Azure Automation account running a PowerShell
+runbook under a system-assigned managed identity holding Contributor on the
+subscription. The runbook:
 
-1. Reads every Defender for Cloud pricing tier and sets any `Standard` to `Free`.
-2. Deallocates every VM tagged `sc500-module`.
-3. Writes what it did somewhere you will see.
+1. Deallocates every VM tagged `az104-module` that is still allocated.
+2. Deallocates every instance of every scale set tagged `az104-module`.
+3. Lists everything else carrying the tag, and changes none of it, so its output
+   is honest about what is still there.
 
 **Layer 2 — you.** The runbook is the backstop for the case where you forgot.
 Teardown discipline is the actual control, because of the cost pipeline latency
@@ -156,20 +156,24 @@ described above. A brake that fires six hours late has already let the spend
 happen.
 
 The runbook body is in
-[`scripts/00-lab-safety/Disable-LabDefenderPlans.ps1`](../../scripts/00-lab-safety/Disable-LabDefenderPlans.ps1).
+[`scripts/00-lab-safety/Stop-LabCompute.ps1`](../../scripts/00-lab-safety/Stop-LabCompute.ps1).
+It is deliberately narrow. Deleting resources from an unattended runbook is how a
+brake becomes an outage, so anything that isn't compute is left for teardown.
 
-## The expensive objectives, named
+## The meters, named as labs are written
 
-You will meet these later. Plan for them now.
+The brake handles compute. The other meters are named where you meet them: every
+lab that creates something billed by the hour, or billed while it exists whether
+used or not, says so in its **Estimated cost** line. The cost planner in the
+Academy groups every lab by that line, so the expensive ones are visible before
+you start.
 
-| Module | Service | Billing behaviour |
-| --- | --- | --- |
-| 04-05 | Security Copilot | Provisioned Security Compute Units bill **hourly while provisioned**, used or not. Highest spend risk in the guide by a wide margin. Provision, work, deprovision in one sitting. |
-| 02-04 | Azure Firewall | Hourly deployment charge plus per-GB data processing, independent of whether traffic flows. |
-| 03-04 | Azure Bastion | Hourly per host. Also Defender for Servers Plan 2, which is per-server per-hour. |
-| 03-05 | AKS | The control plane may be free on the tier you pick; **the node pool VMs are not**. |
-| 02-03 | Virtual WAN hub, VPN Gateway | Both bill hourly from the moment they finish provisioning. |
-| 04-03 | Sentinel ingestion | Per GB ingested. A misconfigured syslog or WEF collector can ingest far more than you intended. Set a daily cap. |
+Two rules hold for every lab regardless:
+
+- **Deallocated still bills for disks.** Only deleting the disk stops that.
+- **Backup data outlives its source.** A Recovery Services vault keeps soft-deleted
+  backup items for 14 days, and the vault can't be deleted until they are gone.
+  Plan backup labs so that wait doesn't surprise you.
 
 ## Hands-on
 
@@ -185,8 +189,9 @@ See [00-01 lab](../../labs/00-lab-safety/00-01-lab.md).
    unreliable in the first week?
 4. A colleague sets `-NotificationThreshold 0.9` expecting an alert at 90%. What
    actually happens?
-5. The brake runbook needs to disable Defender plans. What identity should it
-   run as, what role does that identity need, and at what scope?
+5. The brake runbook needs to deallocate VMs anywhere in the subscription. What
+   identity should it run as, what role does that identity need, and at what
+   scope? What does it deliberately leave alone, and why?
 
 ## Sources
 
@@ -194,4 +199,6 @@ See [00-01 lab](../../labs/00-lab-safety/00-01-lab.md).
 - Action groups: <https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups>
 - Understand Cost Management data (latency): <https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/understand-cost-mgt-data>
 - `New-AzConsumptionBudget`: <https://learn.microsoft.com/en-us/powershell/module/az.billing/new-azconsumptionbudget>
-- `Set-AzSecurityPricing`: <https://learn.microsoft.com/en-us/powershell/module/az.security/set-azsecuritypricing>
+- Power states and billing for Azure virtual machines: <https://learn.microsoft.com/en-us/azure/virtual-machines/states-billing>
+- `Stop-AzVmss`: <https://learn.microsoft.com/en-us/powershell/module/az.compute/stop-azvmss>
+- Delete an Azure Backup Recovery Services vault: <https://learn.microsoft.com/en-us/azure/backup/backup-azure-delete-vault>

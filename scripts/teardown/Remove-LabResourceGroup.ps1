@@ -1,24 +1,25 @@
 <#
 .SYNOPSIS
-    Tears down one SC-500 lab across all four scopes and verifies the result.
+    Tears down one AZ-104 lab across all four scopes and verifies the result.
 
 .DESCRIPTION
-    Implements the checklist in content/00-lab-safety/00-03-teardown-checklist-template.md:
+    Implements the checklist in content/00-lab-safety/00-02-teardown-checklist-template.md:
 
       1. Resources            - delete the lab resource group
-      2. Subscription scope   - Defender plans, policy assignments, orphaned roles
+      2. Subscription scope   - policy assignments, orphaned role assignments
       3. Directory scope      - reported, never auto-deleted
       4. Soft-deleted remains - key vaults holding a name hostage
-      5. Access               - PIM deactivation is reported, not automated
+      5. Access               - roles on your own account are reported, not removed
       6. Verify               - a sweep that proves the teardown worked
 
-    Directory objects are deliberately NOT deleted automatically. A script that
-    deletes app registrations and conditional access policies on your behalf is
-    a script that can lock you out of your own tenant. It reports them instead.
+    Directory objects and resource locks are deliberately NOT removed
+    automatically. A script that deletes users, groups or tenant settings on
+    your behalf can lock you out of your own tenant, and a lock exists precisely
+    to make deletion a deliberate act. Both are reported instead.
 
 .PARAMETER LabId
-    Module identifier, e.g. '02-04'. Matches the rg-sc500-lab-<LabId> convention
-    and the sc500-module tag.
+    Module identifier, e.g. '02-04'. Matches the rg-az104-lab-<LabId> convention
+    and the az104-module tag.
 
 .PARAMETER SweepOnly
     Skip deletion. Run the end-of-session verification sweep across the whole
@@ -39,7 +40,7 @@ param(
     [Parameter(ParameterSetName = 'Sweep', Mandatory)]
     [switch]$SweepOnly,
 
-    [string]$Prefix = 'rg-sc500-lab',
+    [string]$Prefix = 'rg-az104-lab',
     [switch]$PurgeKeyVaults
 )
 
@@ -68,31 +69,29 @@ if (-not $SweepOnly) {
         $contents = Get-AzResource -ResourceGroupName $rgName
         Write-Host "  $($contents.Count) resource(s):"
         $contents | ForEach-Object { Write-Host "    $($_.ResourceType)  $($_.Name)" }
+        # A delete lock here, or on the subscription, makes the delete fail.
+        $locks = Get-AzResourceLock -ResourceGroupName $rgName -ErrorAction SilentlyContinue
+        if ($locks) {
+            Write-Host '  Locks that will block deletion - remove them first, deliberately:' -ForegroundColor Yellow
+            $locks | ForEach-Object { Write-Host "    $($_.Properties.level)  $($_.Name)" }
+        }
         if ($PSCmdlet.ShouldProcess($rgName, 'Remove resource group')) {
-            Remove-AzResourceGroup -Name $rgName -Force | Out-Null
-            Write-Host "  Deleted." -ForegroundColor Green
+            try {
+                Remove-AzResourceGroup -Name $rgName -Force | Out-Null
+                Write-Host "  Deleted." -ForegroundColor Green
+            } catch {
+                Write-Host "  Delete FAILED: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host '  Usual causes: a resource lock, or a Recovery Services vault still holding' -ForegroundColor DarkGray
+                Write-Host '  backup items, including soft-deleted ones (kept 14 days). See 00-02.' -ForegroundColor DarkGray
+            }
         }
     }
 
     # 2. Subscription scope ----------------------------------------------------
     Write-Section '2. Subscription scope'
 
-    $standardPlans = Get-AzSecurityPricing | Where-Object PricingTier -eq 'Standard'
-    if ($standardPlans) {
-        Write-Host '  Defender plans at Standard:' -ForegroundColor Yellow
-        foreach ($p in $standardPlans) {
-            Write-Host "    $($p.Name)"
-            if ($PSCmdlet.ShouldProcess($p.Name, 'Set Defender plan to Free')) {
-                Set-AzSecurityPricing -Name $p.Name -PricingTier 'Free' | Out-Null
-                Write-Host "      -> Free" -ForegroundColor Green
-            }
-        }
-    } else {
-        Write-Host '  No Defender plans at Standard.' -ForegroundColor DarkGray
-    }
-
     $policies = Get-AzPolicyAssignment -Scope $SubScope |
-        Where-Object { $_.Name -like "sc500-$LabId*" }
+        Where-Object { $_.Name -like "az104-$LabId*" }
     foreach ($pol in $policies) {
         Write-Host "  Policy assignment: $($pol.Name)"
         if ($PSCmdlet.ShouldProcess($pol.Name, 'Remove policy assignment')) {
@@ -103,8 +102,9 @@ if (-not $SweepOnly) {
     if (-not $policies) { Write-Host '  No matching policy assignments.' -ForegroundColor DarkGray }
 
     # Orphaned role assignments show an empty DisplayName: the principal or the
-    # scope they referenced no longer resolves.
-    $orphans = Get-AzRoleAssignment -Scope $SubScope |
+    # scope they referenced no longer resolves. No -Scope: that parameter returns
+    # assignments at the scope and ABOVE, which would miss resource-group orphans.
+    $orphans = Get-AzRoleAssignment |
         Where-Object { [string]::IsNullOrWhiteSpace($_.DisplayName) }
     if ($orphans) {
         Write-Host "  $($orphans.Count) orphaned role assignment(s):" -ForegroundColor Yellow
@@ -123,21 +123,21 @@ if (-not $SweepOnly) {
 
     # 3. Directory scope - report only -----------------------------------------
     Write-Section '3. Directory scope (manual)'
-    if (Get-Command Get-AzADApplication -ErrorAction SilentlyContinue) {
-        $apps = Get-AzADApplication -DisplayNameStartsWith "sc500-$LabId" -ErrorAction SilentlyContinue
-        if ($apps) {
-            Write-Host '  App registrations to review and delete by hand:' -ForegroundColor Yellow
-            $apps | ForEach-Object { Write-Host "    $($_.DisplayName)  $($_.AppId)" }
-        } else {
-            Write-Host '  No matching app registrations.' -ForegroundColor DarkGray
-        }
+    $users  = Get-AzADUser  -DisplayNameStartsWith "az104-$LabId" -ErrorAction SilentlyContinue
+    $groups = Get-AzADGroup -DisplayNameStartsWith "az104-$LabId" -ErrorAction SilentlyContinue
+    if ($users -or $groups) {
+        Write-Host '  Directory objects to review and delete by hand (see the lab''s teardown):' -ForegroundColor Yellow
+        $users  | ForEach-Object { Write-Host "    user   $($_.DisplayName)  $($_.UserPrincipalName)" }
+        $groups | ForEach-Object { Write-Host "    group  $($_.DisplayName)" }
+    } else {
+        Write-Host '  No users or groups named for this lab.' -ForegroundColor DarkGray
     }
-    Write-Host '  Conditional access policies are never auto-deleted. Disable, verify, then delete.' -ForegroundColor DarkGray
+    Write-Host '  Tenant-wide settings (SSPR, external collaboration) are never changed by this script.' -ForegroundColor DarkGray
 
     # 4. Soft-deleted remains ---------------------------------------------------
     Write-Section '4. Soft-deleted remains'
     $deadVaults = Get-AzKeyVault -InRemovedState -ErrorAction SilentlyContinue |
-        Where-Object VaultName -like "*sc500*$LabId*"
+        Where-Object VaultName -like "*az104*$LabId*"
     if ($deadVaults) {
         foreach ($v in $deadVaults) {
             $pp = if ($v.PurgeProtectionEnabled) { ' PURGE PROTECTION ON - cannot purge' } else { '' }
@@ -163,22 +163,15 @@ if (-not $SweepOnly) {
 
 Write-Section '6. Verification sweep'
 
-$homeless = Get-AzResource -TagName 'sc500-module' -ErrorAction SilentlyContinue |
+$homeless = Get-AzResource -TagName 'az104-module' -ErrorAction SilentlyContinue |
     Where-Object ResourceGroupName -notlike "$Prefix-*"
 if ($homeless) {
     Write-Host "  $($homeless.Count) tagged resource(s) outside a lab resource group:" -ForegroundColor Yellow
     $homeless | ForEach-Object {
-        Write-Host "    [$($_.Tags['sc500-module'])] $($_.ResourceType)  $($_.Name)  in $($_.ResourceGroupName)"
+        Write-Host "    [$($_.Tags['az104-module'])] $($_.ResourceType)  $($_.Name)  in $($_.ResourceGroupName)"
     }
 } else {
     Write-Host '  No homeless tagged resources.' -ForegroundColor Green
-}
-
-$remainingPlans = Get-AzSecurityPricing | Where-Object PricingTier -eq 'Standard'
-if ($remainingPlans) {
-    Write-Host "  Defender plans still at Standard: $($remainingPlans.Name -join ', ')" -ForegroundColor Yellow
-} else {
-    Write-Host '  All Defender plans at Free.' -ForegroundColor Green
 }
 
 $labRgs = Get-AzResourceGroup -Name "$Prefix-*" -ErrorAction SilentlyContinue
@@ -188,16 +181,18 @@ if ($labRgs) {
     Write-Host '  No lab resource groups remain.' -ForegroundColor Green
 }
 
-$runningVMs = Get-AzVM -Status -ErrorAction SilentlyContinue |
-    Where-Object { $_.PowerState -eq 'VM running' }
-if ($runningVMs) {
-    Write-Host "  $($runningVMs.Count) VM(s) still running: $($runningVMs.Name -join ', ')" -ForegroundColor Yellow
+# Anything not deallocated still bills for compute - including a VM shut down
+# from inside its operating system, which shows as 'VM stopped'.
+$allocatedVMs = Get-AzVM -Status -ErrorAction SilentlyContinue |
+    Where-Object { $_.PowerState -ne 'VM deallocated' }
+if ($allocatedVMs) {
+    Write-Host "  $($allocatedVMs.Count) VM(s) still allocated: $(($allocatedVMs | ForEach-Object { "$($_.Name) ($($_.PowerState))" }) -join ', ')" -ForegroundColor Yellow
 } else {
-    Write-Host '  No running VMs.' -ForegroundColor Green
+    Write-Host '  No allocated VMs.' -ForegroundColor Green
 }
 
 Write-Host "`nNot covered by this script - check by hand:" -ForegroundColor DarkGray
-Write-Host '  PIM role deactivation, conditional access policies, OAuth consent grants,' -ForegroundColor DarkGray
-Write-Host '  Sentinel workspace retention, Defender EASM inventory, Security Copilot SCUs.' -ForegroundColor DarkGray
+Write-Host '  Microsoft Entra roles on your own account, tenant-wide settings a lab changed,' -ForegroundColor DarkGray
+Write-Host '  soft-deleted backup items (14 days) and deleted users (30 days).' -ForegroundColor DarkGray
 
 #endregion

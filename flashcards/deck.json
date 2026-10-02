@@ -1,72 +1,1519 @@
 {
-  "schema": 1,
-  "title": "SC-500 distinctions",
-  "_note": "Cards are distinctions, not definitions. Each front is a question the exam asks by implication; each back is the shortest true answer. 'module' points at the file that teaches it properly. Scheduling is Leitner: 1, 3, 7, 16, 35 days.",
-  "cards": [
-    { "id": "c101", "domain": "01", "module": "01-01", "front": "PIM: eligible versus active", "back": "Eligible means the role must be activated, with whatever the role setting demands - MFA, justification, a ticket, approval. Active means it is held now. Eligibility is what makes standing privilege unnecessary." },
-    { "id": "c102", "domain": "01", "module": "01-01", "front": "Which PIM settings live on the role, and which on the assignment?", "back": "Activation maximum duration, MFA, justification, approval and notifications are role settings. Start and end dates and the eligible-or-active choice are per assignment." },
-    { "id": "c103", "domain": "01", "module": "01-01", "front": "Two Conditional Access policies apply: one grants, one blocks. Outcome?", "back": "Blocked. Every applicable policy is evaluated on every sign-in, there is no priority ordering, and block wins over any number of grants." },
-    { "id": "c104", "domain": "01", "module": "01-01", "front": "App registration, enterprise application, service principal", "back": "The app registration is the application object in its home tenant. The enterprise application is the service principal - the instance of that app in a tenant. Permissions are granted to the service principal." },
-    { "id": "c105", "domain": "01", "module": "01-01", "front": "Delegated versus application permission", "back": "Delegated acts on behalf of a signed-in user and is capped by that user's own access. Application acts without a user and is capped only by the permission itself - which is why it requires admin consent." },
-    { "id": "c106", "domain": "01", "module": "01-01", "front": "System-assigned versus user-assigned managed identity", "back": "System-assigned is tied to one resource and deleted with it. User-assigned is its own resource, shared across resources and surviving their deletion." },
-    { "id": "c107", "domain": "01", "module": "01-01", "front": "The workload is not in Azure. Which identity?", "back": "Workload identity federation. A managed identity only exists for Azure resources, and an app registration with a stored secret moves the credential rather than removing it." },
-    { "id": "c108", "domain": "01", "module": "01-02", "front": "Key Vault: RBAC or access policy?", "back": "One model per vault, not both. RBAC is the current recommendation, scopable to an individual secret and visible in the normal role assignment surface. Access policies are vault-wide lists." },
-    { "id": "c109", "domain": "01", "module": "01-02", "front": "Key Vault soft delete versus purge protection", "back": "Soft delete is always on and cannot be turned off. Purge protection is opt-in and cannot be turned off once enabled - it blocks permanent deletion until the retention period expires." },
-    { "id": "c110", "domain": "01", "module": "01-02", "front": "Defender for Key Vault versus Defender CSPM secrets scanning", "back": "Defender for Key Vault alerts on anomalous access to the vault. CSPM secrets scanning finds credentials sitting in code and on disks - outside the vault entirely." },
-    { "id": "c111", "domain": "01", "module": "01-02", "front": "Does subscription Owner grant access to secrets?", "back": "No. Management-plane roles do not carry data-plane access - though an Owner can grant it to themselves, which is why the assignment is the thing to audit." },
-    { "id": "c112", "domain": "01", "module": "01-03", "front": "Azure Policy effects worth knowing cold", "back": "audit reports, deny blocks creation, modify changes the request, deployIfNotExists deploys a remediation afterwards, append adds a field. Only deny stops the resource existing." },
-    { "id": "c113", "domain": "01", "module": "01-03", "front": "Policy exemption versus exclusion scope", "back": "An exclusion removes a scope from the assignment entirely. An exemption keeps it in scope but records a justified, expiring waiver - so it stays visible in compliance reporting." },
-    { "id": "c114", "domain": "01", "module": "01-03", "front": "CanNotDelete versus ReadOnly locks", "back": "CanNotDelete allows changes but not deletion. ReadOnly blocks changes too, and breaks more than expected because some read operations are implemented as POST. Both inherit downward." },
-    { "id": "c115", "domain": "01", "module": "01-03", "front": "Does a lock protect the data inside a resource?", "back": "No. Locks are management plane. Blobs in a locked storage account are untouched by it - that is blob soft delete, versioning or an immutability policy." },
-    { "id": "c116", "domain": "01", "module": "01-03", "front": "Entra role versus Azure RBAC role", "back": "Entra roles govern the directory; Azure RBAC governs ARM resources. Global Administrator grants nothing in Azure until someone uses the elevate access toggle, which assigns User Access Administrator at root scope." },
-    { "id": "c117", "domain": "01", "module": "01-03", "front": "The three parts of a custom Azure role", "back": "Actions and NotActions - or DataActions and NotDataActions for the data plane - and AssignableScopes, which limits where the definition can be used at all." },
-    { "id": "c118", "domain": "01", "module": "01-03", "front": "Protecting backups from a rogue administrator", "back": "Multi-user authorization with a Resource Guard: a critical operation needs a second principal to approve. Soft delete and immutable vault settings harden the data; MUA is what assumes the admin is the threat." },
-    { "id": "c201", "domain": "02", "module": "02-01", "front": "Four ways to authorize access to blob data", "back": "Entra identity with a data role, account key, SAS, or anonymous public access. Setting AllowSharedKeyAccess to false removes the second and forces the first." },
-    { "id": "c202", "domain": "02", "module": "02-01", "front": "Revoke one issued service SAS without breaking the others", "back": "Only if it references a stored access policy - revoke or edit the policy. Otherwise the only lever is rotating the account key, which invalidates everything signed with it." },
-    { "id": "c203", "domain": "02", "module": "02-01", "front": "User delegation SAS: what makes it different?", "back": "It is signed with Entra credentials rather than the account key, so it inherits the identity's permissions and is revoked by revoking the delegation key or the role assignment." },
-    { "id": "c204", "domain": "02", "module": "02-01", "front": "Trusted services exception versus resource instance rule", "back": "The exception admits a whole class of Microsoft services. A resource instance rule names one specific resource. Narrower is the exam-correct answer whenever both would work." },
-    { "id": "c205", "domain": "02", "module": "02-02", "front": "Setting an Entra admin on a SQL server - is that enough?", "back": "No. SQL logins still exist and Conditional Access cannot see them. Entra-only authentication is the second step, and it disables SQL authentication including the original admin." },
-    { "id": "c206", "domain": "02", "module": "02-02", "front": "TDE, Always Encrypted, dynamic data masking", "back": "TDE protects files and backups at rest and is transparent to queries. Always Encrypted keeps keys off the server so administrators cannot read the column. Masking hides results and is not a security boundary." },
-    { "id": "c207", "domain": "02", "module": "02-02", "front": "Auditing enabled at both server and database level", "back": "Both policies run side by side. You get duplicate records, duplicate ingestion cost and duplicate rows in every query - the fix is to pick one level." },
-    { "id": "c208", "domain": "02", "module": "02-03", "front": "NSG default rules", "back": "Inbound: VNet allowed, Azure Load Balancer allowed, everything else denied. Outbound: VNet and internet allowed, everything else denied. First match by priority wins, lowest number first." },
-    { "id": "c209", "domain": "02", "module": "02-03", "front": "What an application security group actually is", "back": "A named grouping of NICs that NSG rules can reference as a source or destination, so rules are written by role rather than by address range." },
-    { "id": "c210", "domain": "02", "module": "02-03", "front": "Virtual Network Manager security admin rules", "back": "Evaluated before NSGs, from a management scope above the VNets. Allow lets the NSG still decide; Deny and AlwaysAllow cannot be overridden by a subscription owner - which is the whole point." },
-    { "id": "c211", "domain": "02", "module": "02-03", "front": "Azure Firewall rule processing order", "back": "DNAT, then network rules, then application rules, within rule collection groups ordered by priority. A network rule match means application rules never run - which silently defeats FQDN rules." },
-    { "id": "c212", "domain": "02", "module": "02-03", "front": "Can an NSG filter by FQDN?", "back": "No. An NSG knows addresses, ports, protocols and service tags. FQDN filtering is Azure Firewall; HTTP inspection is WAF." },
-    { "id": "c213", "domain": "02", "module": "02-03", "front": "Network Watcher: effective security rules versus IP flow verify", "back": "Effective rules flatten every NSG applying to a NIC into one list. IP flow verify tests one specific flow and names the rule that decided it." },
-    { "id": "c214", "domain": "02", "module": "02-04", "front": "Service endpoint versus private endpoint", "back": "A service endpoint extends the subnet's identity to the service over the backbone - still a public endpoint, no private IP, no on-premises access. A private endpoint is a NIC with a private IP mapped to one resource." },
-    { "id": "c215", "domain": "02", "module": "02-04", "front": "Two things a private endpoint does not do by itself", "back": "It does not disable the public endpoint - that is a separate setting - and it does not fix name resolution without the privatelink DNS zone linked to the VNet." },
-    { "id": "c216", "domain": "02", "module": "02-04", "front": "Private Link service", "back": "The provider side: you publish your own service behind a Standard Load Balancer so consumers can reach it through their own private endpoints, including across tenants." },
-    { "id": "c217", "domain": "02", "module": "02-04", "front": "Service endpoint policy", "back": "Narrows a service endpoint from 'this subnet may reach the service' to 'and only these specific accounts'. It is the exfiltration control for service endpoints." },
-    { "id": "c218", "domain": "02", "module": "02-04", "front": "Microsoft Entra Private Access", "back": "Identity-centric access to private applications through connectors, part of Global Secure Access. A user-to-app control, not a VNet networking feature." },
-    { "id": "c301", "domain": "03", "module": "03-01", "front": "Purview DSPM for AI answers which question?", "back": "What sensitive data is flowing into and out of AI, and which content is overshared to Copilot. It is a data-layer discovery surface, not a runtime detection." },
-    { "id": "c302", "domain": "03", "module": "03-03", "front": "Defender for AI services answers which question?", "back": "Is someone jailbreaking, poisoning or exfiltrating through our Azure-hosted models. It builds on Content Safety Prompt Shields plus threat intelligence and sends alerts into Defender XDR." },
-    { "id": "c303", "domain": "03", "module": "03-03", "front": "Foundry guardrails answer which question?", "back": "Should this prompt or response be permitted at all. Content filters, Prompt Shields and blocklists act at the model layer - they block, where Defender alerts." },
-    { "id": "c304", "domain": "03", "module": "03-03", "front": "AI gateway in API Management answers which question?", "back": "Who may call the model, how much may they spend, and is traffic inspected, cached and logged centrally. Policies: llm-token-limit, llm-emit-token-metric, llm-content-safety, llm-semantic-cache-lookup and -store." },
-    { "id": "c305", "domain": "03", "module": "03-03", "front": "One application is consuming the whole model quota", "back": "llm-token-limit in API Management, keyed per consumer - and the traffic has to route through the gateway for it to mean anything." },
-    { "id": "c306", "domain": "03", "module": "03-02", "front": "Entra Agent ID", "back": "A first-class identity for an agent, so it can be governed like an account: Conditional Access, ownership, lifecycle, and blast-radius analysis in Defender XDR." },
-    { "id": "c307", "domain": "03", "module": "03-02", "front": "Conditional Access for agents on Microsoft 365 E5 - what is missing?", "back": "Additional agent licensing beyond Entra ID P1/P2. E5 supplies neither, so this is a procurement decision before it is a configuration one. Verify the current position; this area moves." },
-    { "id": "c308", "domain": "03", "module": "03-02", "front": "Blast radius analysis", "back": "Defender XDR, for Entra Agent ID - what a compromised agent could reach. It requires the agent to carry an agent identity, which is why governance comes first." },
-    { "id": "c309", "domain": "03", "module": "03-04", "front": "Trusted launch: what does it add?", "back": "Secure boot and vTPM, enabling boot integrity and attestation. It is a security type chosen at VM creation, and integrity monitoring builds on it." },
-    { "id": "c310", "domain": "03", "module": "03-04", "front": "Bastion versus just-in-time VM access", "back": "Bastion removes the public IP by brokering RDP/SSH over TLS to a private address. JIT removes the standing allow rule by opening the port only on an approved, time-bound request. Different halves; they compose." },
-    { "id": "c311", "domain": "03", "module": "03-04", "front": "Why onboard to Azure Arc before enabling Defender for Servers?", "back": "Arc makes the machine an Azure resource, so it can carry policy, inventory, machine configuration and free recommendations. Only then is paying for a plan a decision made with visibility." },
-    { "id": "c312", "domain": "03", "module": "03-04", "front": "Agentless scanning versus the agent", "back": "Agentless snapshots the disk through cloud APIs - broad coverage, no install, no runtime cost, point-in-time. The agent gives live detection and response. They answer different questions." },
-    { "id": "c313", "domain": "03", "module": "03-04", "front": "Azure Machine Configuration", "back": "Audits and enforces in-guest settings on Azure and Arc-enabled machines through policy. The successor to guest configuration; it needs the extension and a managed identity." },
-    { "id": "c314", "domain": "03", "module": "03-05", "front": "Defender for Containers covers which two phases?", "back": "Posture - registry and cluster misconfiguration, image vulnerability findings - and runtime threat detection on the cluster. Hardening recommendations sit on the posture side." },
-    { "id": "c315", "domain": "03", "module": "03-06", "front": "Azure Functions: which control answers 'only authenticated callers'?", "back": "App Service authentication - Easy Auth - in front of the function, plus network access restrictions or private endpoints. Function keys are not an authentication system." },
-    { "id": "c316", "domain": "03", "module": "03-06", "front": "WAF on Application Gateway versus on Front Door", "back": "Application Gateway is regional and sits in front of a regional back end. Front Door is global, and Premium adds Private Link origins so the origin can stay off the public internet." },
-    { "id": "c401", "domain": "04", "module": "04-01", "front": "Recommendation, attack path, alert - which costs what?", "back": "Recommendations are free foundational CSPM. Attack paths need Defender CSPM. Alerts need the workload protection plan for that resource type. The noun in the stem gives you the answer." },
-    { "id": "c402", "domain": "04", "module": "04-01", "front": "What is uniquely EASM?", "back": "Internet-facing assets you did not know you owned. Defender CSPM reasons over your inventory; EASM finds what is not in it. Look for 'unknown' or 'unmanaged'." },
-    { "id": "c403", "domain": "04", "module": "04-01", "front": "Connecting AWS or GCP to Defender for Cloud", "back": "A multicloud connector per account or project, which brings those resources into CSPM and lets workload plans extend to them. Not a matter of agents alone." },
-    { "id": "c404", "domain": "04", "module": "04-02", "front": "Sentinel Reader, Responder, Contributor", "back": "Reader views. Responder adds incident management - assign, reclassify, close. Contributor can create and edit analytics rules. Analysts get Responder, not Contributor." },
-    { "id": "c405", "domain": "04", "module": "04-02", "front": "Who can author a playbook?", "back": "Whoever holds the Logic App permissions, because that is what a playbook is. Sentinel Playbook Operator only lists, views and runs them." },
-    { "id": "c406", "domain": "04", "module": "04-03", "front": "AMA plus DCR versus Windows Event Forwarding", "back": "AMA with a DCR collects from machines you can install on. WEF forwards events to a collector that runs AMA, with the DCR reading the forwarded events channel - for machines you cannot touch." },
-    { "id": "c407", "domain": "04", "module": "04-03", "front": "Where is it decided what a machine collects?", "back": "In the data collection rule, not on the agent and not in the workspace. That is the change the Log Analytics agent retirement forced." },
-    { "id": "c408", "domain": "04", "module": "04-03", "front": "Syslog and CEF collection shape", "back": "Appliances send to a Linux forwarder running AMA; the DCR selects facilities and severities, and CEF is parsed into its own table. The forwarder is the part people forget to secure." },
-    { "id": "c409", "domain": "04", "module": "04-04", "front": "Automation rule versus playbook", "back": "An automation rule is the trigger and condition logic inside Sentinel - assign, tag, close, or call a playbook. The playbook is the Logic App that does the external work." },
-    { "id": "c410", "domain": "04", "module": "04-04", "front": "Sentinel analytics tier versus data lake tier", "back": "Analytics is interactive, and analytics rules and hunting run on it. The lake is cheap long-horizon storage queried by search jobs. Moving a table to the lake stops real-time detection on it." },
-    { "id": "c411", "domain": "04", "module": "04-04", "front": "Cutting Sentinel cost: ingestion or retention?", "back": "Different problems. Ingestion is reduced by a DCR transformation or a cheaper tier for a noisy source. Retention is tiering and retention settings. Confusing them breaks a detection or an audit." },
-    { "id": "c412", "domain": "04", "module": "04-04", "front": "Shortening total retention - is it immediate?", "back": "No. Microsoft waits 30 days before removing data, so a mistaken change can be reverted. Increasing retention applies to data already ingested and not yet removed." },
-    { "id": "c413", "domain": "04", "module": "04-05", "front": "Security Copilot: what is the unit and why does it matter?", "back": "Security Compute Units, provisioned as capacity that bills whether or not you prompt it. In a lab it is the single largest budget risk - smallest capacity, short bursts, deprovision immediately." }
-  ]
+ "schema": 1,
+ "title": "AZ-104 distinctions",
+ "_note": "Cards are distinctions, not definitions. Each front is a question the exam asks by implication; each back is the shortest true answer. 'module' points at the lesson that teaches it and cites the source. Scheduling is Leitner: 1, 3, 7, 16, 35 days.",
+ "cards": [
+  {
+   "id": "c0101",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Security group vs Microsoft 365 group: which can contain devices?",
+   "back": "Security groups only. Microsoft 365 group members can only be users."
+  },
+  {
+   "id": "c0102",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Can you add a member to a dynamic group by hand?",
+   "back": "No. Change the rule, or the attribute the rule reads."
+  },
+  {
+   "id": "c0103",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Dynamic group licensing: assigned or counted?",
+   "back": "Counted. Each unique user member needs an Entra ID P1 licence in the organisation, but you don't assign it to them. Devices need none."
+  },
+  {
+   "id": "c0104",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Licence assignment fails for a new user. First thing to check?",
+   "back": "Usage location. A licence can't be assigned without it; group-based licensing falls back to the tenant location."
+  },
+  {
+   "id": "c0105",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Group-based licensing and nested groups?",
+   "back": "Not supported. Only first-level members of the licensed group get the licence."
+  },
+  {
+   "id": "c0106",
+   "domain": "01",
+   "module": "01-01",
+   "front": "External collaboration settings vs cross-tenant access settings: which wins?",
+   "back": "Neither. The most restrictive setting applies."
+  },
+  {
+   "id": "c0107",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Least-privileged role to let one user invite guests?",
+   "back": "Guest Inviter. It works even when invitations are limited to admin roles."
+  },
+  {
+   "id": "c0108",
+   "domain": "01",
+   "module": "01-01",
+   "front": "SSPR 'Selected': how many groups in the admin center?",
+   "back": "One. Nested groups inside it are supported."
+  },
+  {
+   "id": "c0109",
+   "domain": "01",
+   "module": "01-01",
+   "front": "Why test SSPR with a non-admin account?",
+   "back": "Admin role holders follow a fixed two-gate policy (two methods, no security questions) that ignores your user policy."
+  },
+  {
+   "id": "c0110",
+   "domain": "01",
+   "module": "01-01",
+   "front": "How long can a deleted Entra user be restored?",
+   "back": "30 days. Its licences come back too, even if that over-consumes."
+  },
+  {
+   "id": "c0201",
+   "domain": "01",
+   "module": "01-02",
+   "front": "What are the three parts of an Azure role assignment?",
+   "back": "Security principal (who), role definition (what), scope (where)."
+  },
+  {
+   "id": "c0202",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Contributor vs Owner: what's the one difference that matters?",
+   "back": "Contributor can't assign roles or policies: its NotActions exclude Microsoft.Authorization write and delete."
+  },
+  {
+   "id": "c0203",
+   "domain": "01",
+   "module": "01-02",
+   "front": "User Access Administrator vs Role Based Access Control Administrator?",
+   "back": "Both assign roles, including Owner. RBAC Administrator can only create and delete role assignments; it can't manage access through Azure Policy."
+  },
+  {
+   "id": "c0204",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Is NotActions a deny?",
+   "back": "No. It trims one role's wildcard. Another role granting the action still grants it. Only deny assignments deny."
+  },
+  {
+   "id": "c0205",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Can you create a deny assignment yourself?",
+   "back": "No. Azure creates them, for example for a deployment stack with deny settings."
+  },
+  {
+   "id": "c0206",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Does Owner let you read blob data with your Entra identity?",
+   "back": "No. Owner, Contributor and Reader have no DataActions. Use a data role such as Storage Blob Data Reader."
+  },
+  {
+   "id": "c0207",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Global Administrator can't see subscriptions. Fix?",
+   "back": "Elevate access (Access management for Azure resources): User Access Administrator at root scope /. Turn it off afterwards."
+  },
+  {
+   "id": "c0208",
+   "domain": "01",
+   "module": "01-02",
+   "front": "az role assignment list shows nothing, but the user has access. Why?",
+   "back": "Default is direct assignments at the current subscription only. Add --all, --include-inherited, --include-groups."
+  },
+  {
+   "id": "c0209",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Check access at a subscription: does it show a resource-group assignment?",
+   "back": "No. It shows the scope and what's inherited to it, never child scopes."
+  },
+  {
+   "id": "c0210",
+   "domain": "01",
+   "module": "01-02",
+   "front": "Role assignment limits?",
+   "back": "5,000 per subscription (fixed; management groups not counted), 500 per management group. Assign to groups."
+  },
+  {
+   "id": "c0301",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Does a deny policy fix or delete existing non-compliant resources?",
+   "back": "No. It marks them non-compliant and blocks new or updated ones. Fix existing ones with modify or deployIfNotExists plus a remediation task."
+  },
+  {
+   "id": "c0302",
+   "domain": "01",
+   "module": "01-03",
+   "front": "What runs a remediation task, and with what permissions?",
+   "back": "The policy assignment's managed identity, with the roles the definition needs. The portal grants them; an SDK doesn't."
+  },
+  {
+   "id": "c0303",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Exclusion vs exemption?",
+   "back": "Exclusion (notScopes): not evaluated, not counted. Exemption (Waiver or Mitigated): shown as Exempted, can expire."
+  },
+  {
+   "id": "c0304",
+   "domain": "01",
+   "module": "01-03",
+   "front": "How long before new policy compliance shows?",
+   "back": "About 5 minutes for a new assignment to apply, about 15 for a changed resource, and a full scan every 24 hours. Or trigger a scan."
+  },
+  {
+   "id": "c0305",
+   "domain": "01",
+   "module": "01-03",
+   "front": "CanNotDelete vs ReadOnly lock?",
+   "back": "CanNotDelete: read and modify, no delete. ReadOnly: read only, and it blocks POSTs (VM restart, list storage keys)."
+  },
+  {
+   "id": "c0306",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Who can create locks? Does a lock stop an Owner?",
+   "back": "Owner or User Access Administrator (Microsoft.Authorization/locks/*), not Contributor. Yes: locks apply to everyone."
+  },
+  {
+   "id": "c0307",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Can you lock or tag a management group?",
+   "back": "Neither. Locks and tags go on subscriptions, resource groups and resources."
+  },
+  {
+   "id": "c0308",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Do resources inherit resource group tags?",
+   "back": "No. Use an Inherit a tag policy (modify) plus remediation for existing resources."
+  },
+  {
+   "id": "c0309",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Tag limits?",
+   "back": "50 per resource, resource group or subscription. Name 512 characters (128 for storage accounts), value 256. Names case-insensitive, values case-sensitive."
+  },
+  {
+   "id": "c0310",
+   "domain": "01",
+   "module": "01-03",
+   "front": "What changes when you move a resource to another resource group?",
+   "back": "Its resource ID changes; its region doesn't. Both resource groups are locked for up to 4 hours; the resource keeps running."
+  },
+  {
+   "id": "c0311",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Move resources to a subscription in another tenant?",
+   "back": "Not supported. Change the subscription's directory, or re-create the resources."
+  },
+  {
+   "id": "c0312",
+   "domain": "01",
+   "module": "01-03",
+   "front": "What does Change directory on a subscription delete?",
+   "back": "All Azure role assignments and custom roles, permanently, plus Azure Policy objects. Managed identities must be re-enabled or re-created."
+  },
+  {
+   "id": "c0313",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Where do new subscriptions land? How deep can management groups go?",
+   "back": "Under the root management group, unless a default management group is set. Six levels, not counting root or subscriptions; 10,000 groups."
+  },
+  {
+   "id": "c0314",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Budget alert fired but VMs still run. Why?",
+   "back": "Budgets notify; they don't cap. Attach an action group that runs automation."
+  },
+  {
+   "id": "c0315",
+   "domain": "01",
+   "module": "01-03",
+   "front": "Advisor ignores month-end peaks. Fix?",
+   "back": "Change the right-sizing lookback period from the default 7 days to 14, 21, 30, 60 or 90."
+  },
+  {
+   "id": "c0401",
+   "domain": "02",
+   "module": "02-01",
+   "front": "The two gates for every storage data request?",
+   "back": "Network (the storage firewall) and authorization (Entra role, Shared Key, SAS, or Files identity). Both must pass."
+  },
+  {
+   "id": "c0402",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Can an IP rule use 10.1.1.0/24? A /32?",
+   "back": "No private (RFC 1918) ranges. No /31 or /32 prefixes: enter the single IP. IPv4 only."
+  },
+  {
+   "id": "c0403",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Why can't IP rules restrict a same-region VM?",
+   "back": "Same-region traffic uses private Azure addresses. Use a virtual network rule with a Microsoft.Storage service endpoint."
+  },
+  {
+   "id": "c0404",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Firewall on, settings editable, but the portal can't list blobs. Why?",
+   "back": "The firewall covers the data plane only. Browsing blobs is data plane: add your client IP."
+  },
+  {
+   "id": "c0405",
+   "domain": "02",
+   "module": "02-01",
+   "front": "User delegation SAS: signed with, max validity, affected by key rotation?",
+   "back": "A user delegation key from Entra credentials; 7 days; not affected by key rotation."
+  },
+  {
+   "id": "c0406",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Which SAS can use a stored access policy?",
+   "back": "Only a service SAS. Up to five policies per container."
+  },
+  {
+   "id": "c0407",
+   "domain": "02",
+   "module": "02-01",
+   "front": "How do you revoke a leaked ad hoc account SAS immediately?",
+   "back": "Regenerate the account key that signed it. That's the only immediate way."
+  },
+  {
+   "id": "c0408",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Deleted a stored access policy, then re-created it with the same name. Effect?",
+   "back": "The old tokens that reference it become valid again, if they haven't expired. Use a new name."
+  },
+  {
+   "id": "c0409",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Key expiration policy: does it rotate keys?",
+   "back": "No. It's a rotation reminder, which Azure Policy can report on."
+  },
+  {
+   "id": "c0410",
+   "domain": "02",
+   "module": "02-01",
+   "front": "What does AllowSharedKeyAccess = false break and keep?",
+   "back": "Breaks account keys and every service or account SAS (403). Keeps Entra auth and user delegation SAS. Required for Conditional Access."
+  },
+  {
+   "id": "c0411",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Azure Files identity sources, and how many per account?",
+   "back": "AD DS, Microsoft Entra Domain Services, Microsoft Entra Kerberos. One per storage account, for all its shares."
+  },
+  {
+   "id": "c0412",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Which Files identity source needs no DC line of sight?",
+   "back": "Microsoft Entra Kerberos (Entra-joined or hybrid-joined clients)."
+  },
+  {
+   "id": "c0413",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Default share-level permission: starting value, and when to use it?",
+   "back": "None. Use it when identities aren't synced to Entra (or for computer accounts). It applies to all authenticated identities."
+  },
+  {
+   "id": "c0414",
+   "domain": "02",
+   "module": "02-01",
+   "front": "Share role granted but root folder access denied?",
+   "back": "Windows ACLs on the root still decide. A share-level role only admits the user to the share."
+  },
+  {
+   "id": "c0501",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Can a storage account's type change after creation?",
+   "back": "No. Create a new account and copy the data."
+  },
+  {
+   "id": "c0502",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Storage account name rules?",
+   "back": "3-24 characters, lowercase letters and numbers only, unique across Azure."
+  },
+  {
+   "id": "c0503",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Which redundancy options do Premium accounts support?",
+   "back": "LRS and ZRS only. No geo-redundancy."
+  },
+  {
+   "id": "c0504",
+   "domain": "02",
+   "module": "02-02",
+   "front": "GRS vs RA-GRS?",
+   "back": "Both copy asynchronously to the paired region. Only RA-GRS lets you read the secondary without failover."
+  },
+  {
+   "id": "c0505",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Can you choose the secondary region?",
+   "back": "No. It's the paired region, set by the primary."
+  },
+  {
+   "id": "c0506",
+   "domain": "02",
+   "module": "02-02",
+   "front": "ZRS to GRS?",
+   "back": "No direct path: two steps via GZRS or LRS, at least 24 hours apart."
+  },
+  {
+   "id": "c0507",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Zonal conversion timing?",
+   "back": "Usually starts within about 72 hours, can take weeks, no completion SLA, no downtime."
+  },
+  {
+   "id": "c0508",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Removing RA from RA-GRS: billing?",
+   "back": "Still billed as RA for 30 days after the change."
+  },
+  {
+   "id": "c0509",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Object replication prerequisites?",
+   "back": "Blob versioning on both accounts; change feed on the source. Block blobs only; no hierarchical namespace."
+  },
+  {
+   "id": "c0510",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Object replication: destination container behaviour?",
+   "back": "Read-only while a rule targets it: writes fail with 409. Existing blobs aren't copied by default."
+  },
+  {
+   "id": "c0511",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Customer-managed key requirements?",
+   "back": "Key Vault or Managed HSM with soft delete and purge protection; RSA key of 2048, 3072 or 4096 bits; managed identity with get, wrapkey and unwrapkey."
+  },
+  {
+   "id": "c0512",
+   "domain": "02",
+   "module": "02-02",
+   "front": "When can infrastructure encryption be enabled?",
+   "back": "Only when creating the account or encryption scope."
+  },
+  {
+   "id": "c0513",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Encryption scopes: purpose and deletion?",
+   "back": "A separate key per container or blob. Can't be deleted, only disabled."
+  },
+  {
+   "id": "c0514",
+   "domain": "02",
+   "module": "02-02",
+   "front": "AzCopy between two accounts: through your PC?",
+   "back": "No. azcopy copy uses server-to-server APIs."
+  },
+  {
+   "id": "c0515",
+   "domain": "02",
+   "module": "02-02",
+   "front": "azcopy sync direction and scope?",
+   "back": "One-way; between local storage and Blob Storage, or between containers."
+  },
+  {
+   "id": "c0516",
+   "domain": "02",
+   "module": "02-02",
+   "front": "Owner of the account, AzCopy with Entra returns 403?",
+   "back": "Owner has no data role. Assign Storage Blob Data Contributor, or use a SAS."
+  },
+  {
+   "id": "c0601",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Azure Files billing model recommended for new shares?",
+   "back": "Provisioned v2: storage, IOPS and throughput provisioned separately."
+  },
+  {
+   "id": "c0602",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Pay-as-you-go file share tiers?",
+   "back": "Transaction optimized, hot, cool (HDD). Up to 5 tier changes in 30 days, not twice within 24 hours."
+  },
+  {
+   "id": "c0603",
+   "domain": "02",
+   "module": "02-03",
+   "front": "NFS file share requirements?",
+   "back": "SSD with a provisioned billing model."
+  },
+  {
+   "id": "c0604",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Container access levels?",
+   "back": "Private (none), Blob (read blobs), Container (read blobs and list the container). The account must allow anonymous access."
+  },
+  {
+   "id": "c0605",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Minimum stays for cool, cold, archive?",
+   "back": "30, 90 and 180 days. Leaving early costs a prorated early-deletion charge."
+  },
+  {
+   "id": "c0606",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Which redundancy options support archive?",
+   "back": "LRS, GRS and RA-GRS only. Not ZRS, GZRS or RA-GZRS."
+  },
+  {
+   "id": "c0607",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Rehydration priorities?",
+   "back": "Standard (default, up to 15 hours) or High (under 1 hour for blobs under 10 GB). Can raise, not lower."
+  },
+  {
+   "id": "c0608",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Rehydrate without an early-deletion fee?",
+   "back": "Copy Blob to a new blob name in an online tier."
+  },
+  {
+   "id": "c0609",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Can lifecycle management rehydrate?",
+   "back": "No. It only tiers cooler or deletes. It runs once a day."
+  },
+  {
+   "id": "c0610",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Stop a lifecycle rule re-archiving rehydrated blobs?",
+   "back": "Add daysAfterLastTierChangeGreaterThan to tierToArchive, or rehydrate by copying."
+  },
+  {
+   "id": "c0611",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Rule by last READ time needs what?",
+   "back": "Access time tracking enabled, plus daysAfterLastAccessTimeGreaterThan."
+  },
+  {
+   "id": "c0612",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Blob soft delete vs container soft delete?",
+   "back": "Separate settings, 1-365 days each. Blob soft delete never restores a container."
+  },
+  {
+   "id": "c0613",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Restore a soft-deleted container: any name?",
+   "back": "Original name only, and not if a new container with that name exists."
+  },
+  {
+   "id": "c0614",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Versioning on, blob deleted, Undelete clicked: restored?",
+   "back": "No. Promote a previous version (Make current version)."
+  },
+  {
+   "id": "c0615",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Control versioning costs?",
+   "back": "A lifecycle rule deleting previous versions by age."
+  },
+  {
+   "id": "c0616",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Share snapshots: limits and properties?",
+   "back": "Up to 200 per share; read-only, incremental, whole share; restore individual files."
+  },
+  {
+   "id": "c0617",
+   "domain": "02",
+   "module": "02-03",
+   "front": "Share soft delete default and scope?",
+   "back": "On by default for new accounts, 7 days (1-365). Restores whole shares only."
+  },
+  {
+   "id": "c0701",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Which ARM template section is required besides $schema and contentVersion?",
+   "back": "resources. parameters, variables, functions and outputs are optional."
+  },
+  {
+   "id": "c0702",
+   "domain": "03",
+   "module": "03-01",
+   "front": "What does Bicep become before deployment?",
+   "back": "An ARM JSON template. Resource Manager only deploys JSON; the CLI and PowerShell build Bicep for you."
+  },
+  {
+   "id": "c0703",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Resources without dependsOn: deployment order?",
+   "back": "In parallel. dependsOn forces ordering; list only resources in the same template."
+  },
+  {
+   "id": "c0704",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Bicep: when is dependsOn generated automatically?",
+   "back": "When a resource references another by symbolic name, including parent:."
+  },
+  {
+   "id": "c0705",
+   "domain": "03",
+   "module": "03-01",
+   "front": "uniqueString(resourceGroup().id): random?",
+   "back": "No. Deterministic: same input, same value. Unique per resource group, repeatable."
+  },
+  {
+   "id": "c0706",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Keep a password out of deployment history?",
+   "back": "securestring or secureobject in ARM; @secure() in Bicep."
+  },
+  {
+   "id": "c0707",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Restrict parameter values?",
+   "back": "allowedValues in ARM; @allowed([...]) in Bicep."
+  },
+  {
+   "id": "c0708",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Reference a resource without deploying it (Bicep)?",
+   "back": "Declare it with the existing keyword."
+  },
+  {
+   "id": "c0709",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Incremental vs complete mode?",
+   "back": "Incremental (default) leaves extra resources alone. Complete deletes resources in the group not in the template."
+  },
+  {
+   "id": "c0710",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Preview a deployment's changes?",
+   "back": "what-if: az deployment group what-if, or New-AzResourceGroupDeployment -WhatIf. --confirm-with-what-if previews then asks."
+  },
+  {
+   "id": "c0711",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Deploy at subscription scope (CLI and PowerShell)?",
+   "back": "az deployment sub create; New-AzSubscriptionDeployment."
+  },
+  {
+   "id": "c0712",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Export as Bicep: where?",
+   "back": "Only in the portal. The CLI and PowerShell export ARM JSON; decompile it to get Bicep."
+  },
+  {
+   "id": "c0713",
+   "domain": "03",
+   "module": "03-01",
+   "front": "The exact template a past deployment used?",
+   "back": "Resource group > Deployments > the deployment > Template (ARM JSON)."
+  },
+  {
+   "id": "c0714",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Is bicep decompile exact?",
+   "back": "Best-effort. Output is functionally equivalent but may need cleanup; round trips aren't identical."
+  },
+  {
+   "id": "c0715",
+   "domain": "03",
+   "module": "03-01",
+   "front": "Export template limits?",
+   "back": "Not guaranteed; may omit passwords and use older API versions; fails above 200 resources."
+  },
+  {
+   "id": "c0801",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Stopped vs deallocated VM billing?",
+   "back": "Stopped from inside the OS: compute still billed. Deallocated: compute not billed. Disks bill either way."
+  },
+  {
+   "id": "c0802",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Is the temporary disk persistent?",
+   "back": "No. It isn't a managed disk; data can be lost on deallocation, redeploy or maintenance."
+  },
+  {
+   "id": "c0803",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Resize to a size not in the list?",
+   "back": "Deallocate first. Resizing restarts the VM; deallocating releases dynamic IPs."
+  },
+  {
+   "id": "c0804",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Which disk types can't be OS disks?",
+   "back": "Ultra Disk and Premium SSD v2. Standard HDD OS disks retire September 8, 2028."
+  },
+  {
+   "id": "c0805",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Grow a data disk online?",
+   "back": "Yes. Exception: a disk of 4 TiB or less (HDD, Standard SSD, Premium SSD) going beyond 4 TiB needs deallocate and detach."
+  },
+  {
+   "id": "c0806",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Shrink a managed disk?",
+   "back": "Not possible. Create a smaller disk and copy the data."
+  },
+  {
+   "id": "c0807",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Change disk type (e.g. to Premium SSD)?",
+   "back": "Stop the VM; Premium needs a size that supports Premium storage. The conversion is instant."
+  },
+  {
+   "id": "c0808",
+   "domain": "03",
+   "module": "03-02",
+   "front": "What does encryption at host add to SSE?",
+   "back": "Encryption of the temporary disk and caches, with data flowing encrypted to storage; no VM CPU used."
+  },
+  {
+   "id": "c0809",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Encryption at host prerequisites?",
+   "back": "Register the EncryptionAtHost feature on the subscription; deallocate an existing VM before changing it."
+  },
+  {
+   "id": "c0810",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Azure Disk Encryption retirement?",
+   "back": "September 15, 2028. Use encryption at host for new VMs."
+  },
+  {
+   "id": "c0811",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Move a VM to another region?",
+   "back": "Azure Resource Mover. Resource group and subscription moves use the standard move."
+  },
+  {
+   "id": "c0812",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Move a VM to another VNet?",
+   "back": "Not supported. Re-create the VM from its disk in the target VNet."
+  },
+  {
+   "id": "c0813",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Availability set limits and timing?",
+   "back": "Up to 3 fault domains and 20 update domains; 99.95%; VMs join only at creation."
+  },
+  {
+   "id": "c0814",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Availability zones SLA?",
+   "back": "99.99% for VMs across two or more zones."
+  },
+  {
+   "id": "c0815",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Scale set orchestration: recommended and changeable?",
+   "back": "Flexible is recommended; the mode is fixed at creation."
+  },
+  {
+   "id": "c0816",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Flexible scale set outbound internet?",
+   "back": "No default outbound access. Configure NAT gateway, load balancer outbound rules or public IPs."
+  },
+  {
+   "id": "c0817",
+   "domain": "03",
+   "module": "03-02",
+   "front": "Autoscale scale-in logic?",
+   "back": "Scales in only if ALL scale-in rules trigger. Any scale-out rule triggers scale-out, to the highest capacity asked."
+  },
+  {
+   "id": "c0901",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Which ACR tier has geo-replication and private endpoints?",
+   "back": "Premium."
+  },
+  {
+   "id": "c0902",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Least-privilege role to pull from ACR? To push?",
+   "back": "AcrPull to pull; AcrPush to push and pull. Both are data-plane only."
+  },
+  {
+   "id": "c0903",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Copy an image into ACR without Docker?",
+   "back": "az acr import."
+  },
+  {
+   "id": "c0904",
+   "domain": "03",
+   "module": "03-03",
+   "front": "What does an ACI container group share?",
+   "back": "Host, lifecycle, local network (localhost), IP and DNS label, and volumes. Multi-container is Linux only."
+  },
+  {
+   "id": "c0905",
+   "domain": "03",
+   "module": "03-03",
+   "front": "ACI restart policies and default?",
+   "back": "Always (default), OnFailure, Never. Never prevents restart after a successful exit."
+  },
+  {
+   "id": "c0906",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Persist data from ACI?",
+   "back": "Mount an Azure Files share (Linux containers)."
+  },
+  {
+   "id": "c0907",
+   "domain": "03",
+   "module": "03-03",
+   "front": "ACI properties that need delete and re-create?",
+   "back": "OS type, CPU, memory or GPU, restart policy, network profile, availability zone."
+  },
+  {
+   "id": "c0908",
+   "domain": "03",
+   "module": "03-03",
+   "front": "ACI pull from ACR with managed identity: which kind?",
+   "back": "User-assigned only, set with --assign-identity and --acr-identity, with AcrPull."
+  },
+  {
+   "id": "c0909",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Does ACI autoscale?",
+   "back": "No rule-based scaling. Size the group; run more groups for more capacity."
+  },
+  {
+   "id": "c0910",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Container Apps replica defaults?",
+   "back": "Minimum 0 (scale to zero), maximum 10; configurable up to 1,000."
+  },
+  {
+   "id": "c0911",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Container Apps rules that can't scale to zero?",
+   "back": "CPU and memory rules. HTTP, TCP and event rules can."
+  },
+  {
+   "id": "c0912",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Container Apps revision modes?",
+   "back": "Single (default; new revision replaces the old with no downtime) and multiple (traffic splitting, weights total 100)."
+  },
+  {
+   "id": "c0913",
+   "domain": "03",
+   "module": "03-03",
+   "front": "Container Apps pull from ACR with system identity?",
+   "back": "Yes: az containerapp registry set --identity system; the identity needs AcrPull."
+  },
+  {
+   "id": "c1001",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Do apps in one App Service plan share compute?",
+   "back": "Yes. Every app runs on all the plan's instances. Isolate an app by giving it its own plan."
+  },
+  {
+   "id": "c1002",
+   "domain": "03",
+   "module": "03-04",
+   "front": "How are dedicated App Service tiers billed?",
+   "back": "Per instance, whether apps are busy or not. Features like slots and backups cost nothing extra."
+  },
+  {
+   "id": "c1003",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Scale up vs scale out?",
+   "back": "Up: change the tier (bigger instances, more features). Out: more instances (Basic 3, Standard 10, Premium 30, Isolated 100)."
+  },
+  {
+   "id": "c1004",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Rule-based autoscale vs automatic scaling?",
+   "back": "Autoscale: Standard and higher, metric rules. Automatic scaling: Premium v2 and higher, HTTP-driven, maximum burst up to 30."
+  },
+  {
+   "id": "c1005",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Lowest tier for a TLS binding?",
+   "back": "Basic (SNI). IP-based SSL needs Standard and bills hourly. Free and Shared have none."
+  },
+  {
+   "id": "c1006",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Free managed certificate limits?",
+   "back": "No wildcard, not exportable, not in App Service Environments; renews automatically."
+  },
+  {
+   "id": "c1007",
+   "domain": "03",
+   "module": "03-04",
+   "front": "DNS records for www.contoso.com?",
+   "back": "CNAME www -> <app>.azurewebsites.net, plus TXT asuid.www with the verification ID."
+  },
+  {
+   "id": "c1008",
+   "domain": "03",
+   "module": "03-04",
+   "front": "DNS records for the root contoso.com?",
+   "back": "A record @ -> the app's IP, plus TXT asuid with the verification ID."
+  },
+  {
+   "id": "c1009",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Automatic vs custom App Service backups?",
+   "back": "Automatic: hourly, 30 days, no setup, not downloadable. Custom: storage account, at most every 2 hours, 10 GB, downloadable."
+  },
+  {
+   "id": "c1010",
+   "domain": "03",
+   "module": "03-04",
+   "front": "What isn't restored from an App Service backup?",
+   "back": "Custom domains, TLS bindings, managed identities, network features, scale-out settings, slots."
+  },
+  {
+   "id": "c1011",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Access restrictions: default behaviour?",
+   "back": "No rules: allow all. One rule: implicit deny for unmatched traffic. The main and scm sites have separate rules."
+  },
+  {
+   "id": "c1012",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Does a private endpoint respect access restrictions?",
+   "back": "No. Private endpoint traffic bypasses them; filter it with an NSG."
+  },
+  {
+   "id": "c1013",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Is VNet integration inbound or outbound?",
+   "back": "Outbound only. Private inbound access needs a private endpoint."
+  },
+  {
+   "id": "c1014",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Deployment slots: tier and count?",
+   "back": "Standard and higher; Standard allows 5. No extra charge."
+  },
+  {
+   "id": "c1015",
+   "domain": "03",
+   "module": "03-04",
+   "front": "What does a sticky (deployment slot) setting do?",
+   "back": "Stays with its slot during a swap. Unmarked app settings travel with the app."
+  },
+  {
+   "id": "c1016",
+   "domain": "03",
+   "module": "03-04",
+   "front": "Swap with preview?",
+   "back": "Applies the target's slot settings to the source and pauses for validation; then complete or cancel."
+  },
+  {
+   "id": "c1101",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Reserved addresses per subnet?",
+   "back": "Five: .0 network, .1 gateway, .2 and .3 DNS, and the last (broadcast). A /24 has 251 usable."
+  },
+  {
+   "id": "c1102",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Smallest IPv4 subnet, and its usable addresses?",
+   "back": "/29, with 3 usable. IPv6 subnets must be /64."
+  },
+  {
+   "id": "c1103",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Default outbound access for new VNets?",
+   "back": "Private subnets by default (API after March 31, 2026; portal already). VMs need a NAT gateway, public IP or LB outbound rules."
+  },
+  {
+   "id": "c1104",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Peering states?",
+   "back": "Initiated (one link), Connected (both links), Disconnected (one link deleted: re-create both)."
+  },
+  {
+   "id": "c1105",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Is peering transitive?",
+   "back": "No. A-B and B-C doesn't give A-C. Peer directly, or route through a hub NVA."
+  },
+  {
+   "id": "c1106",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Peer VNets with overlapping address spaces?",
+   "back": "Not possible."
+  },
+  {
+   "id": "c1107",
+   "domain": "04",
+   "module": "04-01",
+   "front": "After resizing a peered VNet?",
+   "back": "Sync the peering on each link."
+  },
+  {
+   "id": "c1108",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Use remote gateways: how many peerings?",
+   "back": "Only one per virtual network, and that network can't have its own gateway."
+  },
+  {
+   "id": "c1109",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Basic public IP status?",
+   "back": "Retired September 30, 2025. Use Standard: static, zone-redundant, closed inbound by default."
+  },
+  {
+   "id": "c1110",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Is an unattached Standard public IP billed?",
+   "back": "Yes, while it exists."
+  },
+  {
+   "id": "c1111",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Route tables per subnet?",
+   "back": "Zero or one. Up to 400 routes per table by default."
+  },
+  {
+   "id": "c1112",
+   "domain": "04",
+   "module": "04-01",
+   "front": "UDR next hop types?",
+   "back": "Virtual appliance (with IP), virtual network gateway, virtual network, internet, None (drop)."
+  },
+  {
+   "id": "c1113",
+   "domain": "04",
+   "module": "04-01",
+   "front": "How does Azure pick a route?",
+   "back": "Longest prefix match, then UDR > BGP > system for the same prefix."
+  },
+  {
+   "id": "c1114",
+   "domain": "04",
+   "module": "04-01",
+   "front": "NVA receives traffic but drops it?",
+   "back": "Enable IP forwarding on its NIC (and in its OS)."
+  },
+  {
+   "id": "c1115",
+   "domain": "04",
+   "module": "04-01",
+   "front": "Next hop vs IP flow verify?",
+   "back": "Next hop: routing (where it goes). IP flow verify: NSG rules (allowed or denied, which rule)."
+  },
+  {
+   "id": "c1116",
+   "domain": "04",
+   "module": "04-01",
+   "front": "NSG flow logs status?",
+   "back": "No new ones after June 30, 2025; retire September 30, 2027. Use virtual network flow logs."
+  },
+  {
+   "id": "c1201",
+   "domain": "04",
+   "module": "04-02",
+   "front": "NSG rule priority range and processing?",
+   "back": "100-4096; lowest number first; processing stops at the first match."
+  },
+  {
+   "id": "c1202",
+   "domain": "04",
+   "module": "04-02",
+   "front": "NSG default inbound rules?",
+   "back": "AllowVNetInBound 65000, AllowAzureLoadBalancerInBound 65001, DenyAllInBound 65500."
+  },
+  {
+   "id": "c1203",
+   "domain": "04",
+   "module": "04-02",
+   "front": "NSG default outbound rules?",
+   "back": "AllowVnetOutBound 65000, AllowInternetOutBound 65001, DenyAllOutBound 65500."
+  },
+  {
+   "id": "c1204",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Order: subnet NSG vs NIC NSG?",
+   "back": "Inbound: subnet then NIC. Outbound: NIC then subnet. Both must allow."
+  },
+  {
+   "id": "c1205",
+   "domain": "04",
+   "module": "04-02",
+   "front": "What is an application security group?",
+   "back": "A named group of NICs used as an NSG rule source or destination. Members must share a VNet."
+  },
+  {
+   "id": "c1206",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Which rule blocked this packet?",
+   "back": "Network Watcher IP flow verify."
+  },
+  {
+   "id": "c1207",
+   "domain": "04",
+   "module": "04-02",
+   "front": "All rules applied to a NIC, combined?",
+   "back": "Effective security rules (VM must be running)."
+  },
+  {
+   "id": "c1208",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Bastion Developer: cost and limits?",
+   "back": "Free; one VM at a time; no peering; select regions; no AzureBastionSubnet or public IP."
+  },
+  {
+   "id": "c1209",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Dedicated Bastion subnet?",
+   "back": "AzureBastionSubnet, /26 or larger, plus a Standard static public IP (Premium can be private-only)."
+  },
+  {
+   "id": "c1210",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Bastion SKU for native client and file transfer?",
+   "back": "Standard (or Premium). Premium adds session recording."
+  },
+  {
+   "id": "c1211",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Can you downgrade a Bastion SKU?",
+   "back": "No. Upgrade in place; downgrade means delete and re-create."
+  },
+  {
+   "id": "c1212",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Service endpoint: what changes?",
+   "back": "The subnet's source IP to the service becomes private. DNS and the destination stay public. Free."
+  },
+  {
+   "id": "c1213",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Service endpoint from on-premises?",
+   "back": "Not supported. Use a private endpoint (or allow on-premises public IPs on the firewall)."
+  },
+  {
+   "id": "c1214",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Private endpoint: what is it?",
+   "back": "A NIC with a private IP in your subnet, mapped to one resource; works from peered and on-premises networks; bills hourly."
+  },
+  {
+   "id": "c1215",
+   "domain": "04",
+   "module": "04-02",
+   "front": "Private endpoint DNS zone for blobs?",
+   "back": "privatelink.blob.core.windows.net, linked to the VNet, so the normal name resolves to the private IP."
+  },
+  {
+   "id": "c1301",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Is Azure DNS a registrar?",
+   "back": "No. It's authoritative hosting. Delegate by setting the domain's NS records at the registrar to the four Azure name servers."
+  },
+  {
+   "id": "c1302",
+   "domain": "04",
+   "module": "04-03",
+   "front": "CNAME at the zone apex?",
+   "back": "Not allowed (and a CNAME set holds one record). Use an alias record to an Azure resource."
+  },
+  {
+   "id": "c1303",
+   "domain": "04",
+   "module": "04-03",
+   "front": "What does an alias record do?",
+   "back": "Points at an Azure resource (public IP, Traffic Manager, CDN, Front Door...), tracks IP changes, empties if the resource is deleted, works at the apex."
+  },
+  {
+   "id": "c1304",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Who can resolve a private DNS zone?",
+   "back": "Only VNets linked to it. Linked VNets resolve each other's names without peering."
+  },
+  {
+   "id": "c1305",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Auto-registration rules?",
+   "back": "Registers A records for VMs' primary NICs; one registration zone per VNet; no PTR, no load balancers."
+  },
+  {
+   "id": "c1306",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Private zones with a custom DNS server?",
+   "back": "Bypassed. Forward the zone to 168.63.129.16 or use Azure DNS Private Resolver."
+  },
+  {
+   "id": "c1307",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Load balancer components?",
+   "back": "Frontend IP, backend pool, health probe, load-balancing rule; plus inbound NAT rules and outbound rules."
+  },
+  {
+   "id": "c1308",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Default distribution mode?",
+   "back": "5-tuple hash. Session persistence: client IP (2-tuple) or client IP and protocol (3-tuple)."
+  },
+  {
+   "id": "c1309",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Standard load balancer security model?",
+   "back": "Secure by default: inbound closed unless an NSG allows it. Basic was retired September 30, 2025."
+  },
+  {
+   "id": "c1310",
+   "domain": "04",
+   "module": "04-03",
+   "front": "What are HA ports?",
+   "back": "A rule (protocol All, port 0) balancing all ports and protocols; internal Standard load balancer only; for NVAs."
+  },
+  {
+   "id": "c1311",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Health probe source address?",
+   "back": "168.63.129.16 (AzureLoadBalancer service tag). The default NSG rule 65001 allows it unless a higher-priority deny blocks it."
+  },
+  {
+   "id": "c1312",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Data Path Availability vs Health Probe Status?",
+   "back": "Data Path: frontend reachability through to a healthy backend. Health Probe Status: each backend's own probe results."
+  },
+  {
+   "id": "c1313",
+   "domain": "04",
+   "module": "04-03",
+   "front": "Backend VM to its own internal load balancer frontend?",
+   "back": "Not supported; that flow fails."
+  },
+  {
+   "id": "c1401",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Platform metrics: collection and retention?",
+   "back": "Automatic, every minute; kept 93 days; one chart shows up to 30 days."
+  },
+  {
+   "id": "c1402",
+   "domain": "05",
+   "module": "05-01",
+   "front": "What's collected automatically vs configured?",
+   "back": "Automatic: platform metrics, activity log. Configure: resource logs (diagnostic setting), guest data (Azure Monitor Agent + DCR)."
+  },
+  {
+   "id": "c1403",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Diagnostic setting destinations?",
+   "back": "Log Analytics workspace, storage account, event hub, partner solution."
+  },
+  {
+   "id": "c1404",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Workspace retention limits?",
+   "back": "Default 30 days (31 in price); analytics up to 2 years; total up to 12 years (long-term, read via search jobs)."
+  },
+  {
+   "id": "c1405",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Log Analytics agent status?",
+   "back": "Retired August 2024. Use the Azure Monitor Agent with data collection rules."
+  },
+  {
+   "id": "c1406",
+   "domain": "05",
+   "module": "05-01",
+   "front": "KQL: filter, choose columns, add column, aggregate?",
+   "back": "where, project, extend, summarize ... by (with bin() for time)."
+  },
+  {
+   "id": "c1407",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Alert on resource deletion?",
+   "back": "Activity log alert rule."
+  },
+  {
+   "id": "c1408",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Alert on a KQL result?",
+   "back": "Log search alert rule (runs the query on a schedule)."
+  },
+  {
+   "id": "c1409",
+   "domain": "05",
+   "module": "05-01",
+   "front": "What's an action group?",
+   "back": "Reusable notifications (email, SMS, push, voice) and actions (runbook, Function, Logic App, webhook, ITSM, Event Hubs)."
+  },
+  {
+   "id": "c1410",
+   "domain": "05",
+   "module": "05-01",
+   "front": "What does an alert processing rule do?",
+   "back": "Acts on fired alerts in a scope: suppress all action groups, or add action groups; always, one-time or recurring."
+  },
+  {
+   "id": "c1411",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Stateful vs stateless alert?",
+   "back": "Stateful (auto-resolve) resolves when the condition clears; stateless fires every time it's met."
+  },
+  {
+   "id": "c1412",
+   "domain": "05",
+   "module": "05-01",
+   "front": "VM insights: agent, DCR, table?",
+   "back": "Azure Monitor Agent; DCR prefixed MSVMI-; InsightsMetrics. Map + Dependency agent retire June 30, 2028."
+  },
+  {
+   "id": "c1413",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Network Watcher enablement?",
+   "back": "Automatic per region when you create a VNet; free; lives in NetworkWatcherRG."
+  },
+  {
+   "id": "c1414",
+   "domain": "05",
+   "module": "05-01",
+   "front": "Connection monitor needs?",
+   "back": "Network Watcher agent extension on Azure VMs; Azure Arc + Azure Monitor Agent on-premises. Classic is deprecated."
+  },
+  {
+   "id": "c1501",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Recovery Services vault protects?",
+   "back": "Azure VMs, SQL/SAP HANA in VMs, Azure Files, on-premises (MARS, MABS, DPM). Also used by Site Recovery."
+  },
+  {
+   "id": "c1502",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Backup vault protects?",
+   "back": "Azure Disks, Azure Blobs, Azure Database for PostgreSQL (and more)."
+  },
+  {
+   "id": "c1503",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Vault redundancy default and when it locks?",
+   "back": "Recovery Services vault defaults to GRS; locked once the first item is protected. Backup vault: set at creation."
+  },
+  {
+   "id": "c1504",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Cross Region Restore requirements?",
+   "back": "GRS vault; extra cost; up to 48 hours to activate; can't be reverted; vault-tier points only."
+  },
+  {
+   "id": "c1505",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Soft delete for backups?",
+   "back": "On by default; 14 extra days at no cost. Enhanced soft delete: custom retention, can be always-on (irreversible)."
+  },
+  {
+   "id": "c1506",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Standard vs Enhanced VM policy?",
+   "back": "Standard: daily, snapshots 1-5 days. Enhanced: every 4-24 hours, snapshots 1-30 days, required for Premium SSD v2 and Ultra; can't go back."
+  },
+  {
+   "id": "c1507",
+   "domain": "05",
+   "module": "05-02",
+   "front": "VMs per backup policy?",
+   "back": "Up to 100."
+  },
+  {
+   "id": "c1508",
+   "domain": "05",
+   "module": "05-02",
+   "front": "VM restore options?",
+   "back": "Create new VM, restore disks (+ template), replace existing (VM must exist), cross region (vault tier), file recovery."
+  },
+  {
+   "id": "c1509",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Why can't the vault be deleted?",
+   "back": "It still holds backup data, including soft-deleted items. Disable soft delete before deleting backup data."
+  },
+  {
+   "id": "c1510",
+   "domain": "05",
+   "module": "05-02",
+   "front": "What does Site Recovery deploy when replication starts?",
+   "back": "Mobility service extension on the VM; cache storage account in the source region; replica disks in the target."
+  },
+  {
+   "id": "c1511",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Site Recovery default replication policy?",
+   "back": "Crash-consistent points every 5 minutes (fixed); 1-day retention; app-consistent snapshots off."
+  },
+  {
+   "id": "c1512",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Test failover vs failover?",
+   "back": "Test: isolated network, no impact on replication or production; clean up after. Failover: real; then commit and reprotect."
+  },
+  {
+   "id": "c1513",
+   "domain": "05",
+   "module": "05-02",
+   "front": "After failover, are VMs protected?",
+   "back": "No. Reprotect them (replicate back), then fail back when ready."
+  },
+  {
+   "id": "c1514",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Built-in backup alerts?",
+   "back": "Security (Sev 0; can't be turned off) and job failures (Sev 1; on by default). Notify via alert processing rule + action group."
+  },
+  {
+   "id": "c1515",
+   "domain": "05",
+   "module": "05-02",
+   "front": "Backup reports need?",
+   "back": "Vault diagnostic settings sending backup events to Log Analytics in resource-specific mode."
+  }
+ ]
 }

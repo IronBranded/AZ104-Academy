@@ -1,0 +1,42 @@
+# Bicep and ARM template checks for every lab template.
+#
+#   - every .bicep file must build and pass the linter
+#   - every .bicepparam file must build against its Bicep file
+#   - every ARM JSON template under labs/**/templates must decompile, which proves it
+#     is a well-formed ARM template (parameters files are only parsed as JSON)
+#
+# The Bicep CLI is pinned to the version these templates were last tested with.
+# Bump it deliberately: a new version can add linter rules.
+name: Bicep templates
+
+on:
+  push:
+    paths:
+      - 'labs/**'
+      - '.github/workflows/bicep.yml'
+  pull_request:
+    paths:
+      - 'labs/**'
+      - '.github/workflows/bicep.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  templates:
+    runs-on: ubuntu-latest
+    env:
+      BICEP_VERSION: v0.47.16
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bicep CLI
+        run: |
+          curl -sSfL -o bicep "https://github.com/Azure/bicep/releases/download/${BICEP_VERSION}/bicep-linux-x64"
+          chmod +x bicep
+          sudo mv bicep /usr/local/bin/bicep
+          bicep --version
+
+      - name: Build, lint and check templates
+        run: bash tools/check-templates.sh

@@ -1,0 +1,749 @@
+{
+ "exam": "AZ-104",
+ "outline_version": "2026-04-17",
+ "outline_label": "Skills measured as of April 17, 2026",
+ "source_url": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104",
+ "retrieved": "2026-09-29",
+ "source_updated_at": "2026-03-19",
+ "_note": "Objective text is verbatim from the source page. Ids are this repo's: stable and semantic, so a reorder of the official outline does not renumber anything. 'module' is the planned owner module; the validator treats an objective whose module is not yet written as planned (warning), and an objective with no owner as an error. Changes to 'module' are objective-mapping changes: review them in the pull request diff.",
+ "objectives": [
+  {
+   "id": "id.users.create",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Microsoft Entra users and groups",
+   "objective": "Create users and groups",
+   "module": "01-01"
+  },
+  {
+   "id": "id.users.properties",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Microsoft Entra users and groups",
+   "objective": "Manage user and group properties",
+   "module": "01-01"
+  },
+  {
+   "id": "id.users.licenses",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Microsoft Entra users and groups",
+   "objective": "Manage licenses in Microsoft Entra ID",
+   "module": "01-01"
+  },
+  {
+   "id": "id.users.external",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Microsoft Entra users and groups",
+   "objective": "Manage external users",
+   "module": "01-01"
+  },
+  {
+   "id": "id.users.sspr",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Microsoft Entra users and groups",
+   "objective": "Configure self-service password reset (SSPR)",
+   "module": "01-01"
+  },
+  {
+   "id": "id.access.builtin-roles",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage access to Azure resources",
+   "objective": "Manage built-in Azure roles",
+   "module": "01-02"
+  },
+  {
+   "id": "id.access.scopes",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage access to Azure resources",
+   "objective": "Assign roles at different scopes",
+   "module": "01-02"
+  },
+  {
+   "id": "id.access.interpret",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage access to Azure resources",
+   "objective": "Interpret access assignments",
+   "module": "01-02"
+  },
+  {
+   "id": "id.gov.policy",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Implement and manage Azure Policy",
+   "module": "01-03"
+  },
+  {
+   "id": "id.gov.locks",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Configure resource locks",
+   "module": "01-03"
+  },
+  {
+   "id": "id.gov.tags",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Apply and manage tags on resources",
+   "module": "01-03"
+  },
+  {
+   "id": "id.gov.resource-groups",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Manage resource groups",
+   "module": "01-03"
+  },
+  {
+   "id": "id.gov.subscriptions",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Manage subscriptions",
+   "module": "01-03"
+  },
+  {
+   "id": "id.gov.costs",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Manage costs by using alerts, budgets, and Azure Advisor recommendations",
+   "module": "01-03"
+  },
+  {
+   "id": "id.gov.management-groups",
+   "domain": "Manage Azure identities and governance",
+   "domain_id": "01",
+   "weight": "20–25%",
+   "functional_group": "Manage Azure subscriptions and governance",
+   "objective": "Configure management groups",
+   "module": "01-03"
+  },
+  {
+   "id": "sto.access.firewalls",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure access to storage",
+   "objective": "Configure Azure Storage firewalls and virtual networks",
+   "module": "02-01"
+  },
+  {
+   "id": "sto.access.sas",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure access to storage",
+   "objective": "Create and use shared access signature (SAS) tokens",
+   "module": "02-01"
+  },
+  {
+   "id": "sto.access.stored-policies",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure access to storage",
+   "objective": "Configure stored access policies",
+   "module": "02-01"
+  },
+  {
+   "id": "sto.access.keys",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure access to storage",
+   "objective": "Manage access keys",
+   "module": "02-01"
+  },
+  {
+   "id": "sto.access.files-identity",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure access to storage",
+   "objective": "Configure identity-based access for Azure Files",
+   "module": "02-01"
+  },
+  {
+   "id": "sto.accounts.create",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage storage accounts",
+   "objective": "Create and configure storage accounts",
+   "module": "02-02"
+  },
+  {
+   "id": "sto.accounts.redundancy",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage storage accounts",
+   "objective": "Configure Azure Storage redundancy",
+   "module": "02-02"
+  },
+  {
+   "id": "sto.accounts.object-replication",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage storage accounts",
+   "objective": "Configure object replication",
+   "module": "02-02"
+  },
+  {
+   "id": "sto.accounts.encryption",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage storage accounts",
+   "objective": "Configure storage account encryption",
+   "module": "02-02"
+  },
+  {
+   "id": "sto.accounts.explorer-azcopy",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage storage accounts",
+   "objective": "Manage data by using Azure Storage Explorer and AzCopy",
+   "module": "02-02"
+  },
+  {
+   "id": "sto.data.file-share",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Create and configure a file share in Azure Files",
+   "module": "02-03"
+  },
+  {
+   "id": "sto.data.blob-container",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Create and configure a container in Azure Blob Storage",
+   "module": "02-03"
+  },
+  {
+   "id": "sto.data.tiers",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Configure storage tiers",
+   "module": "02-03"
+  },
+  {
+   "id": "sto.data.blob-soft-delete",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Configure soft delete for blobs and containers",
+   "module": "02-03"
+  },
+  {
+   "id": "sto.data.files-snapshots",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Configure snapshots and soft delete for Azure Files",
+   "module": "02-03"
+  },
+  {
+   "id": "sto.data.lifecycle",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Configure blob lifecycle management",
+   "module": "02-03"
+  },
+  {
+   "id": "sto.data.versioning",
+   "domain": "Implement and manage storage",
+   "domain_id": "02",
+   "weight": "15–20%",
+   "functional_group": "Configure Azure Files and Azure Blob Storage",
+   "objective": "Configure blob versioning",
+   "module": "02-03"
+  },
+  {
+   "id": "cmp.iac.interpret",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Automate deployment of resources by using Azure Resource Manager (ARM) templates or Bicep files",
+   "objective": "Interpret an Azure Resource Manager template or a Bicep file",
+   "module": "03-01"
+  },
+  {
+   "id": "cmp.iac.modify-arm",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Automate deployment of resources by using Azure Resource Manager (ARM) templates or Bicep files",
+   "objective": "Modify an existing Azure Resource Manager template",
+   "module": "03-01"
+  },
+  {
+   "id": "cmp.iac.modify-bicep",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Automate deployment of resources by using Azure Resource Manager (ARM) templates or Bicep files",
+   "objective": "Modify an existing Bicep file",
+   "module": "03-01"
+  },
+  {
+   "id": "cmp.iac.deploy",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Automate deployment of resources by using Azure Resource Manager (ARM) templates or Bicep files",
+   "objective": "Deploy resources by using an Azure Resource Manager template or a Bicep file",
+   "module": "03-01"
+  },
+  {
+   "id": "cmp.iac.export-convert",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Automate deployment of resources by using Azure Resource Manager (ARM) templates or Bicep files",
+   "objective": "Export a deployment as an Azure Resource Manager template or convert an Azure Resource Manager template to a Bicep file",
+   "module": "03-01"
+  },
+  {
+   "id": "cmp.vm.create",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Create a virtual machine",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.vm.encryption-at-host",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Configure encryption at host for Azure virtual machines",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.vm.move",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Move a virtual machine to another resource group, subscription, or region",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.vm.sizes",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Manage virtual machine sizes",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.vm.disks",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Manage virtual machine disks",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.vm.availability",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Deploy virtual machines to availability zones and availability sets",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.vm.scale-sets",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure virtual machines",
+   "objective": "Deploy and configure an Azure Virtual Machine Scale Sets",
+   "module": "03-02"
+  },
+  {
+   "id": "cmp.containers.acr",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Provision and manage containers in the Azure portal",
+   "objective": "Create and manage an Azure Container Registry",
+   "module": "03-03"
+  },
+  {
+   "id": "cmp.containers.aci",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Provision and manage containers in the Azure portal",
+   "objective": "Provision a container by using Azure Container Instances",
+   "module": "03-03"
+  },
+  {
+   "id": "cmp.containers.aca",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Provision and manage containers in the Azure portal",
+   "objective": "Provision a container by using Azure Container Apps",
+   "module": "03-03"
+  },
+  {
+   "id": "cmp.containers.scaling",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Provision and manage containers in the Azure portal",
+   "objective": "Manage sizing and scaling for containers, including Azure Container Instances and Azure Container Apps",
+   "module": "03-03"
+  },
+  {
+   "id": "cmp.appservice.plan",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Provision an App Service plan",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.plan-scaling",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Configure scaling for an App Service plan",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.create",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Create an App Service",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.tls",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Configure certificates and Transport Layer Security (TLS) for an App Service",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.custom-dns",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Map an existing custom DNS name to an App Service",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.backup",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Configure backup for an App Service",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.networking",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Configure networking settings for an App Service",
+   "module": "03-04"
+  },
+  {
+   "id": "cmp.appservice.slots",
+   "domain": "Deploy and manage Azure compute resources",
+   "domain_id": "03",
+   "weight": "20–25%",
+   "functional_group": "Create and configure Azure App Service",
+   "objective": "Configure deployment slots for an App Service",
+   "module": "03-04"
+  },
+  {
+   "id": "net.vnet.create",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage virtual networks in Azure",
+   "objective": "Create and configure virtual networks and subnets",
+   "module": "04-01"
+  },
+  {
+   "id": "net.vnet.peering",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage virtual networks in Azure",
+   "objective": "Create and configure virtual network peering",
+   "module": "04-01"
+  },
+  {
+   "id": "net.vnet.public-ip",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage virtual networks in Azure",
+   "objective": "Configure public IP addresses",
+   "module": "04-01"
+  },
+  {
+   "id": "net.vnet.udr",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage virtual networks in Azure",
+   "objective": "Configure user-defined routes",
+   "module": "04-01"
+  },
+  {
+   "id": "net.vnet.troubleshoot",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure and manage virtual networks in Azure",
+   "objective": "Troubleshoot network connectivity",
+   "module": "04-01"
+  },
+  {
+   "id": "net.secure.nsg-asg",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure secure access to virtual networks",
+   "objective": "Create and configure network security groups (NSGs) and application security groups",
+   "module": "04-02"
+  },
+  {
+   "id": "net.secure.effective-rules",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure secure access to virtual networks",
+   "objective": "Evaluate effective security rules in NSGs",
+   "module": "04-02"
+  },
+  {
+   "id": "net.secure.bastion",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure secure access to virtual networks",
+   "objective": "Implement Azure Bastion",
+   "module": "04-02"
+  },
+  {
+   "id": "net.secure.service-endpoints",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure secure access to virtual networks",
+   "objective": "Configure service endpoints for Azure platform as a service (PaaS)",
+   "module": "04-02"
+  },
+  {
+   "id": "net.secure.private-endpoints",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure secure access to virtual networks",
+   "objective": "Configure private endpoints for Azure PaaS",
+   "module": "04-02"
+  },
+  {
+   "id": "net.dnslb.dns",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure name resolution and load balancing",
+   "objective": "Configure Azure DNS",
+   "module": "04-03"
+  },
+  {
+   "id": "net.dnslb.load-balancer",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure name resolution and load balancing",
+   "objective": "Configure an internal or public load balancer",
+   "module": "04-03"
+  },
+  {
+   "id": "net.dnslb.troubleshoot-lb",
+   "domain": "Implement and manage virtual networking",
+   "domain_id": "04",
+   "weight": "15–20%",
+   "functional_group": "Configure name resolution and load balancing",
+   "objective": "Troubleshoot load balancing",
+   "module": "04-03"
+  },
+  {
+   "id": "mon.monitor.metrics",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Monitor resources in Azure",
+   "objective": "Interpret metrics in Azure Monitor",
+   "module": "05-01"
+  },
+  {
+   "id": "mon.monitor.log-settings",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Monitor resources in Azure",
+   "objective": "Configure log settings in Azure Monitor",
+   "module": "05-01"
+  },
+  {
+   "id": "mon.monitor.query-logs",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Monitor resources in Azure",
+   "objective": "Query and analyze logs in Azure Monitor",
+   "module": "05-01"
+  },
+  {
+   "id": "mon.monitor.alerts",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Monitor resources in Azure",
+   "objective": "Set up alert rules, action groups, and alert processing rules in Azure Monitor",
+   "module": "05-01"
+  },
+  {
+   "id": "mon.monitor.insights",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Monitor resources in Azure",
+   "objective": "Configure and interpret monitoring of virtual machines, storage accounts, and networks by using Azure Monitor Insights",
+   "module": "05-01"
+  },
+  {
+   "id": "mon.monitor.network-watcher",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Monitor resources in Azure",
+   "objective": "Use Azure Network Watcher and Connection monitor",
+   "module": "05-01"
+  },
+  {
+   "id": "mon.backup.rsv",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Create a Recovery Services vault",
+   "module": "05-02"
+  },
+  {
+   "id": "mon.backup.backup-vault",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Create an Azure Backup vault",
+   "module": "05-02"
+  },
+  {
+   "id": "mon.backup.policy",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Create and configure a backup policy",
+   "module": "05-02"
+  },
+  {
+   "id": "mon.backup.backup-restore",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Perform backup and restore operations by using Azure Backup",
+   "module": "05-02"
+  },
+  {
+   "id": "mon.backup.asr-configure",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Configure Azure Site Recovery for Azure resources",
+   "module": "05-02"
+  },
+  {
+   "id": "mon.backup.asr-failover",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Perform a failover to a secondary region by using Site Recovery",
+   "module": "05-02"
+  },
+  {
+   "id": "mon.backup.reports-alerts",
+   "domain": "Monitor and maintain Azure resources",
+   "domain_id": "05",
+   "weight": "10–15%",
+   "functional_group": "Implement backup and recovery",
+   "objective": "Configure and interpret reports and alerts for backups",
+   "module": "05-02"
+  }
+ ]
+}

@@ -1,4 +1,4 @@
-/* palette.js - SC-500 guide
+/* palette.js - Academy engine
    Command palette, opened with Ctrl/Cmd+K.
 
    Indexes three different kinds of thing, because they are three different
@@ -84,7 +84,7 @@
           .then(function (r) { return r.ok ? r.text() : ''; })
           .then(function (t) {
             if (!t) return;
-            var fmData = global.SC500FrontMatter.parse(t).data || {};
+            var fmData = global.AcademyFrontMatter.parse(t).data || {};
             (fmData.sub_objectives || []).forEach(function (s) {
               entries.push({ kind: 'Objective', label: s, sub: m.id + ' · ' + d.name, href: '#/module/' + m.id });
             });
@@ -310,5 +310,5 @@
     });
   }
 
-  global.SC500Palette = { mount: mount, open: open };
+  global.AcademyPalette = { mount: mount, open: open };
 })(window);

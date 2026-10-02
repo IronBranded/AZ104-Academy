@@ -1,11 +1,11 @@
-/* review.js - SC-500 guide
+/* review.js - Academy engine
    Three views built on the curriculum model:
 
      #/domain/<id>     End-of-domain review: summary, distinctions, a mixed
                        knowledge check, what needs review, where to go back to
      #/coverage        The objective coverage matrix: what the GUIDE provides
                        for every official sub-objective (content, not learner)
-     #/prep[/<filter>] Exam prep: measured SC-500 material only, reviewable by
+     #/prep[/<filter>] Exam prep: measured exam material only, reviewable by
                        domain, objective, needs-review, incorrect, unanswered,
                        Review later, or a mixed-domain set
 
@@ -23,9 +23,9 @@
     return n;
   }
   function link(text, href, cls) { var a = node('a', cls || null, text); a.href = href; return a; }
-  function D() { return global.SC500Domains; }
-  function P() { return global.SC500Progress; }
-  function C() { return global.SC500Curriculum; }
+  function D() { return global.AcademyDomains; }
+  function P() { return global.AcademyProgress; }
+  function C() { return global.AcademyCurriculum; }
 
   function shuffle(a) {
     for (var i = a.length - 1; i > 0; i--) {
@@ -72,7 +72,7 @@
       head.appendChild(node('p', 'view-head__sub',
         'Official domain: ' + dom.name + ' (' + dom.weight.replace('-', '\u2013') + ' of the exam). A review, not a re-read: what the domain contains, what is easy to confuse, a mixed check, and where to go back to.'));
       root.appendChild(head);
-      document.title = 'Domain review \u00b7 ' + info.short + ' \u00b7 SC500 Academy';
+      document.title = 'Domain review \u00b7 ' + info.short + ' \u00b7 ' + window.AcademyExam.academy;
 
       /* Summary */
       var s1 = section(root, 'Domain summary', 'dr-summary');
@@ -100,10 +100,10 @@
         ul.appendChild(li);
       });
       s1.appendChild(ul);
-      if (global.SC500Dashboard) {
+      if (global.AcademyDashboard) {
         var det = node('details', 'dr-table');
         det.appendChild(node('summary', null, 'Objective status: learn, lab, check'));
-        det.appendChild(global.SC500Dashboard.objectiveTable(model, id));
+        det.appendChild(global.AcademyDashboard.objectiveTable(model, id));
         det.open = true;
         s1.appendChild(det);
       }
@@ -112,11 +112,11 @@
       var ds = model.distinctions.filter(function (x) {
         return x.modules.some(function (m) { return dom.lessonIds.indexOf(m) !== -1; });
       });
-      if (ds.length && global.SC500Lesson) {
+      if (ds.length && global.AcademyLesson) {
         var s2 = section(root, 'Important distinctions', 'dr-dist');
         s2.appendChild(node('p', 'lede', 'The comparisons from appendix A6 that involve this domain\u2019s lessons. Read the trap; open the table if the trap does not feel obvious.'));
         var list = node('div', 'distinctions__list');
-        ds.forEach(function (x) { list.appendChild(global.SC500Lesson.distinction(x, model)); });
+        ds.forEach(function (x) { list.appendChild(global.AcademyLesson.distinction(x, model)); });
         s2.appendChild(list);
       }
 
@@ -131,7 +131,7 @@
       function draw() {
         host.textContent = '';
         var pick = prioritise(shuffle(all.slice())).slice(0, size);
-        global.SC500Quiz.renderSet(host, recs(model, pick), { model: model, showLesson: true, src: 'domain-review' });
+        global.AcademyQuiz.renderSet(host, recs(model, pick), { model: model, showLesson: true, src: 'domain-review' });
       }
       draw();
       var again = node('button', 'btn', 'New set');
@@ -209,7 +209,7 @@
       var head = node('header', 'view-head');
       head.appendChild(node('h1', null, 'Objective coverage'));
       head.appendChild(node('p', 'view-head__sub',
-        'What this guide provides for every official SC-500 sub-objective. This page is about the content, not your progress. It is derived at load time from the skills snapshot, lesson front matter, the quiz files and appendix A6, so it cannot drift from them.'));
+        'What this guide provides for every official ' + window.AcademyExam.code + ' sub-objective. This page is about the content, not your progress. It is derived at load time from the skills snapshot, lesson front matter, the quiz files and appendix A6, so it cannot drift from them.'));
       root.appendChild(head);
 
       if (!model.snapshotOk) {
@@ -287,6 +287,8 @@
         sec.appendChild(h);
 
         var wrap = node('div', 'table-scroll');
+        wrap.setAttribute('tabindex', '0'); wrap.setAttribute('role', 'region');   // keyboard-scrollable, as in app.js
+        wrap.setAttribute('aria-label', 'Coverage: ' + D().info(dom.id).short);
         var t = node('table', 'covtable');
         t.dataset.stack = 'true';
         var thead = node('thead'), hr = node('tr');
@@ -368,7 +370,7 @@
       var head = node('header', 'view-head');
       head.appendChild(node('h1', null, 'Exam prep'));
       head.appendChild(node('p', 'view-head__sub',
-        'Measured SC-500 material only: every question here is tagged to an official sub-objective. Results are counts of what you answered, not a prediction - the exam is scaled and questions are not equally weighted.'));
+        'Measured ' + window.AcademyExam.code + ' material only: every question here is tagged to an official sub-objective. Results are counts of what you answered, not a prediction - the exam is scaled and questions are not equally weighted.'));
       root.appendChild(head);
 
       var qids = Object.keys(model.questions).filter(function (q) {
@@ -486,7 +488,7 @@
     function draw() {
       var chunk = set.slice(start, start + PAGE);
       var block = node('div', 'prep-page');
-      global.SC500Quiz.renderSet(block, recs(model, chunk), { model: model, showLesson: true, src: 'prep' });
+      global.AcademyQuiz.renderSet(block, recs(model, chunk), { model: model, showLesson: true, src: 'prep' });
       host.appendChild(block);
       start += chunk.length;
       more.hidden = start >= set.length;
@@ -586,6 +588,8 @@
     });
     t.appendChild(tb);
     var wrap = node('div', 'table-scroll');
+    wrap.setAttribute('tabindex', '0'); wrap.setAttribute('role', 'region');   // keyboard-scrollable, as in app.js
+    wrap.setAttribute('aria-label', 'Results by domain');
     wrap.appendChild(t);
     body.appendChild(wrap);
 
@@ -604,8 +608,8 @@
     body.appendChild(tools);
   }
 
-  global.SC500Views = global.SC500Views || {};
-  global.SC500Views.domain = domainView;
-  global.SC500Views.coverage = coverageView;
-  global.SC500Views.prep = prepView;
+  global.AcademyViews = global.AcademyViews || {};
+  global.AcademyViews.domain = domainView;
+  global.AcademyViews.coverage = coverageView;
+  global.AcademyViews.prep = prepView;
 })(window);

@@ -1,4 +1,4 @@
-/* practice.js - SC-500 guide
+/* practice.js - Academy engine
    Three derived views that the module-local knowledge checks cannot provide.
 
      #/exam     a weighted, timed mock exam sampled across every quiz file
@@ -21,8 +21,8 @@
 (function (global) {
   'use strict';
 
-  var EXAM_KEY = 'sc500:exam:v1';
-  var CARD_KEY = 'sc500:cards:v1';
+  var EXAM_KEY = (window.AcademyExam.slug + ':exam:v1');
+  var CARD_KEY = (window.AcademyExam.slug + ':cards:v1');
   var RETEST_DAYS = 21;
   var BOX_DAYS = [1, 3, 7, 16, 35];
   var DAY = 86400000;
@@ -504,8 +504,8 @@
       /* Feed every answered mock-exam question into the per-question record,
          so Exam prep's "answered incorrectly" and the dashboard's knowledge-
          checked counts include mock-exam work. Unanswered ones are skipped. */
-      if (q.chosen && q.chosen.length && global.SC500Progress && global.SC500Progress.recordAnswer && q.id) {
-        global.SC500Progress.recordAnswer(q.id, sameSet(q.chosen, q.answers), { lesson: q.moduleId || null, src: 'mock-exam' });
+      if (q.chosen && q.chosen.length && global.AcademyProgress && global.AcademyProgress.recordAnswer && q.id) {
+        global.AcademyProgress.recordAnswer(q.id, sameSet(q.chosen, q.answers), { lesson: q.moduleId || null, src: 'mock-exam' });
       }
       if (sameSet(q.chosen, q.answers)) {
         correct++;
@@ -599,7 +599,7 @@
     var again = btn('New attempt');
     again.addEventListener('click', function () {
       exam = null;
-      loadPool(global.SC500App.getManifest()).then(function (items) { startScreen(host, items); });
+      loadPool(global.AcademyApp.getManifest()).then(function (items) { startScreen(host, items); });
     });
     actions.appendChild(again);
     actions.appendChild(link('What to study next', '#/review'));
@@ -768,7 +768,7 @@
   /* ------------------------------------------------------------- review --- */
 
   function moduleVerdict(id) {
-    var P = global.SC500Progress;
+    var P = global.AcademyProgress;
     var q = (P && P.readQuiz) ? P.readQuiz({ kind: 'module', moduleId: id }) : null;
 
     if (!q || !q.at) return { rank: 0, label: 'Never tested', score: null };
@@ -787,7 +787,7 @@
     var host = node('div', 'pr');
     root.appendChild(host);
 
-    var P = global.SC500Progress;
+    var P = global.AcademyProgress;
     if (!P || !P.readQuiz) {
       emptyBox(host, 'Progress tracking is unavailable.', 'assets/js/progress.js did not load, so there is nothing to compute decay from.');
       return;
@@ -865,10 +865,10 @@
     }
   });
 
-  global.SC500Views = global.SC500Views || {};
-  global.SC500Views.exam = mountExam;
-  global.SC500Views.cards = mountCards;
-  global.SC500Views.review = mountReview;
+  global.AcademyViews = global.AcademyViews || {};
+  global.AcademyViews.exam = mountExam;
+  global.AcademyViews.cards = mountCards;
+  global.AcademyViews.review = mountReview;
 
-  global.SC500Practice = { loadPool: loadPool, loadDeck: loadDeck };
+  global.AcademyPractice = { loadPool: loadPool, loadDeck: loadDeck };
 })(window);

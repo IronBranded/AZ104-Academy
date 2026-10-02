@@ -1,4 +1,4 @@
-/* components.css - SC-500 guide
+/* components.css - Academy engine
    Everything that is a thing rather than a frame. */
 
 /* ======================================================================
@@ -648,15 +648,15 @@ h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 1; }
   color: var(--shape-tint, var(--ink-faint));
 }
 
-.shape[data-shape="concept"]    { --shape-tint: var(--domain-01); }
-.shape[data-shape="mechanism"]  { --shape-tint: var(--domain-02); }
+.shape[data-shape="concept"]    { --shape-tint: var(--d-ink, var(--ink-soft)); }
+.shape[data-shape="mechanism"]  { --shape-tint: var(--d-ink, var(--ink-soft)); }
 .shape[data-shape="config"]     { --shape-tint: var(--ink-faint); }
 .shape[data-shape="failure"]    { --shape-tint: var(--cost-high); }
 .shape[data-shape="exam"]       { --shape-tint: var(--brass); }
-.shape[data-shape="selfcheck"]  { --shape-tint: var(--domain-03); }
+.shape[data-shape="selfcheck"]  { --shape-tint: var(--d-ink, var(--ink-soft)); }
 .shape[data-shape="teardown"]   { --shape-tint: var(--cost-high); }
 .shape[data-shape="validation"] { --shape-tint: var(--cost-none); }
-.shape[data-shape="prereq"]     { --shape-tint: var(--domain-04); }
+.shape[data-shape="prereq"]     { --shape-tint: var(--ink-faint); }
 .shape[data-shape="sources"]    { --shape-tint: var(--ink-faint); }
 
 .shape > h2[data-shape="concept"]::before    { content: "First principles"; }
@@ -1049,10 +1049,11 @@ pre[data-diagram="unrendered"]::after {
   left: 0; right: 0; bottom: 0;
   height: 2px;
   background: linear-gradient(90deg,
-    var(--domain-01) 0%,   var(--domain-01) 25%,
-    var(--domain-02) 25%,  var(--domain-02) 50%,
-    var(--domain-03) 50%,  var(--domain-03) 75%,
-    var(--domain-04) 75%,  var(--domain-04) 100%);
+    var(--domain-01) 0%,   var(--domain-01) 20%,
+    var(--domain-02) 20%,  var(--domain-02) 40%,
+    var(--domain-03) 40%,  var(--domain-03) 60%,
+    var(--domain-04) 60%,  var(--domain-04) 80%,
+    var(--domain-05) 80%,  var(--domain-05) 100%);
 }
 .topbar { position: sticky; }
 

@@ -8,12 +8,12 @@ the workflow.
 
 ## Before you write anything
 
-**Re-fetch the skills-measured outline and diff it.** SC-500 is recent and
-Microsoft revises these lists after general availability. The snapshot in
+**Re-fetch the skills-measured outline and diff it.** Microsoft revises these
+lists; AZ-104's last revision took effect on April 17, 2026. The snapshot in
 `docs/SKILLS-MEASURED-SNAPSHOT.md` is the drift baseline:
 
 ```powershell
-$url = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500?accept=text/markdown'
+$url = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104?accept=text/markdown'
 (Invoke-WebRequest -Uri $url -UseBasicParsing).Content |
     Set-Content -Path '.\docs\SKILLS-MEASURED-SNAPSHOT.new.md' -Encoding utf8
 
@@ -37,14 +37,16 @@ retirement date. Assume something has moved.
 
 1. **Copy an existing module of similar shape.** 02-01 for a service-hardening
    module, 03-04 for a many-bullet one, 03-02 for a preview-heavy one.
-2. **Write the front matter first**, all eighteen keys. It drives the site's field
+2. **Write the front matter first**, all seventeen required keys, plus
+   `objective_ids` from `data/objectives/`. It drives the site's field
    card, so an empty `licensing` or a wrong `lab_cost_estimate` is visible to the
    reader.
 3. **Write `Why this exists` before opening any portal.** If you cannot explain the
    threat without naming a product, you do not understand the control yet.
 4. **Write the lab second**, and actually run it. Every cmdlet in this repository
    was either executed or explicitly flagged as version-sensitive.
-5. **Add the AZ-500 divergence note**, and mirror it into `content/appendix/a5-*`.
+5. **Add the module's comparisons** to `content/appendix/a6-choosing-between-options.md`,
+   each opening with a `**Modules NN-NN.**` line so lessons can find them.
 6. **Add the quiz** at `quizzes/<id>.json`. Scenario questions, one deciding
    constraint each, tagged with a verbatim `sub_skill`. Every question in the
    repository carries `why_not`: one note per wrong option, `null` for correct ones,
@@ -180,7 +182,7 @@ a verification, and it is the one you want recorded.
 
 ```
 content(02-04): private access and network perimeter module and lab
-docs(appendix): AZ-500 delta and licensing/cost matrix
+docs(appendix): exam information page
 feat(site): progress tracking, collapsible depth, search and quiz engine
 fix(01-02): correct Key Vault default permission model
 ```
@@ -196,16 +198,17 @@ The README is written for learners. This is the map for maintainers.
 
 | Path | What it holds |
 | --- | --- |
-| `content/` | 22 lesson files: four in Module 0 (lab safety) and 18 mapped to the exam objectives. Theory only - why a control exists, how it works, how it is tested |
+| `content/` | Lesson files: Module 0 (lab safety) and one module per AZ-104 functional group, 15 when complete. Theory only - why it exists, how it works, how it is tested |
 | `labs/` | One lab per exam lesson: numbered steps, portal and PowerShell, validation, and a mandatory teardown |
-| `content/appendix/` | Eleven appendices, including three case studies |
+| `content/appendix/` | Exam information (A1) and the comparisons appendix (A6) |
 | `content/manifest.json` | The only file that defines the site's structure. Patched by hand |
-| `content/official-training.json` | Course SC-500T00-A: learning paths, the 63 modules and Microsoft's 16 labs, mapped to lessons |
+| `content/official-training.json` | Official Microsoft training mapped to lessons. Empty until the AZ-104 learning paths are verified |
 | `quizzes/` | One knowledge check per exam lesson, each question tagged with the official sub-objective it tests |
 | `flashcards/` | The distinctions deck |
 | `assets/` | The site: dependency-free HTML, CSS and JavaScript, no build step |
 | `tools/`, `.github/workflows/` | The validator, the accessibility check, and the CI that runs them |
-| `docs/` | This guide, the style guide, the skills-outline snapshot, the syllabus, and `UX-REDESIGN.md`, which records how the site is structured |
+| `data/` | Exam identity (`exam.js`) and the objectives with stable ids (`objectives/`). The engine reads both and hardcodes neither |
+| `docs/` | This guide, the style guide, the skills-outline snapshot, and `UX-REDESIGN.md`, which records how the site is structured |
 
 **The split between `content/` and `labs/` is deliberate.** Theory files contain no
 numbered configuration steps; labs contain no conceptual explanation. A review pass
@@ -216,30 +219,41 @@ reads `content/`; someone at a terminal reads `labs/`.
 | Check | When | What fails it |
 | --- | --- | --- |
 | **Validate** (`tools/Test-GuideContent.ps1`) | Every push and pull request; weekly with external links | Front-matter schema, required sections, lab structure including teardown, objective mapping against the snapshot, quiz integrity, manifest and orphans, broken internal links. The weekly run also checks every Microsoft Learn URL |
-| **Outline drift** | Weekly | The live skills outline differing from `docs/SKILLS-MEASURED-SNAPSHOT.md`, the practice-assessment status changing, or a linked learning path, its module list, or a Microsoft lab changing. Any of these opens an issue |
+| **Outline drift** | Weekly | The live skills outline differing from `docs/SKILLS-MEASURED-SNAPSHOT.md`, ignoring line wrapping, or a linked learning path, its module list, or a Microsoft lab changing. Either opens an issue |
 | **Accessibility** (`tools/a11y-check.js`) | Every push and pull request | Any WCAG 2.0/2.1 A or AA violation, or a script error, on any page type in either theme |
 
 ## Things that are deliberate
 
 Do not "fix" these without discussing them first:
 
-- **22 modules, not the 12 in the master prompt.** Three sub-headings were split
-  because they carry 9-11 bullets each. Every one of the 87 sub-objectives lands
-  in exactly one exam module. Sections 5.3 and 6 of the master prompt are stale as a
-  result and still need rewriting.
-- **Walkthrough-only labs.** Virtual WAN, VPN gateways, Front Door Premium, and
-  parts of Entra Private Access and Agent ID. Each says why, and each ends in a
-  written deliverable so the objective still maps to lab work.
+- **One module per functional group: 15 exam modules.** Every one of the 82 outline
+  bullets has exactly one owner, recorded in `data/objectives/`. A bullet whose
+  module isn't written yet is a validator warning ("planned"), never silently missing.
+- **Walkthrough labs** where hands-on practice would be expensive. Each says why and
+  is recorded as a walkthrough, never merged with hands-on practice.
 - **Portal-only steps** where the cmdlet surface is unstable. See STYLE-GUIDE §5.
-- **`rg-sc500-core` is never torn down.** It holds the budget, action group, brake
-  runbook, and `law-sc500`. Labs 00-01, 00-02 and 04-02 have deliberately different
-  teardown sections for this reason.
+- **`rg-az104-core` is never torn down.** It holds the budget, action group and
+  brake runbook. Lab 00-01 has a deliberately different teardown section for this reason.
 - **No readiness percentage, no pass prediction.** The dashboard reports
   observable counts per official sub-objective. Do not add a blended score.
-- **Objective ids such as `2.3.4` are positions in the snapshot.** Microsoft does
-  not number objectives; the site says so where it shows them.
-- **Investigation notes (`forensic_relevance`) are collapsed** into a "Beyond the
-  exam" panel at the end of each lesson. They are useful, and not measured.
+- **Two kinds of objective id.** Stable semantic ids (`id.users.sspr`) live in
+  `data/objectives/` and in lesson front matter, and survive a reorder of the official
+  outline. The numbers the site displays (`1.1.5`) are positions, derived at load time.
+- **Adjacent material is labelled.** A lesson may carry a short "Context - not a
+  measured skill" note when a scenario needs it. Never build a lab or question on one.
 - **The guide names its own uncertainty.** Where Microsoft does not publish a fact
-  — SC-500's question count and passing score — appendix A4 says so instead of
+  — AZ-104's question count, length and price — appendix A1 says so instead of
   repeating a third-party number. Keep that habit.
+
+## Lab templates
+
+Bicep files, `.bicepparam` files and ARM JSON templates live under `labs/<domain>/templates/`, with
+worked answers under `templates/solutions/`. CI (`.github/workflows/bicep.yml`) runs
+`tools/check-templates.sh`: every Bicep file must build and pass the linter, every parameters file
+must build, and every ARM template must decompile. Run it locally before committing:
+
+```bash
+bash tools/check-templates.sh    # needs the Bicep CLI on PATH
+```
+
+The workflow pins the Bicep CLI version. Bump it deliberately: new versions can add linter rules.

@@ -1,4 +1,4 @@
-/* progress.js - SC-500 guide
+/* progress.js - Academy engine
    Client-side progress. No backend, no account, no telemetry.
 
    State lives in one localStorage key so export is a single JSON blob and
@@ -25,7 +25,7 @@
 (function (global) {
   'use strict';
 
-  var KEY = 'sc500:progress:v1';
+  var KEY = (window.AcademyExam.slug + ':progress:v1');
   var state = null;
 
   /* ----------------------------------------------------------- persistence */
@@ -57,8 +57,8 @@
 
   /* Tell the views that show learning state that it changed. */
   function notify() {
-    if (global.SC500Nav) global.SC500Nav.refreshProgress();
-    if (global.SC500Lesson && global.SC500Lesson.refresh) global.SC500Lesson.refresh();
+    if (global.AcademyNav) global.AcademyNav.refreshProgress();
+    if (global.AcademyLesson && global.AcademyLesson.refresh) global.AcademyLesson.refresh();
   }
 
   function hash(str) {
@@ -185,8 +185,8 @@
         });
       }
       save();
-      if (global.SC500App) global.SC500App.reroute();
-      if (global.SC500Nav) global.SC500Nav.refreshProgress();
+      if (global.AcademyApp) global.AcademyApp.reroute();
+      if (global.AcademyNav) global.AcademyNav.refreshProgress();
     });
     strip.appendChild(reset);
 
@@ -309,8 +309,8 @@
     /* The redesigned dashboard lives in dashboard.js. This older renderer is
        kept as the fallback so the home page still works if that file is
        missing from a partial deploy. */
-    if (global.SC500Dashboard && global.SC500Dashboard.mount) {
-      return global.SC500Dashboard.mount(root, manifest);
+    if (global.AcademyDashboard && global.AcademyDashboard.mount) {
+      return global.AcademyDashboard.mount(root, manifest);
     }
     var totalPages = 0, totalDone = 0;
 
@@ -380,7 +380,7 @@
 
     /* The second drilldown: coverage across the 87 sub-objectives. Optional -
        the dashboard still works if objectives.js is absent. */
-    if (global.SC500Objectives) global.SC500Objectives.mount(root, manifest);
+    if (global.AcademyObjectives) global.AcademyObjectives.mount(root, manifest);
 
     root.appendChild(controls(manifest));
   }
@@ -402,7 +402,7 @@
       var blob = new Blob([JSON.stringify(load(), null, 2)], { type: 'application/json' });
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'sc500-progress-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.download = window.AcademyExam.slug + '-progress-' + new Date().toISOString().slice(0, 10) + '.json';
       a.click();
       URL.revokeObjectURL(a.href);
     });
@@ -433,9 +433,9 @@
         Object.keys(incoming.marks || {}).forEach(function (k) { if (!s.marks[k]) s.marks[k] = incoming.marks[k]; });
         if (incoming.last && (!s.last || String(incoming.last.at) > String(s.last.at))) s.last = incoming.last;
         save();
-        if (global.SC500App) global.SC500App.reroute();
+        if (global.AcademyApp) global.AcademyApp.reroute();
       }).catch(function (e) {
-        window.alert('That file could not be read as SC500 progress: ' + e.message);
+        window.alert('That file could not be read as ' + window.AcademyExam.academy + ' progress: ' + e.message);
       });
       file.value = '';
     });
@@ -452,8 +452,8 @@
     armConfirm(wipe, 'Reset all progress', 'Erase everything?', function () {
       try { localStorage.removeItem(KEY); } catch (e) {}
       state = null;
-      if (global.SC500App) global.SC500App.reroute();
-      if (global.SC500Nav) global.SC500Nav.refreshProgress();
+      if (global.AcademyApp) global.AcademyApp.reroute();
+      if (global.AcademyNav) global.AcademyNav.refreshProgress();
     });
     row.appendChild(wipe);
 
@@ -566,7 +566,7 @@
   }
   function lastVisit() { return load().last; }
 
-  global.SC500Progress = {
+  global.AcademyProgress = {
     mountPage: mountPage,
     mountDashboard: mountDashboard,
     isComplete: isComplete,

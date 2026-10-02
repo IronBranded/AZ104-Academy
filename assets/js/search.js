@@ -1,4 +1,4 @@
-/* search.js - SC-500 guide
+/* search.js - Academy engine
    Search across modules by keyword, domain or service.
 
    Two tiers, so the first keystroke is instant:
@@ -64,7 +64,7 @@
         .then(function (r) { return r.ok ? r.text() : ''; })
         .then(function (text) {
           if (!text) return;
-          var parsed = global.SC500FrontMatter.parse(text);
+          var parsed = global.AcademyFrontMatter.parse(text);
           var bits = [];
 
           var d = parsed.data || {};
@@ -218,14 +218,14 @@
     hits.forEach(function (h) {
       var li = document.createElement('li');
       var a = node('a', 'nav-link search-hit');
-      if (h.e.domainId && global.SC500Domains) global.SC500Domains.paint(a, h.e.domainId);
+      if (h.e.domainId && global.AcademyDomains) global.AcademyDomains.paint(a, h.e.domainId);
       a.href = '#/' + h.e.kind + '/' + h.e.id;
       a.appendChild(node('span', 'nav-link__id', h.e.kind === 'appendix' ? 'A' + (Number(h.e.id) + 1) : h.e.id));
       var t = node('span', 'nav-link__title');
       t.appendChild(document.createTextNode(h.e.title));
-      if (h.e.domainId && global.SC500Domains) {
+      if (h.e.domainId && global.AcademyDomains) {
         var ctxRow = node('span', 'search-meta');
-        ctxRow.appendChild(global.SC500Domains.badge(h.e.domainId, { weight: h.e.weight }));
+        ctxRow.appendChild(global.AcademyDomains.badge(h.e.domainId, { weight: h.e.weight }));
         if (h.e.kind === 'lab') ctxRow.appendChild(node('span', 'tag', 'Lab'));
         t.appendChild(ctxRow);
         if (h.e.objective && !/^\(/.test(h.e.objective)) t.appendChild(node('span', 'nav-sub', 'Objective: ' + h.e.objective));
@@ -302,5 +302,5 @@
     });
   }
 
-  global.SC500Search = { mount: mount };
+  global.AcademySearch = { mount: mount };
 })(window);

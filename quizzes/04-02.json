@@ -1,102 +1,292 @@
 {
-  "module": "04-02",
-  "title": "Sentinel Workspace, Roles, and Content Hub",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "04-02-q1",
-      "sub_skill": "Create and connect workspaces in Microsoft Sentinel",
-      "prompt": "Your organisation has 12 subscriptions in one tenant, all in one country, with one SOC. A colleague proposes one workspace per subscription for isolation. The case against?",
-      "options": [
-        "Sentinel supports a maximum of four workspaces per tenant",
-        "Every cross-subscription investigation then needs cross-workspace queries, and analytics rules must be duplicated and maintained in each workspace",
-        "Workspaces cannot be queried together at all",
-        "Costs scale per workspace rather than per gigabyte"
-      ],
-      "answer": 1,
-      "explanation": "Correlation is easy inside a workspace and awkward across them. The legitimate drivers for multiple workspaces are regulatory, organisational or contractual — none of which apply here.",
-      "why_not": [
-        "The case against is not a workspace limit. It is the cost of correlating and maintaining detections across workspaces.",
-        null,
-        "Workspaces can be queried together. It is awkward, and that awkwardness is the cost the design imposes.",
-        "The argument against is operational - awkward cross-workspace correlation and duplicated rules - not a per-workspace price."
-      ]
-    },
-    {
-      "id": "04-02-q2",
-      "sub_skill": "Assign roles in Microsoft Sentinel",
-      "prompt": "An analyst reports they cannot close an incident. They hold Microsoft Sentinel Reader. Which role do they need, and which would you avoid giving them?",
-      "options": [
-        "Contributor; avoid Responder, which cannot triage",
-        "Responder, which adds incident management; avoid Contributor, which would let them edit and delete detection logic",
-        "Playbook Operator; avoid Reader, which is redundant",
-        "Automation Contributor; avoid Responder, which is for engineers"
-      ],
-      "answer": 1,
-      "explanation": "Responder is the analyst role: everything Reader can do, plus assigning, reclassifying and closing incidents. Contributor is for the people who write detections. Automation Contributor is assigned to the Sentinel service, not to people.",
-      "why_not": [
-        "Contributor would let them edit and delete detection logic, and Responder can triage - it is the analyst role.",
-        null,
-        "Playbook Operator lists, views and runs playbooks. It does not grant incident management.",
-        "Automation Contributor is assigned to the Sentinel service, not to people, and Responder is the analyst role."
-      ]
-    },
-    {
-      "id": "04-02-q3",
-      "sub_skill": "Assign roles in Microsoft Sentinel",
-      "prompt": "Someone needs to build playbooks. Which permission does that require?",
-      "options": [
-        "Microsoft Sentinel Playbook Operator",
-        "Logic App permissions — playbooks are Logic Apps, and no Sentinel role grants authoring",
-        "Microsoft Sentinel Contributor at workspace scope",
-        "Microsoft Sentinel Automation Contributor on the workspace resource group"
-      ],
-      "answer": 1,
-      "explanation": "Playbook Operator lets someone list, view and manually run playbooks. Creating and editing them is governed by Logic App permissions, because that is what a playbook is.",
-      "why_not": [
-        "Playbook Operator lets someone list, view and manually run playbooks, not create or edit them.",
-        null,
-        "No Sentinel role grants playbook authoring. That is governed by Logic App permissions.",
-        "Automation Contributor is for the Sentinel service to run playbooks, not for people authoring them."
-      ]
-    },
-    {
-      "id": "04-02-q4",
-      "sub_skill": "Implement and use content hub solutions",
-      "prompt": "A team installs 40 content hub solutions in an afternoon and reports that Sentinel is deployed. What is missing?",
-      "options": [
-        "Data connectors, which install separately from solutions",
-        "Active analytics rules — installing a solution delivers rule templates, and nothing detects anything until you create rules from them",
-        "A commitment tier, without which rules cannot run",
-        "Workspace manager, which distributes the solutions"
-      ],
-      "answer": 1,
-      "explanation": "Installing puts templates in the workspace. A tenant with forty solutions installed and no active rules has a full catalogue and no detections. Creating a rule from a template is also where you tune the threshold rather than accepting it.",
-      "why_not": [
-        "Even with data flowing, templates detect nothing. Rules have to be created from them.",
-        null,
-        "Analytics rules do not depend on a commitment tier. What is missing is the rules themselves.",
-        "Workspace manager distributes content across workspaces. It is not needed to activate detections in one."
-      ]
-    },
-    {
-      "id": "04-02-q5",
-      "sub_skill": "Create and connect workspaces in Microsoft Sentinel",
-      "prompt": "You set a commitment tier too high in week one. What can you do about it, and when?",
-      "options": [
-        "Reduce it immediately; commitment tiers are evaluated daily",
-        "You can increase at any time — which restarts the 31-day commitment period — but to decrease or return to pay-as-you-go you must wait out the 31 days",
-        "Nothing; commitment tiers are fixed for 12 months",
-        "Switch to pay-as-you-go immediately, then re-commit at the lower tier"
-      ],
-      "answer": 1,
-      "explanation": "The asymmetry is the point: increases are easy and restart the clock, decreases wait. Commit cautiously on guessed volume, especially in a new deployment.",
-      "why_not": [
-        "A commitment tier cannot be reduced immediately. Decreases wait out the 31-day commitment period.",
-        null,
-        "The commitment period is 31 days, not 12 months.",
-        "Returning to pay-as-you-go is also a decrease, so it waits out the 31 days as well."
-      ]
-    }
-  ]
+ "module": "04-02",
+ "title": "Secure Access to Virtual Networks",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "04-02-q1",
+   "sub_skill": "Create and configure network security groups (NSGs) and application security groups",
+   "prompt": "An NSG has two inbound rules: priority 100 deny TCP 3389 from Internet, priority 200 allow TCP 3389 from 203.0.113.0/24. An admin at 203.0.113.5 tries RDP. What happens?",
+   "options": [
+    "Allowed: the more specific rule wins",
+    "Denied: rule 100 matches first and processing stops",
+    "Allowed: allow rules beat deny rules",
+    "Denied by DenyAllInBound at 65500"
+   ],
+   "answer": 1,
+   "explanation": "Rules are processed from the lowest priority number, and processing stops at the first match. Give the allow rule a lower number than the deny rule.",
+   "why_not": [
+    "NSGs don't pick the most specific rule; they stop at the first match by priority.",
+    null,
+    "Allow and deny have no precedence; priority order decides.",
+    "Rule 100 matches before the default rule is reached."
+   ]
+  },
+  {
+   "id": "04-02-q2",
+   "sub_skill": "Create and configure network security groups (NSGs) and application security groups",
+   "prompt": "Web VMs are added and removed weekly. You need an NSG rule allowing HTTPS from the internet to whichever VMs are web servers, without editing the rule. What should you use?",
+   "options": [
+    "A service tag of VirtualNetwork as the destination",
+    "One rule per VM private IP",
+    "A network security group on each NIC with priority 4096",
+    "An application security group as the rule's destination, with the web VMs' NICs as members"
+   ],
+   "answer": 3,
+   "explanation": "ASGs group NICs by role, so rules follow membership rather than addresses.",
+   "why_not": [
+    "That covers the whole network, not just web servers.",
+    "That needs rule changes every time a VM is added.",
+    "Per-NIC NSGs don't solve role-based targeting.",
+    null
+   ]
+  },
+  {
+   "id": "04-02-q3",
+   "sub_skill": "Create and configure network security groups (NSGs) and application security groups",
+   "prompt": "Inbound traffic from the internet reaches a VM's subnet. The subnet NSG allows TCP 443, and the NIC has an NSG with no custom rules. Is the traffic allowed?",
+   "options": [
+    "No; the NIC NSG's default DenyAllInBound blocks it, and inbound traffic must be allowed by both NSGs",
+    "Yes; the subnet NSG already allowed it",
+    "Yes; an NSG with no custom rules allows everything",
+    "No; NIC NSGs are evaluated before subnet NSGs for inbound"
+   ],
+   "answer": 0,
+   "explanation": "Inbound traffic is evaluated by the subnet NSG and then the NIC NSG; a deny at either level blocks it.",
+   "why_not": [
+    null,
+    "When both levels have an NSG, both must allow the traffic.",
+    "Its default rules deny inbound internet traffic.",
+    "Inbound is evaluated subnet first, then NIC; the NIC's deny still applies."
+   ]
+  },
+  {
+   "id": "04-02-q4",
+   "sub_skill": "Evaluate effective security rules in NSGs",
+   "prompt": "An administrator needs to know exactly which NSG rule is denying TCP 22 from 198.51.100.7 to a VM. Which tool answers that most directly?",
+   "options": [
+    "Azure Advisor",
+    "The activity log",
+    "Network Watcher IP flow verify",
+    "Next hop"
+   ],
+   "answer": 2,
+   "explanation": "IP flow verify tests a specific flow and reports whether it's allowed or denied, and which rule decided.",
+   "why_not": [
+    "Advisor makes recommendations; it doesn't evaluate a specific packet.",
+    "It records management operations, not packet decisions.",
+    null,
+    "Next hop reports routing, not security rule decisions."
+   ]
+  },
+  {
+   "id": "04-02-q5",
+   "sub_skill": "Evaluate effective security rules in NSGs",
+   "prompt": "You need to see every security rule that applies to a VM's network interface, combining its subnet and NIC NSGs, with service tags expanded. Where do you look?",
+   "options": [
+    "The subnet's NSG rules page",
+    "The VM's Activity log",
+    "Azure Policy compliance",
+    "The NIC's effective security rules"
+   ],
+   "answer": 3,
+   "explanation": "Effective security rules show the aggregate of the NSGs applied to a network interface.",
+   "why_not": [
+    "That shows only the subnet NSG.",
+    "It doesn't show rule evaluation.",
+    "Policy evaluates resource configuration, not traffic rules.",
+    null
+   ]
+  },
+  {
+   "id": "04-02-q6",
+   "sub_skill": "Evaluate effective security rules in NSGs",
+   "prompt": "Effective security rules for a VM's NIC show nothing. What is the most likely reason?",
+   "options": [
+    "The NIC has no ASG membership",
+    "The VM isn't running",
+    "Service endpoints are disabled",
+    "Effective rules only show NIC-level NSGs"
+   ],
+   "answer": 1,
+   "explanation": "Effective security rules are calculated for a running VM's network interface; start the VM to view them.",
+   "why_not": [
+    "ASG membership doesn't affect whether effective rules are shown.",
+    null,
+    "They're unrelated to effective rules.",
+    "They show subnet and NIC NSGs together."
+   ]
+  },
+  {
+   "id": "04-02-q7",
+   "sub_skill": "Implement Azure Bastion",
+   "prompt": "Developers need occasional SSH access to a single test VM, at no cost, without public IPs. What should you deploy?",
+   "options": [
+    "Azure Bastion Developer SKU",
+    "Azure Bastion Basic SKU",
+    "A public IP on the VM with an NSG allowing SSH",
+    "Azure Bastion Premium SKU"
+   ],
+   "answer": 0,
+   "explanation": "Bastion Developer is free, uses shared infrastructure, and connects to one VM at a time in supported regions.",
+   "why_not": [
+    null,
+    "Basic bills hourly and needs an AzureBastionSubnet and a public IP.",
+    "That exposes SSH to the internet.",
+    "Premium is the most expensive tier."
+   ]
+  },
+  {
+   "id": "04-02-q8",
+   "sub_skill": "Implement Azure Bastion",
+   "prompt": "Admins must connect through Bastion to VMs in three peered spoke VNets, using the native SSH client from their laptops. What is the minimum SKU?",
+   "options": [
+    "Developer",
+    "Basic",
+    "Standard",
+    "Premium"
+   ],
+   "answer": 2,
+   "explanation": "Connecting with the native client (az CLI) requires Standard or Premium; peering requires Basic or higher.",
+   "why_not": [
+    "Developer doesn't support peered VNets or the native client.",
+    "Basic supports peering but not the native client.",
+    null,
+    "Premium works, but Standard is the minimum for the native client."
+   ]
+  },
+  {
+   "id": "04-02-q9",
+   "sub_skill": "Implement Azure Bastion",
+   "prompt": "You deploy a dedicated Bastion host. Which subnet configuration is required?",
+   "options": [
+    "Any subnet /29 or larger",
+    "A subnet named BastionSubnet, /24",
+    "No subnet; Bastion is fully shared",
+    "A subnet named AzureBastionSubnet, /26 or larger"
+   ],
+   "answer": 3,
+   "explanation": "Basic, Standard and Premium need a subnet named AzureBastionSubnet with a prefix of /26 or larger.",
+   "why_not": [
+    "Dedicated SKUs need the specific name and at least /26.",
+    "The name must be exactly AzureBastionSubnet.",
+    "That's only the Developer SKU.",
+    null
+   ]
+  },
+  {
+   "id": "04-02-q10",
+   "sub_skill": "Configure service endpoints for Azure platform as a service (PaaS)",
+   "prompt": "A storage account must accept traffic only from subnet App in VNet1, at no extra cost. What should you configure?",
+   "options": [
+    "A private endpoint in subnet App",
+    "A Microsoft.Storage service endpoint on subnet App, and a virtual network rule for App on the storage firewall",
+    "An NSG on subnet App allowing Storage",
+    "An ASG containing the storage account"
+   ],
+   "answer": 1,
+   "explanation": "Service endpoints are free; combined with a VNet rule on the storage firewall, they restrict the account to the subnet.",
+   "why_not": [
+    "That works but bills hourly; the requirement is no extra cost.",
+    null,
+    "An NSG controls the VNet side, not who the storage account accepts.",
+    "ASGs contain NICs, not PaaS services."
+   ]
+  },
+  {
+   "id": "04-02-q11",
+   "sub_skill": "Configure service endpoints for Azure platform as a service (PaaS)",
+   "prompt": "After enabling a Microsoft.Storage service endpoint on a subnet, what does a VM in that subnet see when it resolves mystorage.blob.core.windows.net?",
+   "options": [
+    "The same public IP address as before",
+    "A private 10.x address from the subnet",
+    "No answer, because public resolution is disabled",
+    "The VM's own private IP"
+   ],
+   "answer": 0,
+   "explanation": "A service endpoint changes the source address used to reach the service, not the destination; DNS still returns the public endpoint.",
+   "why_not": [
+    null,
+    "That's what a private endpoint with private DNS does.",
+    "Service endpoints don't change DNS.",
+    "DNS for the service doesn't change to the VM's address."
+   ]
+  },
+  {
+   "id": "04-02-q12",
+   "sub_skill": "Configure service endpoints for Azure platform as a service (PaaS)",
+   "prompt": "On-premises servers connected over VPN must reach a storage account that's restricted with a service endpoint. Why does it fail?",
+   "options": [
+    "The VPN gateway must also have a service endpoint",
+    "Service endpoints only work in the same region as the VNet",
+    "The storage account needs a stored access policy",
+    "Service endpoints don't extend to on-premises networks; the account isn't reachable from there unless you allow on-premises public IPs or use a private endpoint"
+   ],
+   "answer": 3,
+   "explanation": "By default, resources secured to VNets with service endpoints aren't reachable from on-premises. Use a private endpoint for private on-premises access.",
+   "why_not": [
+    "Gateways can't use subnet service endpoints this way.",
+    "Storage service endpoints work across regions; on-premises is the issue.",
+    "Stored access policies govern SAS tokens, not network access.",
+    null
+   ]
+  },
+  {
+   "id": "04-02-q13",
+   "sub_skill": "Configure private endpoints for Azure PaaS",
+   "prompt": "A storage account must be reached privately from a VNet and from on-premises over ExpressRoute, and its public endpoint must be disabled. What should you deploy?",
+   "options": [
+    "A service endpoint and a VNet firewall rule",
+    "Bastion Standard",
+    "A private endpoint for the account, integrated with a private DNS zone, then disable public network access",
+    "A route table sending Storage traffic to the gateway"
+   ],
+   "answer": 2,
+   "explanation": "Private endpoints give the resource a private IP reachable from peered and on-premises networks, and allow disabling public access.",
+   "why_not": [
+    "Service endpoints don't support on-premises access and keep the public endpoint.",
+    "Bastion provides RDP and SSH to VMs, not PaaS access.",
+    null,
+    "Routing doesn't give the account a private address."
+   ]
+  },
+  {
+   "id": "04-02-q14",
+   "sub_skill": "Configure private endpoints for Azure PaaS",
+   "prompt": "A private endpoint for a storage account exists, but applications still connect to its public IP. What is the most likely cause?",
+   "options": [
+    "DNS: the privatelink private DNS zone isn't linked to the VNet, or the clients' DNS doesn't resolve it",
+    "The private endpoint needs a public IP",
+    "Service endpoints must also be enabled",
+    "The NSG on the endpoint subnet blocks DNS"
+   ],
+   "answer": 0,
+   "explanation": "Clients use the normal name; it must resolve via the private DNS zone to the private IP for traffic to use the endpoint.",
+   "why_not": [
+    null,
+    "Private endpoints don't use public IPs.",
+    "They're unnecessary for a private endpoint.",
+    "The symptom is resolution to the public IP, a DNS configuration issue."
+   ]
+  },
+  {
+   "id": "04-02-q15",
+   "sub_skill": "Configure private endpoints for Azure PaaS",
+   "prompt": "Security requires that compromised VMs can't copy data to storage accounts outside the organization, even over the Microsoft backbone. Which approach gives instance-scoped access?",
+   "options": [
+    "Service endpoints for Microsoft.Storage",
+    "Private endpoints for the approved accounts",
+    "An NSG allowing the Storage service tag",
+    "Bastion Premium session recording"
+   ],
+   "answer": 1,
+   "explanation": "Private endpoints map to a specific resource instance, which provides built-in protection against data exfiltration.",
+   "why_not": [
+    "Service endpoints apply to the whole service, including other customers' accounts.",
+    null,
+    "The service tag covers all storage, not your accounts only.",
+    "Recording covers admin sessions, not data paths."
+   ]
+  }
+ ]
 }

@@ -1,193 +1,311 @@
 {
-  "module": "01-03",
-  "title": "Governance and Regulatory Compliance",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "01-03-q1",
-      "sub_skill": "Implement and configure security controls by using Azure Policy, including built-in and custom policy definitions",
-      "prompt": "You assign a policy with the Deny effect requiring HTTPS-only on storage accounts, at subscription scope. A week later compliance still reports 40% and no deployments have failed. What explains both observations, and what would change the number?",
-      "options": [
-        "The assignment has no managed identity; add one and re-evaluate",
-        "Deny acts only on create and update requests; assign Modify or DeployIfNotExists and run a remediation task",
-        "The policy is in report-only mode; switch it to enforced",
-        "Compliance data refreshes monthly; wait for the next cycle"
-      ],
-      "answer": 1,
-      "explanation": "Deny blocks new and changed resources and never touches existing ones, so pre-existing non-compliant accounts stay non-compliant and nothing fails because nobody deployed a new one. Remediating existing resources needs Modify or DeployIfNotExists plus a remediation task. Azure Policy has no report-only mode - that is Conditional Access.",
-      "why_not": [
-        "A managed identity is needed by Modify and DeployIfNotExists to remediate, not by Deny. Adding one changes nothing about resources that already exist.",
-        null,
-        "Azure Policy has no report-only mode. Report-only is a Conditional Access policy state.",
-        "Waiting changes nothing. Deny never acts on resources that already exist, so they stay non-compliant however often compliance is evaluated."
-      ]
-    },
-    {
-      "id": "01-03-q2",
-      "sub_skill": "Implement resource locks",
-      "prompt": "A ReadOnly lock is applied to a storage account as a hardening measure. An application that only reads blobs stops working. Why?",
-      "options": [
-        "ReadOnly locks block data-plane reads as well as writes",
-        "Listing storage account keys is a POST operation, which ReadOnly blocks",
-        "ReadOnly locks remove the application's role assignment",
-        "ReadOnly locks require the application to re-authenticate every hour"
-      ],
-      "answer": 1,
-      "explanation": "Locks are control-plane controls. ReadOnly does not stop blob reads, but it does block operations implemented as POST that look like reads - listing account keys being the standard example. This is why CanNotDelete is the usual recommendation and ReadOnly causes more outages than it prevents.",
-      "why_not": [
-        "Locks are control-plane controls. Blob reads are data plane and are not affected by a ReadOnly lock.",
-        null,
-        "Locks do not remove or change role assignments.",
-        "Locks have nothing to do with authentication or token lifetime."
-      ]
-    },
-    {
-      "id": "01-03-q3",
-      "sub_skill": "Evaluate and remediate overprivileged access assignments by using Azure role-based access control (RBAC)",
-      "prompt": "A colleague's notes say to evaluate overprivileged assignments in the Microsoft Entra Permissions Management blade. What is wrong, and where would you do this now?",
-      "options": [
-        "Nothing is wrong; the blade moved to the Defender portal",
-        "Permissions Management was retired; use CIEM capabilities in Defender CSPM, PIM access reviews, and Azure RBAC enumeration",
-        "Nothing is wrong, but it requires an add-on licence",
-        "Permissions Management was renamed Entra ID Governance; use that blade"
-      ],
-      "answer": 1,
-      "explanation": "Microsoft Entra Permissions Management was retired on 1 October 2025, with support ending 1 November 2025. Its entitlement capabilities live on inside Defender CSPM. This is one of the sharper traps in AZ-500-era material, and the SC-500 bullet is worded 'by using Azure role-based access control' for that reason.",
-      "why_not": [
-        "Something is wrong: Permissions Management was retired on 1 October 2025, not moved.",
-        null,
-        "No licence brings it back. The product was retired, and support ended on 1 November 2025.",
-        "It was not renamed. It was retired, and its entitlement capabilities live on in Defender CSPM."
-      ]
-    },
-    {
-      "id": "01-03-q4",
-      "sub_skill": "Configure security controls for backup protection by using Azure Backup security features",
-      "prompt": "Multi-user authorization is configured on a Recovery Services vault, with the Resource Guard in the same subscription and owned by the same administrator. What does this configuration protect against?",
-      "options": [
-        "A compromised administrator account deleting backups",
-        "Accidental deletion by that administrator, but not a deliberate one",
-        "Nothing at all; MUA requires a separate tenant to function",
-        "Ransomware encrypting the recovery points"
-      ],
-      "answer": 1,
-      "explanation": "MUA works only if the Resource Guard lives where the vault's administrator cannot reach it - a different subscription, ideally a different tenant, under different people. Same-owner MUA is a speed bump against accident and no defence against an attacker who already holds that account.",
-      "why_not": [
-        "A compromised administrator who also owns the Resource Guard can approve their own critical operation.",
-        null,
-        "MUA does function with the Resource Guard in the same subscription. It simply guards only against accident when one person controls both sides.",
-        "MUA adds a second approval to critical operations on the vault. It is not a control against data being encrypted."
-      ]
-    },
-    {
-      "id": "01-03-q5",
-      "sub_skill": "Manage custom roles, including Azure roles and Microsoft Entra roles",
-      "prompt": "A custom Azure role grants DataActions Microsoft.KeyVault/vaults/secrets/* with NotDataActions Microsoft.KeyVault/vaults/secrets/getSecret/action, so that a support team can manage secrets without reading their values. It is assigned to Priya on a key vault. Priya still retrieves a secret's value from that vault. Which two statements could each explain this?",
-      "options": [
-        "Priya holds another role assignment, on the vault or at a scope above it, that includes getSecret/action - NotDataActions subtracts only within its own role and is not a deny",
-        "The vault uses the access policy permission model, where Azure RBAC data actions do not apply, and an access policy grants Priya secret permissions",
-        "The exclusion should have been Microsoft.KeyVault/vaults/secrets/read under NotActions, which is what controls reading a secret's value",
-        "Priya also holds Key Vault Reader on the vault, which includes reading secret values"
-      ],
-      "answer": [0, 1],
-      "explanation": "Effective access is the union of every role assignment at the scope and above. NotDataActions removes a data action from its own role only - Microsoft's documentation states it is not a deny rule - so a second assignment that includes getSecret/action still grants it. Separately, Azure RBAC data actions govern only vaults on the Azure RBAC permission model; on an access policy vault, the policy decides, so check enableRbacAuthorization before debugging anything else. Only a deny assignment, which you cannot create directly, overrides a grant.",
-      "why_not": [
-        null,
-        null,
-        "Microsoft.KeyVault/vaults/secrets/read is a control-plane action that views a secret's properties, not its value. Reading the value is the data action getSecret/action, so NotDataActions is the right place for this exclusion.",
-        "Key Vault Reader reads metadata only. It cannot read secret contents."
-      ],
-      "difficulty": "scenario",
-      "concept": "NotDataActions is not a deny; the vault's permission model decides",
-      "misconception": "An exclusion in one role definition blocks the permission everywhere"
-    },
-    {
-      "id": "01-03-q6",
-      "sub_skill": "Evaluate regulatory compliance by using Microsoft Defender for Cloud",
-      "prompt": "An auditor asks which PCI DSS controls your Azure subscription currently fails, and which of your resources are responsible. Defender for Cloud is enabled on the subscription. Where do you get this answer?",
-      "options": [
-        "The secure score, filtered to the recommendations with the highest score impact",
-        "The PCI DSS audit report for Azure in the Microsoft Service Trust Portal",
-        "The Regulatory compliance dashboard, after adding the PCI DSS standard to the subscription",
-        "The Microsoft cloud security benchmark, which is applied by default and covers PCI DSS on its own"
-      ],
-      "answer": 2,
-      "explanation": "Additional standards are assigned to a subscription or management group and then appear in the Regulatory compliance dashboard, which maps each control in the framework to the recommendations - and so the resources - that evidence it.",
-      "why_not": [
-        "Secure score is computed from the Microsoft cloud security benchmark. It helps you prioritise recommendations; it does not map them to PCI DSS controls.",
-        "The Service Trust Portal documents Microsoft's own compliance as the cloud provider. It says nothing about how your resources are configured.",
-        null,
-        "The Microsoft cloud security benchmark is the default standard and the basis of secure score. PCI DSS still has to be added as a standard of its own before its controls appear in the dashboard."
-      ],
-      "difficulty": "foundation",
-      "concept": "Regulatory compliance dashboard",
-      "misconception": "Secure score or the provider's audit reports show your own framework compliance"
-    },
-    {
-      "id": "01-03-q7",
-      "sub_skill": "Implement and configure security controls in Defender for Cloud, including security standards and recommendations",
-      "prompt": "A Defender for Cloud recommendation flags a storage account used only by an isolated test harness. The risk has been formally accepted until the harness is decommissioned in three months. The account must stay visible in compliance reporting with the reason recorded, and the waiver must end on its own. What should you do?",
-      "options": [
-        "Disable the recommendation in the Microsoft cloud security benchmark for the subscription",
-        "Create an exemption for that resource on the recommendation, with a justification and an expiration date",
-        "Move the storage account to a resource group excluded from the standard's assignment scope",
-        "Apply a CanNotDelete lock to the storage account and record the accepted risk in the lock's notes"
-      ],
-      "answer": 1,
-      "explanation": "An exemption keeps the resource in scope but records a justified waiver, which flows into the compliance view instead of disappearing from it, and an expiration date ends the waiver without anyone having to remember to remove it.",
-      "why_not": [
-        "Disabling the recommendation removes it for every resource in the subscription, not just this one, and records no per-resource reason.",
-        null,
-        "An exclusion takes the scope out of the assignment entirely, so the account is no longer evaluated and no longer appears in compliance reporting.",
-        "A lock controls deletion on the management plane. It has no effect on recommendations or on compliance reporting."
-      ],
-      "difficulty": "scenario",
-      "concept": "Recommendation exemptions",
-      "misconception": "Removing a resource from scope is the same as accepting its risk"
-    },
-    {
-      "id": "01-03-q8",
-      "sub_skill": "Manage Azure built-in role assignments",
-      "prompt": "Alex holds the Owner role at a management group. To make Alex read-only in subscription Sub1, which sits under that management group, an administrator assigns Alex the Reader role at Sub1. What is Alex's effective access in Sub1, and what would actually make it read-only?",
-      "options": [
-        "Reader - the more specific scope takes precedence, so nothing further is needed",
-        "Owner - assignments are additive and inherited, so the Owner assignment at the management group must be replaced by assignments at only the scopes Alex should administer",
-        "Owner - add a condition to the Reader assignment that denies write operations",
-        "Owner - create a deny assignment for write operations on Sub1 from the Access control (IAM) blade"
-      ],
-      "answer": 1,
-      "explanation": "Effective permission is the union of every assignment at the scope and above it. There is no ordering and no precedence by specificity, so the inherited Owner assignment still applies in Sub1. The fix is to stop granting Owner at the parent scope.",
-      "why_not": [
-        "Azure RBAC has no precedence by scope. A Reader assignment adds nothing to, and removes nothing from, an Owner assignment inherited from above.",
-        null,
-        "A condition narrows only what its own assignment grants. It cannot take away permissions granted by a different assignment.",
-        "You cannot create deny assignments directly; they are created by platform features such as Azure managed applications."
-      ],
-      "difficulty": "applied",
-      "concept": "Additive, inherited role assignments",
-      "misconception": "A more specific role assignment overrides an inherited one"
-    },
-    {
-      "id": "01-03-q9",
-      "sub_skill": "Implement and configure security controls by using infrastructure as code",
-      "prompt": "Developers deploy storage accounts with Bicep through Azure Pipelines from an Azure Repos repository. Requirements: a storage account that allows anonymous blob access must never be created, whichever tool deploys it; and developers must see IaC misconfigurations as comments on the pull request before it is merged. Which two actions meet the requirements? Each correct answer is part of the solution.",
-      "options": [
-        "Assign an Azure Policy definition with the Deny effect that blocks storage accounts allowing anonymous blob access",
-        "Assign the same policy definition with the Audit effect and review the compliance results weekly",
-        "Connect the Azure DevOps organisation to Defender for Cloud DevOps security, run the Microsoft Security DevOps extension in the pipeline, and enable pull request annotations",
-        "Enable Defender for Storage on the subscription"
-      ],
-      "answer": [0, 2],
-      "explanation": "A Bicep deployment is a series of Azure Resource Manager requests, so a Deny policy blocks a non-compliant template exactly as it blocks a portal click - the platform enforces it, whoever deploys. Catching the problem before merge is DevOps security: Microsoft Security DevOps runs IaC analysers in the pipeline, and with pull request annotations enabled the findings appear on the pull request.",
-      "why_not": [
-        null,
-        "Audit reports non-compliance after the resource already exists. The requirement is that it is never created.",
-        null,
-        "Defender for Storage detects threats against storage at runtime. It neither blocks configurations nor comments on pull requests."
-      ],
-      "difficulty": "scenario",
-      "concept": "Policy guardrails plus pre-deployment IaC scanning",
-      "misconception": "An Audit policy prevents non-compliant deployments"
-    }
-  ]
+ "module": "01-03",
+ "title": "Subscriptions and Governance",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "01-03-q1",
+   "sub_skill": "Implement and manage Azure Policy",
+   "prompt": "You assign the built-in Allowed locations policy, effect deny, to a subscription that already contains VMs in a region not on the list. What happens to those VMs?",
+   "options": [
+    "They are deleted within 24 hours",
+    "They are moved to an allowed region",
+    "They keep running and are reported as non-compliant; new or updated deployments that break the rule are denied",
+    "They are stopped until an administrator approves them"
+   ],
+   "answer": 2,
+   "explanation": "For deny, existing resources that match the rule are marked non-compliant. New and updated resources are denied at request time.",
+   "why_not": [
+    "A deny policy never deletes or changes existing resources.",
+    "Policy doesn't move resources; moving doesn't change a resource's region anyway.",
+    null,
+    "No policy effect stops or deallocates resources."
+   ]
+  },
+  {
+   "id": "01-03-q2",
+   "sub_skill": "Implement and manage Azure Policy",
+   "prompt": "Every existing and future resource in a resource group must carry the resource group's CostCenter tag. What should you use?",
+   "options": [
+    "The Inherit a tag from the resource group policy (modify) with a remediation task, using the assignment's managed identity",
+    "A CanNotDelete lock on the resource group",
+    "Nothing: resources inherit resource group tags automatically",
+    "The Require a tag on resources policy (deny)"
+   ],
+   "answer": 0,
+   "explanation": "modify adds the tag to new and updated resources at request time. A remediation task, running as the assignment's managed identity, fixes existing resources.",
+   "why_not": [
+    null,
+    "Locks prevent change or deletion; they don't add tags.",
+    "Tags aren't inherited.",
+    "deny blocks new non-compliant resources but never adds the tag, and does nothing to existing ones."
+   ]
+  },
+  {
+   "id": "01-03-q3",
+   "sub_skill": "Implement and manage Azure Policy",
+   "prompt": "One resource group must be left out of a subscription-wide policy for six months, and auditors must still see that it is out of compliance by agreement. What should you configure?",
+   "options": [
+    "An exclusion (notScopes) on the assignment",
+    "Enforcement mode DoNotEnforce on the assignment",
+    "A ReadOnly lock on the resource group",
+    "A policy exemption with the Waiver category and an expiry date"
+   ],
+   "answer": 3,
+   "explanation": "Exempted resources remain visible as Exempted in compliance reports. Waiver records accepted non-compliance, and expiresOn ends the exemption automatically.",
+   "why_not": [
+    "Excluded resources aren't evaluated or counted, so auditors wouldn't see them at all.",
+    "That would stop enforcement for the whole subscription, not one resource group.",
+    "A lock doesn't change policy evaluation.",
+    null
+   ]
+  },
+  {
+   "id": "01-03-q4",
+   "sub_skill": "Configure resource locks",
+   "prompt": "A resource group contains a storage account with a CanNotDelete lock. The resource group itself has no lock. A subscription Owner tries to delete the resource group. What happens?",
+   "options": [
+    "Everything except the storage account is deleted",
+    "The whole delete fails; nothing in the resource group is deleted",
+    "The delete succeeds because Owner overrides locks",
+    "The storage account is moved to a new resource group"
+   ],
+   "answer": 1,
+   "explanation": "A Delete lock on any resource in the group blocks the entire resource group delete. Remove the lock first.",
+   "why_not": [
+    "Resource group deletion is all or nothing; a partial delete isn't possible.",
+    null,
+    "Locks apply to every user and role, Owner included.",
+    "Azure never moves resources to work around a lock."
+   ]
+  },
+  {
+   "id": "01-03-q5",
+   "sub_skill": "Configure resource locks",
+   "prompt": "After an administrator adds a ReadOnly lock to a resource group, users report they can no longer restart a VM in it and an app can't retrieve the storage account keys. Why?",
+   "options": [
+    "ReadOnly blocks POST operations, and restarting a VM and listing storage account keys are POST requests",
+    "ReadOnly also locks the data plane",
+    "The lock removed the users' role assignments",
+    "ReadOnly locks deallocate VMs"
+   ],
+   "answer": 0,
+   "explanation": "Microsoft documents that ReadOnly locks block POST requests, including listing storage account keys and starting or restarting VMs.",
+   "why_not": [
+    null,
+    "Locks apply to the control plane only; the issue is POST operations on the control plane.",
+    "Locks don't change role assignments.",
+    "Locks don't change the state of resources."
+   ]
+  },
+  {
+   "id": "01-03-q6",
+   "sub_skill": "Configure resource locks",
+   "prompt": "You must prevent the accidental deletion of resources in three subscriptions that share a management group. Where can you apply a resource lock?",
+   "options": [
+    "On the management group, so all three subscriptions inherit it",
+    "On the root management group",
+    "On the Microsoft Entra tenant",
+    "On each subscription (or lower); locks can't be applied to management groups"
+   ],
+   "answer": 3,
+   "explanation": "Locks can be set on subscriptions, resource groups and resources, and they inherit downwards. Management groups can't be locked.",
+   "why_not": [
+    "You can't add a lock to a management group.",
+    "The root is a management group; locks can't be applied there either.",
+    "Locks are Azure Resource Manager objects on subscriptions, resource groups and resources.",
+    null
+   ]
+  },
+  {
+   "id": "01-03-q7",
+   "sub_skill": "Apply and manage tags on resources",
+   "prompt": "Resource group RG1 has the tag Department = Finance. A VM created in RG1 afterwards has no tags. What explains this?",
+   "options": [
+    "Tags take 24 hours to propagate to child resources",
+    "Resources don't inherit tags from their resource group",
+    "VMs don't support tags",
+    "The tag name is case-sensitive and didn't match"
+   ],
+   "answer": 1,
+   "explanation": "Tags apply only to the object you set them on. Use an inherit-tag policy (modify) to copy them to resources.",
+   "why_not": [
+    "There's no propagation; tags are never inherited.",
+    null,
+    "Virtual machines support tags.",
+    "Tag names are case-insensitive, and nothing was copied to compare anyway."
+   ]
+  },
+  {
+   "id": "01-03-q8",
+   "sub_skill": "Apply and manage tags on resources",
+   "prompt": "A finance analyst must be able to add and change tags on any resource in a subscription, but must not be able to change the resources themselves. Which role should you assign?",
+   "options": [
+    "Contributor",
+    "Reader",
+    "Tag Contributor",
+    "Resource Policy Contributor"
+   ],
+   "answer": 2,
+   "explanation": "Tag Contributor grants write access to the tags resource type, so it can tag resources without access to the resources themselves. Microsoft notes one catch: it can't apply tags to resources or resource groups through the Azure portal, only through Azure PowerShell or the REST API (it can tag subscriptions in the portal).",
+   "why_not": [
+    "Contributor can change the resources themselves.",
+    "Reader can't write tags.",
+    null,
+    "That role manages policies, not tags on resources."
+   ]
+  },
+  {
+   "id": "01-03-q9",
+   "sub_skill": "Manage resource groups",
+   "prompt": "You must move a virtual network and its dependent resources to a subscription that belongs to a different Microsoft Entra tenant. What is correct?",
+   "options": [
+    "A resource move doesn't support moving to another tenant; associate the subscription with that tenant or re-create the resources",
+    "Use Move-AzResource with -DestinationSubscriptionId",
+    "Move the resource group to the other subscription",
+    "Export the resources as a template and use Move-AzResource on the template"
+   ],
+   "answer": 0,
+   "explanation": "Moves are supported within one tenant only. Otherwise, change the subscription's directory or re-create the resources.",
+   "why_not": [
+    null,
+    "Cross-subscription moves require both subscriptions to be in the same tenant.",
+    "You can't move a resource group to another subscription at all.",
+    "Templates aren't moved; a template can only re-create resources."
+   ]
+  },
+  {
+   "id": "01-03-q10",
+   "sub_skill": "Manage resource groups",
+   "prompt": "You start moving a VM and its dependent resources from RG1 to RG2 in the same subscription. During the move, what is true?",
+   "options": [
+    "The VM is deallocated until the move finishes",
+    "The VM's region changes to RG2's region",
+    "RG1 and RG2 are locked for changes, up to four hours; the VM keeps running; its resource ID will change",
+    "Only RG1 is locked; you can still create resources in RG2"
+   ],
+   "answer": 2,
+   "explanation": "Both resource groups are locked for create, delete and update for up to four hours. Resources keep running, and the resource ID changes to reflect the new group.",
+   "why_not": [
+    "Resources keep operating normally during a move.",
+    "A move changes only the resource group or subscription, never the region.",
+    null,
+    "Both source and target resource groups are locked."
+   ]
+  },
+  {
+   "id": "01-03-q11",
+   "sub_skill": "Manage subscriptions",
+   "prompt": "After an acquisition, you use Change directory to associate a subscription with your tenant. Users report they can no longer manage its resources. Why?",
+   "options": [
+    "Role assignments take 24 hours to replicate to the new tenant",
+    "Changing directory permanently deletes all Azure role assignments and custom roles for the subscription",
+    "Users must re-register the resource providers",
+    "Change directory moved the resources to a new region"
+   ],
+   "answer": 1,
+   "explanation": "Role assignments and custom roles are permanently deleted when a subscription moves to another directory. Re-create them in the target tenant.",
+   "why_not": [
+    "They aren't replicated at all; they're deleted.",
+    null,
+    "Resource provider registration isn't what removed their access.",
+    "Changing directory doesn't move resources."
+   ]
+  },
+  {
+   "id": "01-03-q12",
+   "sub_skill": "Manage subscriptions",
+   "prompt": "You move a subscription from management group MG-Sandbox to MG-Production. What happens to the policies and role assignments applied at MG-Production?",
+   "options": [
+    "Nothing, until you re-assign each policy to the subscription",
+    "The subscription keeps MG-Sandbox's assignments and adds MG-Production's",
+    "The move is blocked until MG-Production's policies are exempted",
+    "The subscription now inherits them, and no longer inherits those from MG-Sandbox"
+   ],
+   "answer": 3,
+   "explanation": "A subscription that moves to a management group inherits all user access and policies from its new parent chain.",
+   "why_not": [
+    "Inheritance is automatic; a subscription inherits from its parent management group.",
+    "A subscription has one parent and inherits only from its current chain.",
+    "Moves aren't blocked by the new parent's policies in this way.",
+    null
+   ]
+  },
+  {
+   "id": "01-03-q13",
+   "sub_skill": "Manage costs by using alerts, budgets, and Azure Advisor recommendations",
+   "prompt": "A monthly budget with an Actual 100% threshold fires, but the VMs keep running and costs keep rising. What should you add so that crossing the budget deallocates lab VMs?",
+   "options": [
+    "An action group on the budget notification that runs automation, such as a runbook that deallocates VMs",
+    "Set the budget's reset period to daily",
+    "Change the threshold type to Forecasted",
+    "Enable the spending cap on the budget"
+   ],
+   "answer": 0,
+   "explanation": "A budget only notifies. An action group attached to the notification can trigger automation that acts.",
+   "why_not": [
+    null,
+    "Budgets never stop resources, whatever their reset period.",
+    "A forecasted alert only warns earlier; it doesn't act.",
+    "Budgets have no spending cap; they notify."
+   ]
+  },
+  {
+   "id": "01-03-q14",
+   "sub_skill": "Manage costs by using alerts, budgets, and Azure Advisor recommendations",
+   "prompt": "Advisor keeps recommending you shut down a VM that is busy only during month-end payroll processing. What should you change?",
+   "options": [
+    "The VM's size, to a larger one",
+    "Advisor's lookback period for VM right-sizing, for example to 30 days",
+    "The subscription's budget threshold",
+    "Nothing; Advisor recommendations can't be configured"
+   ],
+   "answer": 1,
+   "explanation": "The default lookback is seven days. You can set 14, 21, 30, 60 or 90 days so that monthly peaks are included.",
+   "why_not": [
+    "That would increase cost and doesn't address how Advisor evaluates the VM.",
+    null,
+    "Budgets don't influence Advisor recommendations.",
+    "Advisor lets you configure the right-sizing lookback period and CPU filter."
+   ]
+  },
+  {
+   "id": "01-03-q15",
+   "sub_skill": "Configure management groups",
+   "prompt": "New subscriptions created by developers should automatically fall under the management group where your sandbox policies are assigned, not under the root. What should you configure?",
+   "options": [
+    "A policy at the root management group that moves subscriptions",
+    "A ReadOnly lock on the root management group",
+    "The default management group for new subscriptions in the hierarchy settings",
+    "Nothing: new subscriptions inherit the creator's management group"
+   ],
+   "answer": 2,
+   "explanation": "New subscriptions default to the root management group unless you set a different default management group in the hierarchy settings.",
+   "why_not": [
+    "Policy doesn't move subscriptions between management groups.",
+    "Management groups can't be locked.",
+    null,
+    "New subscriptions land under the root management group by default."
+   ]
+  },
+  {
+   "id": "01-03-q16",
+   "sub_skill": "Configure management groups",
+   "prompt": "You're designing a management group hierarchy that mirrors your organisation: Root > Company > Region > Country > Division > Department > Team > Project, with subscriptions under Project. Will Azure accept it?",
+   "options": [
+    "Yes; management groups have no depth limit",
+    "Yes, as long as there are fewer than 10,000 management groups",
+    "Only if each level contains a single subscription",
+    "No; a management group tree supports up to six levels of depth, not counting the root or the subscription level"
+   ],
+   "answer": 3,
+   "explanation": "Below the root, Company through Project is seven levels, one more than the six-level maximum. 10,000 is the separate limit on the number of management groups per directory.",
+   "why_not": [
+    "There is a documented limit of six levels of depth.",
+    "10,000 is the count limit; depth is limited separately to six levels.",
+    "The number of subscriptions per level has nothing to do with the depth limit.",
+    null
+   ]
+  }
+ ]
 }

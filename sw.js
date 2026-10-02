@@ -1,4 +1,4 @@
-/* sw.js - SC-500 guide service worker
+/* sw.js - Academy engine service worker
    ---------------------------------------------------------------------------
    Offline capability has been a stated constraint of this project since the
    first version of the build prompt, and the site has never actually had it:
@@ -30,11 +30,20 @@
    activate. */
 
 /* Bump on EVERY deploy that changes a JS or CSS file. Content is revalidated
-   in the background, but the shell is served cache-first. */
-var CACHE_VERSION = 'sc500-v2';
+   in the background, but the shell is served cache-first.
+
+   The cache name carries the exam slug from data/exam.js. Cache Storage is
+   per ORIGIN, not per path, and every Academy published under one GitHub
+   account shares <user>.github.io. So activate() below deletes only caches
+   carrying this Academy's own prefix: deleting "everything that is not mine"
+   would evict every other Academy's offline copy on each update. */
+importScripts('data/exam.js');
+var CACHE_PREFIX = self.AcademyExam.slug + '-';
+var CACHE_VERSION = CACHE_PREFIX + 'v1';
 var SHELL = [
   './',
   'index.html',
+  'data/exam.js',
   'content/manifest.json',
   'flashcards/deck.json',
   'assets/css/tokens.css',
@@ -114,7 +123,7 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (k) {
-        return k === CACHE_VERSION ? null : caches.delete(k);
+        return (k.indexOf(CACHE_PREFIX) !== 0 || k === CACHE_VERSION) ? null : caches.delete(k);
       }));
     }).then(function () { return self.clients.claim(); })
   );

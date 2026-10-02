@@ -1,4 +1,4 @@
-/* tokens.css - SC-500 guide
+/* tokens.css - Academy engine
    Design tokens. Nothing here paints anything; layout.css and components.css do.
 
    PALETTE: Microsoft Fluent 2 / Azure portal values, not invented brand hexes.
@@ -6,15 +6,27 @@
    sits continuously beside the portals it teaches.
 
    DOMAIN COLOURS ARE PART OF THE LEARNING SYSTEM, not decoration. One colour
-   per SC-500 exam domain, used identically on the dashboard, in navigation, in
+   per exam domain, used identically on the dashboard, in navigation, in
    lesson headers, in diagrams and in review results, so the colour itself
-   tells you which quarter of the exam you are in:
+   tells you which part of the exam you are in. AZ-104 has five domains:
 
      00  neutral   Lab safety - a project prerequisite, not an exam domain
-     01  #0078D4   Identity, Access & Governance      (icon: person)
-     02  #008272   Storage, Databases & Networking    (icon: stacked layers)
-     03  #8661C5   Compute Security                   (icon: chip)
-     04  #D83B01   Security Posture & Monitoring      (icon: shield)
+     01  #0078D4   Identity & Governance    (icon: person)
+     02  #008272   Storage                  (icon: cylinder)
+     03  #8661C5   Compute                  (icon: chip)
+     04  #BF0077   Networking               (icon: three linked nodes)
+     05  #D83B01   Monitor & Maintain       (icon: pulse)
+
+   Labels and icons live in data/exam.js; only the colours live here.
+
+   Networking magenta cannot use its brand hex in dark mode: #BF0077 measures
+   2.88:1 on --paper, below the 3:1 floor. Dark uses #DA3A98 (4.17 paper,
+   3.72 raised, 3.47 tint) with ink #E57AB8 (>= 5.37:1 on all three). Light
+   keeps #BF0077 (>= 5.44:1) with ink #A3006A (>= 6.85:1).
+
+   Blue (01) and purple (03) measure deltaE 4.4 apart under simulated
+   protanopia (CAM02-UCS): effectively one colour. The icon and the text label
+   are what separate them, which is why a domain mark is never colour alone.
 
    Each domain has three tokens. Use the right one - contrast was measured:
 
@@ -30,14 +42,14 @@
    other token may sit in a domain's hue family:
      - "caution" (Medium cost, Preview status, Needs review) is one amber-gold,
        #efd36b dark / #4f3c00 light. It replaced three oranges that sat beside
-       Domain 4's #D83B01; in light mode "Needs review" was indistinguishable
+       Domain 5's #D83B01; in light mode "Needs review" was indistinguishable
        from Domain 4 under protanopia (CIEDE2000 0.2), and the Preview badge
        failed AA at 3.96:1.
      - "Low cost" is neutral grey. It was #0078d4 in light mode, identical to
        Domain 1.
    Values were chosen by measurement: text >= 4.5:1 on paper and raised
    surfaces, chip text >= 4.5:1, and the largest CIEDE2000 distance from
-   Domain 4 under simulated protanopia and deuteranopia (Machado 2009) that
+   Domain 5 under simulated protanopia and deuteranopia (Machado 2009) that
    still reads as amber. Dark: 32.7 normal, 14.5 worst-case colour-blind.
    Light: 28.7 normal, 7.1 worst-case colour-blind.
    Deliberately unchanged: the accent (links, buttons, focus) stays Azure blue
@@ -76,7 +88,7 @@
   --cost-max:   #ff8c8c;
 
   --status-ga:      var(--ink-soft);
-  --status-preview: #efd36b;   /* caution amber: orange belongs to Domain 4 */
+  --status-preview: #efd36b;   /* caution amber: orange belongs to Domain 5 */
 
   /* --- exam domains (see the header) --------------------------------------
      The previous tints put domains 03 and 04 in two near-identical purples
@@ -85,13 +97,15 @@
   --d-01: #0078d4;  --d-01-ink: #4ca0e1;  --d-01-tint: #20303c;
   --d-02: #008272;  --d-02-ink: #4fa99e;  --d-02-tint: #20312e;
   --d-03: #8661c5;  --d-03-ink: #a88dd5;  --d-03-tint: #332d3a;
-  --d-04: #d83b01;  --d-04-ink: #e57e57;  --d-04-tint: #3e271e;
+  --d-04: #da3a98;  --d-04-ink: #e57ab8;  --d-04-tint: #3a2231;
+  --d-05: #d83b01;  --d-05-ink: #e57e57;  --d-05-tint: #3e271e;
 
   --domain-00: var(--d-00);
   --domain-01: var(--d-01);
   --domain-02: var(--d-02);
   --domain-03: var(--d-03);
   --domain-04: var(--d-04);
+  --domain-05: var(--d-05);
 
   /* --- learning states: shape + text carry them, colour only reinforces ---- */
   --state-done:   #54b054;
@@ -101,7 +115,7 @@
   /* --- syntax --------------------------------------------------------------
      Tuned against the Azure portal's own code surfaces. Muted by design, with
      one exception: --syn-danger must remain the loudest thing in any block. */
-  --syn-comment:  #8a8886;
+  --syn-comment:  #979593;   /* was #8a8886: 4.39:1 on --raise, below AA; now 5.19:1 (5.82 on --paper) */
   --syn-string:   #9cdcfe;   /* VS Code dark+ string blue */
   --syn-keyword:  #c5a3e8;
   --syn-fn:       #6ed0d8;
@@ -182,7 +196,8 @@
   --d-01: #0078d4;  --d-01-ink: #0062ae;  --d-01-tint: #edf6fc;
   --d-02: #008272;  --d-02-ink: #006e61;  --d-02-tint: #edf6f5;
   --d-03: #8661c5;  --d-03-ink: #7151a5;  --d-03-tint: #f7f4fb;
-  --d-04: #d83b01;  --d-04-ink: #b53201;  --d-04-tint: #fcf1ed;
+  --d-04: #bf0077;  --d-04-ink: #a3006a;  --d-04-tint: #fcf0f7;
+  --d-05: #d83b01;  --d-05-ink: #b53201;  --d-05-tint: #fcf1ed;
 
   --state-done:   #107c10;
   --state-review: #4f3c00;
@@ -218,7 +233,8 @@
     --d-01: #0078d4; --d-01-ink: #0062ae; --d-01-tint: #edf6fc;
     --d-02: #008272; --d-02-ink: #006e61; --d-02-tint: #edf6f5;
     --d-03: #8661c5; --d-03-ink: #7151a5; --d-03-tint: #f7f4fb;
-    --d-04: #d83b01; --d-04-ink: #b53201; --d-04-tint: #fcf1ed;
+    --d-04: #bf0077; --d-04-ink: #a3006a; --d-04-tint: #fcf0f7;
+    --d-05: #d83b01; --d-05-ink: #b53201; --d-05-tint: #fcf1ed;
     --state-done: #107c10; --state-review: #4f3c00; --state-todo: #605e5c;
     --syn-comment: #6e6e6e; --syn-string: #0451a5; --syn-keyword: #5c2e91;
     --syn-fn: #0f6b73; --syn-variable: #a4501b; --syn-param: #484644;
@@ -241,5 +257,5 @@
    mark also carries an icon and a text label. Make sure borders survive. */
 @media (forced-colors: active) {
   :root { --d-00: CanvasText; --d-01: CanvasText; --d-02: CanvasText;
-          --d-03: CanvasText; --d-04: CanvasText; }
+          --d-03: CanvasText; --d-04: CanvasText; --d-05: CanvasText; }
 }

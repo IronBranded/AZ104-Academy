@@ -1,4 +1,4 @@
-/* practice.css - SC-500 guide
+/* practice.css - Academy engine
    Styles for #/exam, #/cards and #/review. Everything is scoped under .pr so it
    cannot affect a page that was rendering correctly before this file existed.
    Tokens come from tokens.css; each var carries a fallback so a missing token

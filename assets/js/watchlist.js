@@ -1,4 +1,4 @@
-/* watchlist.js - SC-500 guide
+/* watchlist.js - Academy engine
    #/preview - the verification watchlist.
 
    Two facts already live in every module's front matter and are invisible
@@ -59,7 +59,7 @@
         .then(function (r) { return r.ok ? r.text() : ''; })
         .then(function (text) {
           if (!text) return null;
-          var d = (global.SC500FrontMatter.parse(text).data) || {};
+          var d = (global.AcademyFrontMatter.parse(text).data) || {};
           t.status = d.status || 'GA';
           t.verified = d.last_verified || '';
           t.age = ageOf(t.verified);
@@ -192,6 +192,6 @@
     });
   }
 
-  global.SC500Views = global.SC500Views || {};
-  global.SC500Views.preview = mount;
+  global.AcademyViews = global.AcademyViews || {};
+  global.AcademyViews.preview = mount;
 })(window);

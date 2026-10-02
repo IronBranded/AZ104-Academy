@@ -1,4 +1,4 @@
-/* theme.js - SC-500 guide
+/* theme.js - Academy engine
    Theme control: dark (default), light, or follow the OS.
 
    Loaded FIRST and applied synchronously, before the stylesheets paint, so a
@@ -8,7 +8,7 @@
 (function (global) {
   'use strict';
 
-  var KEY = 'sc500:theme:v1';
+  var KEY = (window.AcademyExam.slug + ':theme:v1');
   var ORDER = ['dark', 'light', 'system'];
   var LABEL = { dark: 'Dark', light: 'Light', system: 'System' };
   var GLYPH = { dark: '\u25D0', light: '\u25CB', system: '\u25D1' };
@@ -49,5 +49,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
   else mount();
 
-  global.SC500Theme = { get: read, set: apply, cycle: next };
+  global.AcademyTheme = { get: read, set: apply, cycle: next };
 })(window);

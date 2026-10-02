@@ -1,168 +1,197 @@
 {
-  "module": "01-02",
-  "title": "Secrets and Keys with Azure Key Vault",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "01-02-q1",
-      "sub_skill": "Configure access to Key Vault",
-      "prompt": "A requirement states that an administrator holding Contributor on a key vault must not be able to grant themselves access to its secrets. Which permission model satisfies this?",
-      "options": [
-        "The vault access policy model, with the administrator omitted from all policies",
-        "The Azure RBAC permission model",
-        "The vault access policy model, with a CanNotDelete lock applied to the vault",
-        "Either model, provided the vault firewall denies the administrator's address"
-      ],
-      "answer": 1,
-      "explanation": "Under the access policy model, anyone holding Microsoft.KeyVault/vaults/write can add a policy granting themselves data-plane access, so omitting them from today's policies changes nothing. Azure RBAC makes data-plane permissions role assignments, creatable only by Owner or User Access Administrator. A firewall does not help: the control plane is not filtered by it.",
-      "why_not": [
-        "Under the access policy model, Contributor includes Microsoft.KeyVault/vaults/write, which can add a policy granting themselves access. Omitting them from today's policies changes nothing.",
-        null,
-        "CanNotDelete blocks deletion only. Adding an access policy is a write, so the administrator can still grant themselves access.",
-        "The vault firewall filters only the data plane. Adding an access policy is a control-plane operation through Azure Resource Manager, which the firewall does not see."
-      ]
-    },
-    {
-      "id": "01-02-q2",
-      "sub_skill": "Configure firewall settings on Key Vault",
-      "prompt": "You set a vault's network rules to deny by default with no allowed addresses. From your laptop, which operations still succeed?",
-      "options": [
-        "Reading the vault's tags and changing its SKU",
-        "Retrieving a secret value",
-        "Listing the names of secrets in the vault",
-        "Adding a new access policy to the vault"
-      ],
-      "answer": [0, 3],
-      "explanation": "The vault firewall filters the data plane at <vault>.vault.azure.net only. Control-plane operations go to Azure Resource Manager and are governed by Azure RBAC, so reading properties, changing the SKU, and adding access policies all still work. Reading or listing secrets is data plane and is blocked.",
-      "why_not": [
-        null,
-        "Retrieving a secret value is a data-plane operation on <vault>.vault.azure.net, which the firewall blocks.",
-        "Listing secret names is also data plane, so the firewall blocks it too.",
-        null
-      ]
-    },
-    {
-      "id": "01-02-q3",
-      "sub_skill": "Configure Key Vault settings",
-      "prompt": "A lab vault is deleted and the same lab must run again next week with the same vault name. Which configuration choice made at creation determines whether that is possible?",
-      "options": [
-        "The SKU, because Premium vaults are purged automatically",
-        "Purge protection, because it cannot be disabled once enabled",
-        "The soft-delete setting, because soft delete can be turned off at creation",
-        "The permission model, because RBAC vaults release their names immediately"
-      ],
-      "answer": 1,
-      "explanation": "Soft delete is always on and cannot be disabled, and it reserves the name for the retention period. With purge protection off you can purge the deleted vault and reclaim the name; with it on, nobody can, at any privilege level, until retention expires.",
-      "why_not": [
-        "The SKU has no bearing on soft delete or purge. A deleted vault of either SKU keeps its name reserved for the retention period.",
-        null,
-        "Soft delete is always on and cannot be turned off, at creation or later.",
-        "The permission model has no bearing on deletion. A soft-deleted vault reserves its name whichever model it used."
-      ]
-    },
-    {
-      "id": "01-02-q4",
-      "sub_skill": "Implement Defender for Key Vault",
-      "prompt": "Which question does Defender for Key Vault answer, and which does Defender CSPM secret scanning answer?",
-      "options": [
-        "Defender for Key Vault finds credentials stored outside the vault; secret scanning detects anomalous vault access",
-        "Defender for Key Vault detects anomalous access to the vault; secret scanning finds credentials stored outside it",
-        "Both detect anomalous access, at different scopes",
-        "Both find exposed credentials, one at rest and one in transit"
-      ],
-      "answer": 1,
-      "explanation": "They face opposite directions. Defender for Key Vault is a workload protection plan watching the vault's data plane for unusual principals, locations and volume. Secret scanning is agentless discovery of credentials that never made it into a vault, which is usually how lateral movement was possible.",
-      "why_not": [
-        "This is the reverse. Defender for Key Vault watches the vault's own data plane; secret scanning looks outside it.",
-        null,
-        "Secret scanning does not watch access at all. It discovers credentials sitting outside the vault.",
-        "Defender for Key Vault does not look for exposed credentials. It alerts on unusual access to the vault."
-      ]
-    },
-    {
-      "id": "01-02-q5",
-      "sub_skill": "Configure access to Key Vault",
-      "prompt": "An application must read one specific secret and nothing else in the vault. Which assignment is least privilege?",
-      "options": [
-        "Key Vault Reader at vault scope",
-        "Key Vault Secrets User at vault scope",
-        "Key Vault Secrets User scoped to the individual secret",
-        "Key Vault Secrets Officer scoped to the individual secret"
-      ],
-      "answer": 2,
-      "explanation": "RBAC assignments can be scoped to an individual secret, key or certificate, and that is the least-privilege answer people forget exists. Key Vault Reader sees that a secret exists but not its value; Secrets User at vault scope reads every secret; Secrets Officer can also delete.",
-      "why_not": [
-        "Key Vault Reader sees that the secret exists but cannot read its value.",
-        "Secrets User at vault scope can read every secret in the vault, not just this one.",
-        null,
-        "Secrets Officer can also manage and delete the secret, which is more than reading it."
-      ]
-    },
-    {
-      "id": "01-02-q6",
-      "sub_skill": "Deploy Key Vault",
-      "prompt": "You are deploying a new key vault to hold customer-managed keys. Requirements: keys must be protected by hardware security modules; no one, including a compromised subscription Owner, may permanently delete the vault before its retention period ends; and data-plane access must be grantable on an individual key and managed alongside other Azure role assignments. Which configuration meets every requirement?",
-      "options": [
-        "Standard SKU, soft-delete retention of 90 days, access policy permission model",
-        "Premium SKU, soft-delete retention of 90 days, access policy permission model",
-        "Standard SKU, purge protection enabled, Azure RBAC permission model",
-        "Premium SKU, purge protection enabled, Azure RBAC permission model"
-      ],
-      "answer": 3,
-      "explanation": "The Premium SKU backs keys with hardware security modules; Standard SKU keys are software-protected. Soft delete is always on, but only purge protection stops a privileged principal purging the vault before retention expires, and it cannot be turned off once enabled. Azure RBAC is the permission model that can be scoped to a single key and is managed as ordinary role assignments; access policies are vault-wide lists.",
-      "why_not": [
-        "Fails all three: Standard SKU keys are software-protected, soft delete alone still allows a purge, and access policies cannot be scoped below the vault.",
-        "Meets the HSM requirement, but soft delete alone still lets a sufficiently privileged principal purge the vault, and access policies are vault-wide.",
-        "Purge protection and Azure RBAC are right, but Standard SKU keys are software-protected, not HSM-backed.",
-        null
-      ],
-      "difficulty": "applied",
-      "concept": "SKU, purge protection and permission model at deployment",
-      "misconception": "Soft delete alone protects a vault from a malicious administrator"
-    },
-    {
-      "id": "01-02-q7",
-      "sub_skill": "Manage keys, secrets, and certificates",
-      "prompt": "An application reads a database password from Key Vault using the secret's URI with no version identifier. The password has just been rotated in the database. The application must use the new password without a configuration change, and the old password must no longer be readable from the vault - but must stay restorable in case the rotation has to be rolled back. What should you do?",
-      "options": [
-        "Set the new value on the existing secret, which creates a new version, then disable the previous version",
-        "Create a secret with a different name holding the new value, then delete the old secret",
-        "Delete the secret, then immediately create a secret with the same name holding the new value",
-        "Set the new value on the existing secret, then purge the previous version"
-      ],
-      "answer": 0,
-      "explanation": "Writing a new value creates a new version, and a URI without a version resolves to the current one, so the application picks up the new password with no configuration change. Disabling the previous version stops it being returned, while leaving it available to re-enable if the rotation is rolled back.",
-      "why_not": [
-        null,
-        "The application references the secret by name, so a new name means a configuration change. Deleting the old secret also removes all of its versions at once.",
-        "A deleted secret stays in the soft-deleted state for the retention period, and a new object cannot be created in the vault with the name of an object in the deleted state - so the create fails until the secret is purged or recovered.",
-        "Purge applies to a secret that has already been deleted, not to a single version of a live secret - and a purge would also remove the rollback path the requirement asks for."
-      ],
-      "difficulty": "scenario",
-      "concept": "Secret versioning and rotation",
-      "misconception": "Rotating a secret means replacing the secret object"
-    },
-    {
-      "id": "01-02-q8",
-      "sub_skill": "Scan for secrets by using Defender Cloud Security Posture Management (Defender CSPM)",
-      "prompt": "Defender for Key Vault is enabled on your subscription. The security team now wants to find storage account connection strings left in plaintext on the disks of Azure VMs and of AWS EC2 instances already connected to Defender for Cloud, without installing anything on the machines. Which two plans each provide this capability? Each correct answer is a complete solution.",
-      "options": [
-        "Defender CSPM",
-        "Defender for Servers Plan 1",
-        "Defender for Servers Plan 2",
-        "Defender for Key Vault, which is already enabled"
-      ],
-      "answer": [0, 2],
-      "explanation": "Machine secrets scanning is part of agentless machine scanning, which reads a disk snapshot through cloud APIs and needs no agent and no inbound connectivity. It is available with either the Defender CSPM plan or Defender for Servers Plan 2, for Azure VMs and for AWS and GCP instances connected to Defender for Cloud.",
-      "why_not": [
-        null,
-        "Plan 1 provides Defender for Endpoint integration and agent-based vulnerability management, but not agentless scanning - which is where machine secrets scanning comes from.",
-        null,
-        "Defender for Key Vault watches access to the vault itself. A secret sitting on a VM disk is outside the vault, which is exactly why it is a finding."
-      ],
-      "difficulty": "applied",
-      "concept": "Agentless machine secrets scanning",
-      "misconception": "Protecting the vault also finds secrets that never reached it"
-    }
-  ]
+ "module": "01-02",
+ "title": "Azure Role-Based Access Control",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "01-02-q1",
+   "sub_skill": "Manage built-in Azure roles",
+   "prompt": "A project lead must create and manage all resources in a resource group but must not be able to grant anyone else access. Which built-in role should you assign?",
+   "options": [
+    "Owner",
+    "Contributor",
+    "User Access Administrator",
+    "Role Based Access Control Administrator"
+   ],
+   "answer": 1,
+   "explanation": "Contributor grants full management of all resources, and its NotActions remove Microsoft.Authorization write and delete, so it can't create role assignments.",
+   "why_not": [
+    "Owner can also assign roles, which the requirement forbids.",
+    null,
+    "User Access Administrator manages access, not resources: it has only read access to resources.",
+    "This role assigns roles and reads resources; it can't create or manage them."
+   ]
+  },
+  {
+   "id": "01-02-q2",
+   "sub_skill": "Manage built-in Azure roles",
+   "prompt": "A security team member must assign Azure roles to others in a subscription but must not manage Azure Policy or any resources. What is the least-privileged built-in role?",
+   "options": [
+    "Owner",
+    "User Access Administrator",
+    "Contributor",
+    "Role Based Access Control Administrator"
+   ],
+   "answer": 3,
+   "explanation": "Role Based Access Control Administrator can only create and delete role assignments (plus read). Microsoft documents that it can't manage access in other ways, such as Azure Policy.",
+   "why_not": [
+    "Owner manages every resource and every authorization setting: far more than needed.",
+    "User Access Administrator holds all of Microsoft.Authorization, which includes managing access through Azure Policy.",
+    "Contributor manages resources and can't assign roles at all.",
+    null
+   ]
+  },
+  {
+   "id": "01-02-q3",
+   "sub_skill": "Manage built-in Azure roles",
+   "prompt": "A user holds Contributor on a subscription. They try to assign an Azure Policy definition to a resource group and the operation fails. Why?",
+   "options": [
+    "Contributor's NotActions exclude Microsoft.Authorization write and delete operations, which include policy assignments",
+    "Contributor can't read policy definitions",
+    "Policy assignments require a Microsoft Entra role",
+    "Policies can only be assigned at management group scope"
+   ],
+   "answer": 0,
+   "explanation": "Contributor's NotActions remove Microsoft.Authorization/*/Write and */Delete. That covers role assignments and policy assignments and definitions.",
+   "why_not": [
+    null,
+    "Contributor can read everything; writing the assignment is what's excluded.",
+    "Policy assignments are Azure resources governed by Azure RBAC, not Entra roles.",
+    "Policies can be assigned at management group, subscription, resource group or resource scope."
+   ]
+  },
+  {
+   "id": "01-02-q4",
+   "sub_skill": "Manage built-in Azure roles",
+   "prompt": "A user holds Contributor on a resource group. Contributor's NotActions exclude Microsoft.Authorization/*/Write. The same user is also assigned User Access Administrator on the same resource group. Can the user create role assignments on that resource group?",
+   "options": [
+    "No, Contributor's NotActions take precedence over other roles",
+    "No, a user can't hold two privileged roles at the same scope",
+    "Yes, because Azure RBAC is additive and NotActions is not a deny",
+    "Only after a deny assignment is removed"
+   ],
+   "answer": 2,
+   "explanation": "Effective permissions are the union of all applicable role assignments. NotActions only trims a wildcard within one role; it isn't a deny rule. User Access Administrator grants Microsoft.Authorization/*, so the user can assign roles. Only a deny assignment would block it.",
+   "why_not": [
+    "NotActions only trims one role's wildcard. It never removes a permission granted by another role.",
+    "Nothing prevents holding several roles at one scope; their permissions add up.",
+    null,
+    "The scenario has no deny assignment. A deny assignment would block the action, not be required to allow it."
+   ]
+  },
+  {
+   "id": "01-02-q5",
+   "sub_skill": "Assign roles at different scopes",
+   "prompt": "You must give a support group read access to every resource group in three subscriptions, including resource groups created in the future. The subscriptions share a management group. What should you do?",
+   "options": [
+    "Assign Reader to the group on each existing resource group",
+    "Assign Reader to the group at the management group scope",
+    "Assign Reader to each user at each subscription scope",
+    "Assign the Directory Readers Microsoft Entra role"
+   ],
+   "answer": 1,
+   "explanation": "Assignments inherit to every child scope, including ones created later. One group assignment at the management group covers all three subscriptions.",
+   "why_not": [
+    "Assignments on existing resource groups don't reach resource groups created later, and it multiplies the assignments to maintain.",
+    null,
+    "That works but multiplies assignments per user. Group assignments at a higher scope are simpler and count once.",
+    "Microsoft Entra roles don't grant access to Azure resources."
+   ]
+  },
+  {
+   "id": "01-02-q6",
+   "sub_skill": "Assign roles at different scopes",
+   "prompt": "A Global Administrator can't see any subscriptions in the Azure portal. They need to grant themselves access to fix a subscription. What should they do first?",
+   "options": [
+    "Assign themselves Owner from the subscription's Access control (IAM) page",
+    "Nothing: Global Administrator already has Owner on every subscription",
+    "Assign themselves the Privileged Role Administrator Microsoft Entra role",
+    "Turn on Access management for Azure resources in Microsoft Entra ID properties"
+   ],
+   "answer": 3,
+   "explanation": "Elevating access assigns that user User Access Administrator at root scope (/), which lets them assign roles in any subscription. They should turn it off after the fix.",
+   "why_not": [
+    "Without any Azure role they can't open the subscription's Access control page to assign anything.",
+    "By default the Global Administrator has no access to Azure resources.",
+    "That is another directory role; it grants nothing on Azure resources.",
+    null
+   ]
+  },
+  {
+   "id": "01-02-q7",
+   "sub_skill": "Assign roles at different scopes",
+   "prompt": "An application's managed identity needs to read blob data in one storage account and nothing else. Which assignment follows least privilege?",
+   "options": [
+    "Reader on the subscription",
+    "Storage Blob Data Reader on the storage account",
+    "Owner on the storage account",
+    "Contributor on the resource group"
+   ],
+   "answer": 1,
+   "explanation": "Reading blob contents is a data action. It needs a data role, such as Storage Blob Data Reader, at the narrowest scope that works: the storage account.",
+   "why_not": [
+    "Reader is control plane only and far too broad in scope; it doesn't grant blob data access.",
+    null,
+    "Owner has no DataActions and is privileged; it's the wrong kind of role and too much of it.",
+    "Contributor manages resources but has no DataActions, and the scope is broader than needed."
+   ]
+  },
+  {
+   "id": "01-02-q8",
+   "sub_skill": "Interpret access assignments",
+   "prompt": "You remove a user's Reader assignment on resource group RG1. An hour later the user can still view RG1. What is the most likely explanation?",
+   "options": [
+    "Role assignment changes take up to 24 hours",
+    "The user has another assignment that applies to RG1, inherited from a parent scope or received through a group",
+    "Deleted role assignments are soft-deleted for 30 days",
+    "Reader access can't be removed from a resource group"
+   ],
+   "answer": 1,
+   "explanation": "Access is the union of every applicable assignment: direct, through groups, and inherited from the subscription or management group. Check access at RG1 shows them.",
+   "why_not": [
+    "Changes take up to 10 minutes, and an hour has passed.",
+    null,
+    "Role assignments aren't soft-deleted; removing one revokes it.",
+    "Any role assignment can be removed."
+   ]
+  },
+  {
+   "id": "01-02-q9",
+   "sub_skill": "Interpret access assignments",
+   "prompt": "`az role assignment list --assignee avery@contoso.com` returns an empty list, yet Avery can restart virtual machines in RG1. Which addition is most likely to reveal the assignment?",
+   "options": [
+    "--output table",
+    "--include-classic-administrators",
+    "--all --include-inherited --include-groups",
+    "--role Contributor"
+   ],
+   "answer": 2,
+   "explanation": "By default the command shows only direct assignments at the current subscription. --all adds child scopes such as RG1, --include-inherited adds parent scopes, and --include-groups adds assignments received through group membership.",
+   "why_not": [
+    "Changing the format doesn't change which assignments are returned.",
+    "Classic administrator roles are retired; that isn't where modern access comes from.",
+    null,
+    "Filtering by role still only shows direct assignments at subscription scope."
+   ]
+  },
+  {
+   "id": "01-02-q10",
+   "sub_skill": "Interpret access assignments",
+   "prompt": "In the Azure portal you open Access control (IAM) > Check access on a subscription for a user who holds Contributor on one resource group inside it. What do you see for that user?",
+   "options": [
+    "Nothing from that resource group assignment; Check access shows assignments at the selected scope and inherited to it, not those at child scopes",
+    "The Contributor assignment, marked as a child-scope assignment",
+    "Contributor on the whole subscription",
+    "An error, because Check access only works on resource groups"
+   ],
+   "answer": 0,
+   "explanation": "Check access lists role and deny assignments at the chosen scope and inherited from above. To see a child-scope assignment, run Check access at that resource group, or list with --all.",
+   "why_not": [
+    null,
+    "Check access doesn't list assignments at child scopes.",
+    "Assignments inherit downwards, never upwards.",
+    "Check access works at management group, subscription, resource group and resource scopes."
+   ]
+  }
+ ]
 }

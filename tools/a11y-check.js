@@ -1,4 +1,4 @@
-/* a11y-check.js - SC-500 guide
+/* a11y-check.js - Academy engine
    Automated accessibility regression check, run by .github/workflows/a11y.yml.
 
    Serves nothing itself: point it at a running copy of the site
@@ -29,23 +29,46 @@ const path = require('path');
 
 const BASE = (process.env.BASE_URL || 'http://localhost:8080/').replace(/\/?$/, '/');
 const AXE = fs.readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
+/* The theme is restored from localStorage under the exam's own key, so the
+   slug is read from data/exam.js rather than hardcoded. */
+const SLUG = (fs.readFileSync(path.join(__dirname, '..', 'data', 'exam.js'), 'utf8').match(/slug:\s*'([^']+)'/) || [])[1];
+if (!SLUG) throw new Error('slug not found in data/exam.js');
 
 const ROUTES = [
   '#/',
-  '#/module/01-01',          // lesson anatomy, knowledge check, first diagram
-  '#/module/02-03',          // diagram with decision nodes
-  '#/module/02-04',          // two diagrams on one page
-  '#/module/00-02',          // Module 0 lesson with a diagram
-  '#/lab/02-04',             // lab mode header and part tracker
+  '#/module/01-01',          // lesson anatomy, knowledge check, a diagram
+  '#/module/01-02',          // scope diagram, tables with code
+  '#/module/01-03',          // longest lesson: many tables, two code blocks
+  '#/lab/01-03',             // lab with seven parts
+  '#/module/02-01',          // first Storage lesson: teal domain, decision diagram
+  '#/domain/02',             // Storage domain review, first module present
+  '#/module/02-02',          // redundancy map diagram (subgraphs)
+  '#/module/02-03',          // tier and rehydration diagram, lifecycle JSON
+  '#/module/03-01',          // first Compute lesson: purple domain, code blocks
+  '#/domain/03',             // Compute domain review
+  '#/module/03-02',          // availability decision diagram, many tables
+  '#/lab/03-02',             // first lab with an hourly meter
+  '#/module/03-03',          // container services diagram
+  '#/module/03-04',          // plans, apps and slots diagram
+  '#/module/04-01',          // first Networking lesson: magenta, peering diagram
+  '#/module/04-02',          // NSG evaluation diagram
+  '#/module/04-03',          // load balancer anatomy diagram
+  '#/module/05-01',          // alert pipeline diagram, KQL code blocks
+  '#/domain/05',             // Monitor & Maintain domain review
+  '#/module/05-02',          // Site Recovery lifecycle diagram
+  '#/module/00-02',          // Module 0 lesson
+  '#/lab/01-01',             // lab mode header and part tracker
+  '#/lab/00-01',             // lab with a cost chip
   '#/domain/01',             // domain review
+  '#/domain/04',             // a domain with no modules written yet
   '#/coverage',              // coverage matrix
-  '#/prep/domain/02',        // exam prep question set
+  '#/prep/domain/01',        // exam prep question set
   '#/exam',                  // mock exam (practice.js)
-  '#/appendix/0',            // plain content page
-  '#/module/03-02',          // a lesson in Preview status (the Preview badge)
-  '#/preview',               // verification watchlist: Preview and cost chips
-  '#/cost'                   // cost planner: every cost level's chip
-];
+  '#/appendix/0',            // exam information page
+  '#/appendix/1',            // comparison appendix
+  '#/preview',               // verification watchlist
+  '#/cost'                   // cost planner
+]
 const THEMES = ['dark', 'light'];
 
 /* A page is ready when its own content has rendered: the SPA fills #content
@@ -66,7 +89,7 @@ async function settle(page) {
 
   for (const theme of THEMES) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-    await context.addInitScript(t => { try { localStorage.setItem('sc500:theme:v1', t); } catch (e) {} }, theme);
+    await context.addInitScript(a => { try { localStorage.setItem(a.key, a.theme); } catch (e) {} }, { key: SLUG + ':theme:v1', theme });
     const page = await context.newPage();
     page.on('pageerror', e => consoleErrors.push(`${theme} ${page.url()} :: ${e.message}`));
 

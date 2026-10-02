@@ -1,0 +1,273 @@
+{
+ "module": "05-02",
+ "title": "Backup and Recovery",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "05-02-q1",
+   "sub_skill": "Create a Recovery Services vault",
+   "prompt": "You must back up Azure VMs and Azure file shares, and later use Site Recovery. Which vault type do you create?",
+   "options": [
+    "A Backup vault",
+    "A storage account with soft delete",
+    "A key vault",
+    "A Recovery Services vault"
+   ],
+   "answer": 3,
+   "explanation": "Recovery Services vaults protect Azure VMs, Azure Files, SQL/SAP in VMs and on-premises workloads, and are used by Site Recovery.",
+   "why_not": [
+    "Backup vaults protect disks, blobs and PostgreSQL, not VMs or Azure Files.",
+    "That's data protection inside storage, not Azure Backup or Site Recovery.",
+    "Key vaults store secrets and keys.",
+    null
+   ]
+  },
+  {
+   "id": "05-02-q2",
+   "sub_skill": "Create a Recovery Services vault",
+   "prompt": "A Recovery Services vault already protects 20 VMs with LRS storage. Audit now requires backups to survive a regional outage. What must you do?",
+   "options": [
+    "Create a new vault with GRS (optionally Cross Region Restore) and protect the VMs there, because redundancy locks after the first item is protected",
+    "Change the vault's redundancy to GRS",
+    "Enable Cross Region Restore on the LRS vault",
+    "Enable soft delete"
+   ],
+   "answer": 0,
+   "explanation": "Storage redundancy must be set before protecting workloads; afterwards it's locked.",
+   "why_not": [
+    null,
+    "Redundancy can't be changed once items are protected.",
+    "CRR requires a GRS vault.",
+    "Soft delete protects against deletion, not regional loss."
+   ]
+  },
+  {
+   "id": "05-02-q3",
+   "sub_skill": "Create an Azure Backup vault",
+   "prompt": "You need to back up Azure managed disks and Azure Blobs. Which vault do you create?",
+   "options": [
+    "A Recovery Services vault",
+    "Two Recovery Services vaults, one per datasource",
+    "A Backup vault",
+    "A Site Recovery vault"
+   ],
+   "answer": 2,
+   "explanation": "Backup vaults support Azure Disks, Azure Blobs, Azure Database for PostgreSQL and more.",
+   "why_not": [
+    "Recovery Services vaults don't protect standalone managed disks and blobs.",
+    "The vault type, not the count, is the issue.",
+    null,
+    "There's no separate Site Recovery vault; Site Recovery uses Recovery Services vaults."
+   ]
+  },
+  {
+   "id": "05-02-q4",
+   "sub_skill": "Create an Azure Backup vault",
+   "prompt": "When can you choose the storage redundancy of a Backup vault?",
+   "options": [
+    "Any time, from the vault's properties",
+    "When you create the vault",
+    "Only after the first backup",
+    "Never: Backup vaults are always LRS"
+   ],
+   "answer": 1,
+   "explanation": "For Backup vaults, you must configure storage redundancy when you create the vault.",
+   "why_not": [
+    "Backup vault redundancy is configured at creation.",
+    null,
+    "It's set at creation, before any backups.",
+    "They support LRS, GRS and ZRS."
+   ]
+  },
+  {
+   "id": "05-02-q5",
+   "sub_skill": "Create and configure a backup policy",
+   "prompt": "A VM must be backed up every 4 hours with 14 days of instant restore. Which policy type?",
+   "options": [
+    "Enhanced",
+    "Standard",
+    "Standard with two policies assigned",
+    "A Backup vault policy"
+   ],
+   "answer": 0,
+   "explanation": "Enhanced supports backups every 4, 6, 8, 12 or 24 hours and 1-30 days of instant restore snapshots.",
+   "why_not": [
+    null,
+    "Standard runs once a day with up to 5 days of snapshots.",
+    "A VM has one backup policy.",
+    "VMs are protected by Recovery Services vault policies."
+   ]
+  },
+  {
+   "id": "05-02-q6",
+   "sub_skill": "Create and configure a backup policy",
+   "prompt": "A VM protected by an Enhanced policy must be switched back to a Standard policy to save cost. What happens?",
+   "options": [
+    "The switch is immediate",
+    "The switch works after a 14-day wait",
+    "It works if soft delete is disabled",
+    "It isn't possible: a VM backed up with an Enhanced policy can't be changed to a Standard policy"
+   ],
+   "answer": 3,
+   "explanation": "Backup doesn't allow changing the policy type to Standard after a VM backup is enabled with the Enhanced policy.",
+   "why_not": [
+    "Microsoft documents that this change isn't allowed.",
+    "There's no waiting period that allows it.",
+    "Soft delete doesn't affect the policy type.",
+    null
+   ]
+  },
+  {
+   "id": "05-02-q7",
+   "sub_skill": "Perform backup and restore operations by using Azure Backup",
+   "prompt": "A VM was deleted yesterday. You need it back from last night's backup, with the same configuration. Which restore option fails?",
+   "options": [
+    "Create a new VM",
+    "Replace existing",
+    "Restore disks",
+    "Cross Region Restore"
+   ],
+   "answer": 1,
+   "explanation": "Replace existing replaces the disks of an existing VM; if the VM has been deleted, this option can't be used.",
+   "why_not": [
+    "Create new works whether or not the original exists.",
+    null,
+    "Restoring disks doesn't need the original VM.",
+    "Its availability depends on GRS and CRR, not on the original VM existing."
+   ]
+  },
+  {
+   "id": "05-02-q8",
+   "sub_skill": "Perform backup and restore operations by using Azure Backup",
+   "prompt": "A user needs one configuration file from a VM as it was three days ago. The VM must keep running. What's the most efficient restore?",
+   "options": [
+    "Replace existing with the 3-day-old recovery point",
+    "Create a new VM and copy the file",
+    "File recovery: mount the recovery point with the downloaded script and copy the file",
+    "Restore disks to the paired region"
+   ],
+   "answer": 2,
+   "explanation": "File recovery mounts a recovery point's disks so individual files can be copied, without restoring the whole VM.",
+   "why_not": [
+    "That replaces every disk and loses three days of changes.",
+    "It works but takes far longer and costs more.",
+    null,
+    "Region doesn't matter for one file."
+   ]
+  },
+  {
+   "id": "05-02-q9",
+   "sub_skill": "Configure Azure Site Recovery for Azure resources",
+   "prompt": "When you enable Site Recovery replication for an Azure VM, what does Site Recovery deploy in the source region?",
+   "options": [
+    "The Mobility service extension on the VM and a cache storage account",
+    "A second VM running in the source region",
+    "A VPN gateway",
+    "An Azure Backup policy"
+   ],
+   "answer": 0,
+   "explanation": "Site Recovery installs the Mobility service extension; disk writes go to a cache storage account in the source region, then to replica disks in the target.",
+   "why_not": [
+    null,
+    "The replica VM is created only at failover, in the target region.",
+    "Replication doesn't need a VPN gateway.",
+    "Site Recovery doesn't use backup policies."
+   ]
+  },
+  {
+   "id": "05-02-q10",
+   "sub_skill": "Configure Azure Site Recovery for Azure resources",
+   "prompt": "With Site Recovery's default replication policy for Azure VMs, how often are crash-consistent recovery points created, and how long are recovery points kept?",
+   "options": [
+    "Every hour; retained for 30 days",
+    "Every 4 hours; retained for 7 days",
+    "Every 5 minutes; retained for 14 days",
+    "Every 5 minutes; retained for 1 day"
+   ],
+   "answer": 3,
+   "explanation": "Crash-consistent points are created every 5 minutes (fixed); default recovery point retention is one day, and app-consistent snapshots are off.",
+   "why_not": [
+    "Crash-consistent points are every 5 minutes; default retention is 1 day.",
+    "Those resemble backup settings, not replication.",
+    "Default retention is 1 day.",
+    null
+   ]
+  },
+  {
+   "id": "05-02-q11",
+   "sub_skill": "Perform a failover to a secondary region by using Site Recovery",
+   "prompt": "You must validate your disaster recovery plan monthly without affecting production or ongoing replication. What do you run?",
+   "options": [
+    "A planned failover, then failback",
+    "A test failover into an isolated virtual network, followed by cleanup",
+    "Disable and re-enable replication",
+    "Restore disks from Azure Backup"
+   ],
+   "answer": 1,
+   "explanation": "Test failover creates VMs in a network you choose without affecting replication or production; clean up afterwards.",
+   "why_not": [
+    "A real failover affects production.",
+    null,
+    "That interrupts protection.",
+    "That tests backup, not Site Recovery failover."
+   ]
+  },
+  {
+   "id": "05-02-q12",
+   "sub_skill": "Perform a failover to a secondary region by using Site Recovery",
+   "prompt": "After failing over VMs to the secondary region during an outage, management asks whether they are protected now. What is correct?",
+   "options": [
+    "Yes: protection moves automatically with failover",
+    "Yes, if the vault is GRS",
+    "No: VMs start unprotected in the target region; you must reprotect them to replicate back",
+    "Only after a test failover"
+   ],
+   "answer": 2,
+   "explanation": "After failover, VMs run in the target region unprotected until you reprotect them; then you can fail back.",
+   "why_not": [
+    "Microsoft states VMs start in an unprotected state.",
+    "Vault redundancy doesn't reprotect VMs.",
+    null,
+    "Test failovers don't change protection."
+   ]
+  },
+  {
+   "id": "05-02-q13",
+   "sub_skill": "Configure and interpret reports and alerts for backups",
+   "prompt": "A backup job failed overnight, but nobody was emailed. Built-in Azure Monitor alerts for job failures are enabled. What's missing?",
+   "options": [
+    "An alert processing rule that routes the alerts to an action group with email",
+    "A metric alert rule for backup failures",
+    "Classic alerts",
+    "A diagnostic setting to a storage account"
+   ],
+   "answer": 0,
+   "explanation": "Built-in backup alerts aren't created by your alert rules, so notifications are configured with alert processing rules and action groups.",
+   "why_not": [
+    null,
+    "Built-in alerts already exist; they just need routing.",
+    "Classic backup alerts are deprecated.",
+    "Storage doesn't send notifications."
+   ]
+  },
+  {
+   "id": "05-02-q14",
+   "sub_skill": "Configure and interpret reports and alerts for backups",
+   "prompt": "Backup reports show no data, although backups run fine. What is the most likely cause?",
+   "options": [
+    "Soft delete is enabled",
+    "The vault's diagnostic settings don't send backup events to a Log Analytics workspace in resource-specific mode",
+    "The vault uses LRS",
+    "Job-failure alerts are on"
+   ],
+   "answer": 1,
+   "explanation": "Backup reports need vault diagnostic data in Log Analytics; the backup events are supported only in resource-specific mode.",
+   "why_not": [
+    "Soft delete doesn't affect reporting.",
+    null,
+    "Redundancy doesn't affect reporting.",
+    "Alerts and reports are independent."
+   ]
+  }
+ ]
+}

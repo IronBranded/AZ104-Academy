@@ -1,102 +1,292 @@
 {
-  "module": "03-01",
-  "title": "AI Data Exposure and Purview DSPM",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "03-01-q1",
-      "sub_skill": "Identify overexposure of data in SharePoint",
-      "prompt": "A confidential acquisition folder was shared five years ago with Everyone Except External Users. Legal says nobody outside the deal team should find it through Copilot, and the deal team must not be disrupted today. Which control, and what risk remains?",
-      "options": [
-        "Restricted Access Control — access is revoked for everyone outside the deal team",
-        "Restricted Content Discovery — the site stops surfacing in Copilot and org-wide search, but everyone who could open the files still can",
-        "Remove the Everyone Except External Users claim from the people picker — existing shares are revoked",
-        "A sensitivity label with encryption — Copilot can no longer summarise the files"
-      ],
-      "answer": 1,
-      "explanation": "RCD reduces reachability and changes no permission, which is exactly what 'do not disrupt the deal team' requires. RAC would revoke access. Hiding the EEEU claim only affects future sharing. A label would work on labelled files but is a content-level control, not a site-level one.",
-      "why_not": [
-        "RAC overrides existing permissions and sharing links. Legal asked for the folder to stop being found, not for anyone's access to be removed.",
-        null,
-        "Hiding the Everyone Except External Users claim only affects future sharing. Existing shares stay in place.",
-        "A sensitivity label with encryption is a content-level control that works only on files it is applied to. The requirement is about the site's reachability."
-      ]
-    },
-    {
-      "id": "03-01-q2",
-      "sub_skill": "Identify overexposure of data in SharePoint",
-      "prompt": "Same site, but Legal now says unauthorised users must lose access entirely. Which control, and what breaks?",
-      "options": [
-        "Restricted Content Discovery — nothing breaks, the content is simply hidden",
-        "Restricted Access Control — it overrides existing permissions and sharing links, so anyone outside the named group loses access",
-        "Restricted SharePoint Search — the site is removed from the tenant allow-list",
-        "A DAG activity report — sharing is revoked when the report is run"
-      ],
-      "answer": 1,
-      "explanation": "RAC limits the site to members of specified Entra or Microsoft 365 groups and overrides existing permissions and sharing links. That is its purpose and it will break things for anyone outside the group. Restricted SharePoint Search is retiring and new enablement has been blocked since 31 July 2026.",
-      "why_not": [
-        "RCD hides the site from Copilot and org-wide search but changes no permission, so unauthorised users keep their access.",
-        null,
-        "Restricted SharePoint Search is retiring, and new enablement has been blocked since 31 July 2026. It never removed anyone's access in any case.",
-        "A DAG activity report only reports. Running it changes no sharing."
-      ]
-    },
-    {
-      "id": "03-01-q3",
-      "sub_skill": "Identify overexposure of data in SharePoint",
-      "prompt": "Your tenant has Microsoft 365 E5 and no Copilot licences. You open Data access governance in the SharePoint admin center. What can you run?",
-      "options": [
-        "Both activity reports and permission-state snapshot reports",
-        "Activity reports only, capped at 10,000 sites, and only once data collection has been enabled",
-        "Nothing — DAG requires SharePoint Advanced Management in all cases",
-        "Snapshot reports only; activity reports require Copilot"
-      ],
-      "answer": 1,
-      "explanation": "E5 provides activity reports, capped at 10,000 sites, with data collection enabled first. Snapshot and permission-state reports need SharePoint Advanced Management — which is unlocked automatically if anyone in the tenant holds a Microsoft 365 Copilot licence.",
-      "why_not": [
-        "Snapshot and permission-state reports need SharePoint Advanced Management, which E5 alone does not provide in a tenant with no Copilot licences.",
-        null,
-        "Activity reports are available with E5 alone. SharePoint Advanced Management is needed only for the snapshot and permission-state reports.",
-        "It is the other way round: activity reports come with E5, and snapshot reports need SharePoint Advanced Management."
-      ]
-    },
-    {
-      "id": "03-01-q4",
-      "sub_skill": "Identify risks related to Microsoft Copilot and AI apps by using Microsoft Purview Data Security Posture Management (DSPM)",
-      "prompt": "DSPM for AI shows 400 Copilot interactions last week. Incident response asks what a specific user asked on Tuesday. Under what configuration can you answer?",
-      "options": [
-        "Always — DSPM records prompts and responses by default",
-        "Only if a collection policy was in place at the time; otherwise the interactions happened and the content was never stored",
-        "Only if the user holds an Audit (Premium) licence",
-        "Only if Insider Risk Management flagged the session as risky"
-      ],
-      "answer": 1,
-      "explanation": "Prompt and response content is captured only when a collection policy exists — in practice the one-click policy 'DSPM for AI - Capture interactions for Copilot experiences'. Without it you have activity counts and nothing else, and the gap is unrecoverable.",
-      "why_not": [
-        "Prompt and response content is captured only when a collection policy exists. Without one you have activity counts and nothing else.",
-        null,
-        "No licence recovers content that was never captured. Without a collection policy in place at the time, the content was never stored.",
-        "A flag raised later does not make content exist. Without a collection policy in place at the time, the content was never stored."
-      ]
-    },
-    {
-      "id": "03-01-q5",
-      "sub_skill": "Identify risks related to Microsoft Copilot and AI apps by using Microsoft Purview Data Security Posture Management (DSPM)",
-      "prompt": "A document carries a sensitivity label with encryption. A user can open it, but Copilot refuses to summarise it. What explains this?",
-      "options": [
-        "The label applies a DLP policy that blocks Copilot for all users",
-        "The user holds VIEW but not EXTRACT usage rights, and Copilot needs both to summarise labelled content",
-        "Copilot cannot read any encrypted content under any configuration",
-        "Restricted Content Discovery is enabled on the site"
-      ],
-      "answer": 1,
-      "explanation": "Copilot honours sensitivity labels with encryption. Summarisation requires the user to hold both the EXTRACT and VIEW usage rights granted by the label; VIEW alone lets them open the file but not have Copilot extract from it.",
-      "why_not": [
-        "Nothing here involves a DLP policy. The user opens the file, and the refusal follows from the label's usage rights.",
-        null,
-        "Copilot does honour labels with encryption. It can summarise such content when the user holds both EXTRACT and VIEW.",
-        "RCD changes whether a site surfaces in Copilot and org-wide search. The refusal here follows the label's usage rights on this specific file."
-      ]
-    }
-  ]
+ "module": "03-01",
+ "title": "ARM Templates and Bicep",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "03-01-q1",
+   "sub_skill": "Interpret an Azure Resource Manager template or a Bicep file",
+   "prompt": "An ARM template has a parameter location with defaultValue \"[resourceGroup().location]\". You deploy it to resource group RG1 in West Europe without passing location. Where are the resources created?",
+   "options": [
+    "The region of the subscription's first resource group",
+    "West Europe, the location of RG1",
+    "The deployment fails because location is required",
+    "The region of the machine running the deployment"
+   ],
+   "answer": 1,
+   "explanation": "resourceGroup().location returns the location of the resource group being deployed to, so the default resolves to West Europe.",
+   "why_not": [
+    "There's no such rule; the function reads the target resource group.",
+    null,
+    "It has a default value, so it isn't required.",
+    "The client's location plays no part."
+   ]
+  },
+  {
+   "id": "03-01-q2",
+   "sub_skill": "Interpret an Azure Resource Manager template or a Bicep file",
+   "prompt": "A Bicep file defines var storageName = 'st${uniqueString(resourceGroup().id)}'. You deploy it twice to the same resource group. What happens to the storage account name?",
+   "options": [
+    "It's identical both times, so the second deployment updates the same account",
+    "It changes each time, creating a second account",
+    "The second deployment fails because the name is taken",
+    "It's random but guaranteed unique across Azure"
+   ],
+   "answer": 0,
+   "explanation": "uniqueString() returns the same hash for the same input, giving a name that is unique per resource group and repeatable.",
+   "why_not": [
+    null,
+    "uniqueString is deterministic: the same input returns the same value.",
+    "It's the same resource in the same group, so it's an update, not a conflict.",
+    "It isn't random; it's a hash of the input."
+   ]
+  },
+  {
+   "id": "03-01-q3",
+   "sub_skill": "Interpret an Azure Resource Manager template or a Bicep file",
+   "prompt": "In a Bicep file, resource vnet '...' = {...} is followed by resource nic '...' = { properties: { ipConfigurations: [ { properties: { subnet: { id: vnet.properties.subnets[0].id } } } ] } }. There's no dependsOn. In what order are they deployed?",
+   "options": [
+    "In parallel, because there's no dependsOn",
+    "The NIC first, because it appears later in the file",
+    "The VNet first, then the NIC, because referencing vnet by its symbolic name creates an implicit dependency",
+    "The deployment fails until you add dependsOn"
+   ],
+   "answer": 2,
+   "explanation": "Referencing another resource by symbolic name, including through parent, makes Bicep generate the dependsOn in the compiled template.",
+   "why_not": [
+    "Bicep adds dependsOn automatically when one resource references another's symbolic name.",
+    "File order doesn't determine deployment order.",
+    null,
+    "Bicep infers the dependency; explicit dependsOn isn't needed."
+   ]
+  },
+  {
+   "id": "03-01-q4",
+   "sub_skill": "Modify an existing Azure Resource Manager template",
+   "prompt": "You add a blob container resource to an ARM template that already deploys its storage account. Deployments sometimes fail because the parent account isn't found. What should you add to the container resource?",
+   "options": [
+    "A condition property",
+    "A copy loop",
+    "An output referencing the storage account",
+    "A dependsOn entry with the storage account's resourceId()"
+   ],
+   "answer": 3,
+   "explanation": "Without dependsOn, resources deploy in parallel. dependsOn makes Resource Manager finish the account before the container.",
+   "why_not": [
+    "Conditions decide whether a resource deploys, not when.",
+    "Copy loops create multiple instances; they don't order deployment.",
+    "Outputs don't affect deployment order.",
+    null
+   ]
+  },
+  {
+   "id": "03-01-q5",
+   "sub_skill": "Modify an existing Azure Resource Manager template",
+   "prompt": "An ARM template's skuName parameter has allowedValues [\"Standard_LRS\", \"Standard_GRS\"]. A team must deploy with Standard_ZRS. What's the minimal change?",
+   "options": [
+    "Change defaultValue to Standard_ZRS",
+    "Add \"Standard_ZRS\" to the parameter's allowedValues",
+    "Remove the parameter and hard-code the SKU",
+    "Add Standard_ZRS to the parameters file"
+   ],
+   "answer": 1,
+   "explanation": "allowedValues restricts accepted values. Add the new value to the list.",
+   "why_not": [
+    "The default must still be an allowed value, and passing ZRS would still be rejected.",
+    null,
+    "That removes flexibility; it isn't the minimal change.",
+    "Parameter values outside allowedValues are rejected at deployment."
+   ]
+  },
+  {
+   "id": "03-01-q6",
+   "sub_skill": "Modify an existing Azure Resource Manager template",
+   "prompt": "An ARM template takes an adminPassword parameter of type string. Security finds the password visible in the deployment history. What should you change?",
+   "options": [
+    "Change the parameter type to securestring",
+    "Move the password into a variable",
+    "Output the password instead",
+    "Deploy in complete mode"
+   ],
+   "answer": 0,
+   "explanation": "securestring and secureobject values aren't saved to the deployment history or logged.",
+   "why_not": [
+    null,
+    "Variables are stored in the template and are no more secret.",
+    "Outputs are recorded in deployment history.",
+    "Deployment mode doesn't affect what's logged."
+   ]
+  },
+  {
+   "id": "03-01-q7",
+   "sub_skill": "Modify an existing Bicep file",
+   "prompt": "In a Bicep file you must ensure deployers can only pass 'Standard_LRS' or 'Standard_ZRS' for param skuName string. What do you add?",
+   "options": [
+    "An @secure() decorator",
+    "An if condition on the resource",
+    "An @allowed(['Standard_LRS', 'Standard_ZRS']) decorator above the parameter",
+    "A @description decorator listing the values"
+   ],
+   "answer": 2,
+   "explanation": "@allowed restricts a parameter to a list of values, like allowedValues in ARM JSON.",
+   "why_not": [
+    "@secure hides the value; it doesn't restrict it.",
+    "A condition controls whether the resource deploys, not which values are allowed.",
+    null,
+    "A description documents; it doesn't enforce anything."
+   ]
+  },
+  {
+   "id": "03-01-q8",
+   "sub_skill": "Modify an existing Bicep file",
+   "prompt": "You need to add a blob container to an existing Bicep file that declares resource stg 'Microsoft.Storage/storageAccounts@2023-05-01'. Which approach needs no explicit dependsOn?",
+   "options": [
+    "Declare the container with name: 'stg/default/reports' and no parent",
+    "Declare the container as an existing resource",
+    "Add the container as an output",
+    "Declare a blobServices resource with parent: stg, then the container with parent pointing to it"
+   ],
+   "answer": 3,
+   "explanation": "parent references the parent by symbolic name, so Bicep generates the dependencies automatically.",
+   "why_not": [
+    "The slash-name form needs an explicit dependsOn to guarantee ordering.",
+    "existing references something already deployed; it doesn't create it.",
+    "Outputs return values; they don't deploy resources.",
+    null
+   ]
+  },
+  {
+   "id": "03-01-q9",
+   "sub_skill": "Modify an existing Bicep file",
+   "prompt": "A Bicep file must reference a Log Analytics workspace that another team already deployed, to read its ID, without redeploying it. What should you declare?",
+   "options": [
+    "A resource with the existing keyword and the workspace's name",
+    "A module pointing at the other team's file",
+    "A new resource with the same name",
+    "A param containing the workspace object"
+   ],
+   "answer": 0,
+   "explanation": "The existing keyword declares a reference to a resource that already exists; it isn't deployed or modified.",
+   "why_not": [
+    null,
+    "That would deploy their resources as part of your deployment.",
+    "That would redeploy, and potentially reconfigure, their workspace.",
+    "Parameters pass values in; they don't read a resource's current properties."
+   ]
+  },
+  {
+   "id": "03-01-q10",
+   "sub_skill": "Deploy resources by using an Azure Resource Manager template or a Bicep file",
+   "prompt": "A resource group contains VM1, VNet1 and storage1. You deploy a template defining only storage1, using complete mode. What happens?",
+   "options": [
+    "Nothing happens to VM1 and VNet1",
+    "VM1 and VNet1 are deleted, because they aren't in the template",
+    "The deployment fails because the template is incomplete",
+    "VM1 and VNet1 are moved to a new resource group"
+   ],
+   "answer": 1,
+   "explanation": "In complete mode, Resource Manager deletes resources in the resource group that aren't in the template. What-if first, or use incremental mode.",
+   "why_not": [
+    "That describes incremental mode.",
+    null,
+    "Complete mode deploys; it deletes what's missing.",
+    "Deployments never move resources."
+   ]
+  },
+  {
+   "id": "03-01-q11",
+   "sub_skill": "Deploy resources by using an Azure Resource Manager template or a Bicep file",
+   "prompt": "Before deploying a changed Bicep file to production, you must see exactly which resources would be created, modified or deleted, without changing anything. What should you run?",
+   "options": [
+    "az bicep build",
+    "az deployment group validate",
+    "az deployment group what-if (or New-AzResourceGroupDeployment -WhatIf)",
+    "az group export"
+   ],
+   "answer": 2,
+   "explanation": "The what-if operation predicts Create, Delete, Modify, NoChange and other changes without deploying.",
+   "why_not": [
+    "build only compiles the file to JSON; it doesn't compare with Azure.",
+    "Validation checks the template is deployable; it doesn't list per-resource changes.",
+    null,
+    "Export produces a template from current resources; it doesn't preview changes."
+   ]
+  },
+  {
+   "id": "03-01-q12",
+   "sub_skill": "Deploy resources by using an Azure Resource Manager template or a Bicep file",
+   "prompt": "You use one Bicep file for dev and prod, with different SKU and instance counts. What is the intended way to supply the values?",
+   "options": [
+    "A parameters file per environment, such as dev.bicepparam and prod.bicepparam",
+    "Two copies of the Bicep file with hard-coded values",
+    "Variables with both sets of values and complete mode",
+    "Outputs that switch the values"
+   ],
+   "answer": 0,
+   "explanation": "Parameters files, JSON or .bicepparam, supply per-environment values to the same template.",
+   "why_not": [
+    null,
+    "That duplicates the template and invites drift.",
+    "Mode doesn't select values; parameters do.",
+    "Outputs return values; they don't feed inputs."
+   ]
+  },
+  {
+   "id": "03-01-q13",
+   "sub_skill": "Export a deployment as an Azure Resource Manager template or convert an Azure Resource Manager template to a Bicep file",
+   "prompt": "Resources were created manually in the portal. You need a Bicep file describing them as a starting point, and you only have the Azure CLI and the portal. What's the most direct way?",
+   "options": [
+    "az group export --output bicep",
+    "Copy the template from the resource group's deployment history",
+    "bicep build on the resource group",
+    "Portal: the resource group > Export template > Bicep"
+   ],
+   "answer": 3,
+   "explanation": "Bicep files can currently be exported only from the portal. With the CLI, export JSON and then decompile it.",
+   "why_not": [
+    "The CLI exports ARM JSON; Bicep export is portal-only.",
+    "Manually created resources may have no deployment entry, and history gives JSON.",
+    "build compiles Bicep you already have; it doesn't read Azure.",
+    null
+   ]
+  },
+  {
+   "id": "03-01-q14",
+   "sub_skill": "Export a deployment as an Azure Resource Manager template or convert an Azure Resource Manager template to a Bicep file",
+   "prompt": "An auditor needs the exact template that was used by a deployment last Tuesday, not the resources' current state. Where do you get it?",
+   "options": [
+    "Export template on the resource group",
+    "The resource group's Deployments page: select the deployment and open its template",
+    "Decompile the current resources",
+    "The Activity log's JSON for the storage account"
+   ],
+   "answer": 1,
+   "explanation": "Deployment history keeps a copy of the template each deployment used (ARM JSON).",
+   "why_not": [
+    "Export reflects current resources and is reconstructed, not the template that was used.",
+    null,
+    "Decompile converts JSON to Bicep; it doesn't retrieve history.",
+    "The activity log records operations, not the template."
+   ]
+  },
+  {
+   "id": "03-01-q15",
+   "sub_skill": "Export a deployment as an Azure Resource Manager template or convert an Azure Resource Manager template to a Bicep file",
+   "prompt": "You decompile a large ARM template with bicep decompile. The Bicep file builds but has linter warnings and an unusual symbolic name. What's true?",
+   "options": [
+    "Decompilation is best-effort; the output is functionally equivalent but may need cleanup",
+    "The decompiler has failed and the Bicep file won't deploy",
+    "You must redeploy the original JSON to fix the Bicep file",
+    "JSON → Bicep → JSON returns the byte-identical original"
+   ],
+   "answer": 0,
+   "explanation": "Microsoft describes decompile as best-effort with no guaranteed mapping. You may need to fix warnings and rename symbols.",
+   "why_not": [
+    null,
+    "Warnings don't stop deployment; the output is functionally equivalent.",
+    "The fix is to edit the Bicep file.",
+    "Round trips produce functionally equivalent, not identical, templates."
+   ]
+  }
+ ]
 }

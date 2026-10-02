@@ -1,0 +1,349 @@
+{
+ "module": "05-01",
+ "title": "Monitoring Resources in Azure",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "05-01-q1",
+   "sub_skill": "Interpret metrics in Azure Monitor",
+   "prompt": "How long does Azure Monitor keep platform metrics, and how much can one metrics explorer chart display?",
+   "options": [
+    "30 days kept; 7 days per chart",
+    "1 year kept; 90 days per chart",
+    "93 days kept; up to 30 days in one chart",
+    "Forever, in the activity log"
+   ],
+   "answer": 2,
+   "explanation": "Platform and custom metrics are stored for 93 days; one chart can visualize up to 30 days.",
+   "why_not": [
+    "Platform metrics are kept for 93 days.",
+    "Platform metrics are kept for 93 days, and a chart shows up to 30.",
+    null,
+    "Metrics are stored in the metrics database, not the activity log."
+   ]
+  },
+  {
+   "id": "05-01-q2",
+   "sub_skill": "Interpret metrics in Azure Monitor",
+   "prompt": "A storage account's Transactions chart must show a separate line for each API operation. What do you use?",
+   "options": [
+    "Apply splitting by the API name dimension",
+    "Change the aggregation to Count",
+    "Add a diagnostic setting",
+    "Create a log search alert"
+   ],
+   "answer": 0,
+   "explanation": "For metrics with dimensions, splitting shows one line per dimension value.",
+   "why_not": [
+    null,
+    "Aggregation changes the calculation, not the breakdown.",
+    "Splitting is a metrics explorer feature; no export is needed.",
+    "Alerts don't chart breakdowns."
+   ]
+  },
+  {
+   "id": "05-01-q3",
+   "sub_skill": "Interpret metrics in Azure Monitor",
+   "prompt": "Free space on each logical disk of your VMs doesn't appear in metrics explorer. What's required?",
+   "options": [
+    "A diagnostic setting on the VM",
+    "Nothing: wait 93 days",
+    "The Log Analytics agent",
+    "The Azure Monitor Agent with a data collection rule for guest performance counters"
+   ],
+   "answer": 3,
+   "explanation": "Guest OS metrics require the Azure Monitor Agent and a data collection rule; platform metrics alone don't include them.",
+   "why_not": [
+    "Diagnostic settings route platform logs and metrics; guest counters need the agent.",
+    "Retention isn't the issue; the data isn't collected.",
+    "It was retired in August 2024.",
+    null
+   ]
+  },
+  {
+   "id": "05-01-q4",
+   "sub_skill": "Configure log settings in Azure Monitor",
+   "prompt": "A storage account's blob read and write operations must be queryable in a Log Analytics workspace. What do you configure?",
+   "options": [
+    "Nothing: resource logs are collected automatically",
+    "A diagnostic setting on the blob service that sends its logs to the workspace",
+    "A metric alert on Transactions",
+    "Storage insights"
+   ],
+   "answer": 1,
+   "explanation": "Resource logs require a diagnostic setting routing them to a destination such as a Log Analytics workspace.",
+   "why_not": [
+    "Resource logs aren't collected until you create a diagnostic setting.",
+    null,
+    "An alert doesn't store logs.",
+    "Insights visualize metrics; they don't ingest resource logs."
+   ]
+  },
+  {
+   "id": "05-01-q5",
+   "sub_skill": "Configure log settings in Azure Monitor",
+   "prompt": "Security wants Azure resource logs streamed in near real time to a third-party SIEM. Which diagnostic setting destination fits?",
+   "options": [
+    "A storage account",
+    "The activity log",
+    "An event hub",
+    "A metric alert"
+   ],
+   "answer": 2,
+   "explanation": "Diagnostic settings can stream to Event Hubs for ingestion by external systems such as SIEMs.",
+   "why_not": [
+    "Storage suits archival, not streaming.",
+    "The activity log is a source, not a destination.",
+    null,
+    "Alerts aren't log destinations."
+   ]
+  },
+  {
+   "id": "05-01-q6",
+   "sub_skill": "Configure log settings in Azure Monitor",
+   "prompt": "Audit requires certain workspace tables to be kept for 7 years at low cost and queried only occasionally. What should you configure?",
+   "options": [
+    "Set the tables' total retention to 7 years, using long-term retention, and use search jobs when needed",
+    "Set analytics retention to 7 years",
+    "Nothing: workspaces keep data for 7 years by default",
+    "Move the data to Azure Backup"
+   ],
+   "answer": 0,
+   "explanation": "Total retention can be set up to 12 years; data beyond analytics retention is kept at low cost and read back with search jobs.",
+   "why_not": [
+    null,
+    "Analytics retention goes up to 2 years.",
+    "The default is 30 days.",
+    "Backup doesn't hold Log Analytics data."
+   ]
+  },
+  {
+   "id": "05-01-q7",
+   "sub_skill": "Query and analyze logs in Azure Monitor",
+   "prompt": "Which KQL query counts operations per resource group in the activity log over the last 7 days?",
+   "options": [
+    "AzureActivity | project ResourceGroup | take 7",
+    "AzureActivity | where ResourceGroup > ago(7d) | count",
+    "Heartbeat | summarize count() by ResourceGroup",
+    "AzureActivity | where TimeGenerated > ago(7d) | summarize count() by ResourceGroup"
+   ],
+   "answer": 3,
+   "explanation": "Filter by time with where and ago(), then aggregate with summarize count() by the grouping column.",
+   "why_not": [
+    "take returns a sample of rows; it doesn't count or filter by time.",
+    "ago() compares with time, not a resource group, and count gives one total.",
+    "Heartbeat holds agent check-ins, not the activity log.",
+    null
+   ]
+  },
+  {
+   "id": "05-01-q8",
+   "sub_skill": "Query and analyze logs in Azure Monitor",
+   "prompt": "In KQL, which operator adds a calculated column to every row without removing other columns?",
+   "options": [
+    "project",
+    "extend",
+    "summarize",
+    "where"
+   ],
+   "answer": 1,
+   "explanation": "extend adds calculated columns; project selects columns; summarize aggregates.",
+   "why_not": [
+    "project chooses which columns to keep.",
+    null,
+    "summarize aggregates rows into groups.",
+    "where filters rows."
+   ]
+  },
+  {
+   "id": "05-01-q9",
+   "sub_skill": "Query and analyze logs in Azure Monitor",
+   "prompt": "You need to know which VMs stopped reporting in the last 15 minutes. Which table and query pattern fit?",
+   "options": [
+    "AzureActivity | where OperationNameValue has 'stop'",
+    "InsightsMetrics | take 15",
+    "Heartbeat | summarize LastSeen = max(TimeGenerated) by Computer | where LastSeen < ago(15m)",
+    "StorageBlobLogs | summarize count() by Computer"
+   ],
+   "answer": 2,
+   "explanation": "Agents write Heartbeat records; the latest heartbeat per computer shows which have gone quiet.",
+   "why_not": [
+    "That shows control-plane stop operations, not agents that stopped reporting.",
+    "take returns 15 rows, not missing machines.",
+    null,
+    "Storage logs don't describe VM agents."
+   ]
+  },
+  {
+   "id": "05-01-q10",
+   "sub_skill": "Set up alert rules, action groups, and alert processing rules in Azure Monitor",
+   "prompt": "You must be alerted whenever anyone deletes a virtual machine in a subscription. Which alert rule type?",
+   "options": [
+    "Activity log alert",
+    "Metric alert on Percentage CPU",
+    "Log search alert on InsightsMetrics",
+    "Alert processing rule"
+   ],
+   "answer": 0,
+   "explanation": "Activity log alerts fire on specific activity log events, such as a resource being deleted.",
+   "why_not": [
+    null,
+    "CPU doesn't record deletions.",
+    "InsightsMetrics holds performance data, not deletions.",
+    "Processing rules modify fired alerts; they don't detect events."
+   ]
+  },
+  {
+   "id": "05-01-q11",
+   "sub_skill": "Set up alert rules, action groups, and alert processing rules in Azure Monitor",
+   "prompt": "When a critical alert fires, the on-call engineer must get an SMS and an Automation runbook must run. Where do you configure both?",
+   "options": [
+    "In the alert rule's condition",
+    "In a diagnostic setting",
+    "In a data collection rule",
+    "In an action group attached to the alert rule"
+   ],
+   "answer": 3,
+   "explanation": "Action groups hold notifications (email, SMS, push, voice) and actions (runbooks, Functions, Logic Apps, webhooks, ITSM, Event Hubs).",
+   "why_not": [
+    "The condition defines when the alert fires, not what happens.",
+    "Diagnostic settings route data.",
+    "DCRs configure agent data collection.",
+    null
+   ]
+  },
+  {
+   "id": "05-01-q12",
+   "sub_skill": "Set up alert rules, action groups, and alert processing rules in Azure Monitor",
+   "prompt": "During patching every Saturday 22:00-02:00, alerts for VMs in rg-app should still be recorded but notify no one. What should you create?",
+   "options": [
+    "Disable every alert rule on Saturdays",
+    "An alert processing rule scoped to rg-app that suppresses action groups, with a recurring weekly schedule",
+    "Delete the action groups each Saturday",
+    "Set the alert rules to Sev4"
+   ],
+   "answer": 1,
+   "explanation": "Alert processing rules can suppress notifications for a scope on a recurring schedule; fired alerts remain visible.",
+   "why_not": [
+    "That stops alerts entirely and affects other resources in shared rules.",
+    null,
+    "Fragile, and it affects every rule using them.",
+    "Severity doesn't stop notifications."
+   ]
+  },
+  {
+   "id": "05-01-q13",
+   "sub_skill": "Configure and interpret monitoring of virtual machines, storage accounts, and networks by using Azure Monitor Insights",
+   "prompt": "You enable VM insights on a VM with the Azure Monitor Agent. Where does the guest performance data go?",
+   "options": [
+    "To the activity log",
+    "To the storage account's insights-metrics container",
+    "To the InsightsMetrics table in the chosen Log Analytics workspace, through a DCR prefixed MSVMI-",
+    "To the AzureActivity table"
+   ],
+   "answer": 2,
+   "explanation": "VM insights creates a data collection rule (MSVMI-) that sends common guest performance counters to InsightsMetrics.",
+   "why_not": [
+    "The activity log records control-plane events.",
+    "That's a diagnostic-setting destination, not VM insights.",
+    null,
+    "That table holds activity log data."
+   ]
+  },
+  {
+   "id": "05-01-q14",
+   "sub_skill": "Configure and interpret monitoring of virtual machines, storage accounts, and networks by using Azure Monitor Insights",
+   "prompt": "Which Insights experience shows topology, health and metrics for all network resources without any configuration?",
+   "options": [
+    "Network insights",
+    "VM insights",
+    "Storage insights",
+    "Connection monitor"
+   ],
+   "answer": 0,
+   "explanation": "Azure Monitor Network insights provides topology, health and metrics for deployed network resources without configuration.",
+   "why_not": [
+    null,
+    "VM insights focuses on VMs and needs the agent.",
+    "Storage insights covers storage accounts.",
+    "Connection monitor tests connectivity; it's one of the tools Network insights links to."
+   ]
+  },
+  {
+   "id": "05-01-q15",
+   "sub_skill": "Configure and interpret monitoring of virtual machines, storage accounts, and networks by using Azure Monitor Insights",
+   "prompt": "Which statement about the VM insights Map feature is correct?",
+   "options": [
+    "It's required for VM insights performance charts",
+    "It uses the Log Analytics agent going forward",
+    "It's enabled by default in every subscription",
+    "It needs the Dependency agent and retires on June 30, 2028"
+   ],
+   "answer": 3,
+   "explanation": "The Dependency agent and the Map experience in VM insights retire on June 30, 2028; the Map is optional.",
+   "why_not": [
+    "Performance monitoring works without the Map; the Dependency agent is optional.",
+    "The Log Analytics agent was retired in August 2024.",
+    "Map collection is an option you choose when enabling VM insights.",
+    null
+   ]
+  },
+  {
+   "id": "05-01-q16",
+   "sub_skill": "Use Azure Network Watcher and Connection monitor",
+   "prompt": "You need continuous monitoring of latency and packet loss between Azure VMs and an on-premises server, with alerts. Which tool, and what does the on-premises side need?",
+   "options": [
+    "Connection troubleshoot; nothing on-premises",
+    "Connection monitor; the on-premises server needs Azure Arc and the Azure Monitor Agent",
+    "IP flow verify; the Log Analytics agent",
+    "Packet capture; a VPN gateway"
+   ],
+   "answer": 1,
+   "explanation": "Connection monitor provides continuous connectivity monitoring; on-premises sources must be Arc-enabled with the Azure Monitor Agent.",
+   "why_not": [
+    "Connection troubleshoot is a one-time test, not continuous monitoring.",
+    null,
+    "IP flow verify checks NSG rules for a single flow; the Log Analytics agent isn't supported.",
+    "Packet capture records traffic; it doesn't monitor latency over time."
+   ]
+  },
+  {
+   "id": "05-01-q17",
+   "sub_skill": "Use Azure Network Watcher and Connection monitor",
+   "prompt": "Connection monitor shows no data from an Azure VM you added as a source. What's the most likely cause?",
+   "options": [
+    "The Network Watcher agent extension isn't installed on the VM",
+    "Network Watcher isn't enabled in any region",
+    "The VM has no public IP",
+    "The VM isn't in NetworkWatcherRG"
+   ],
+   "answer": 0,
+   "explanation": "Connection monitor, packet capture and connection troubleshoot require the Network Watcher agent extension on Azure VMs.",
+   "why_not": [
+    null,
+    "Network Watcher is enabled automatically when you create a virtual network.",
+    "Connection monitor doesn't require a public IP on the source.",
+    "Sources don't need to be in that resource group."
+   ]
+  },
+  {
+   "id": "05-01-q18",
+   "sub_skill": "Use Azure Network Watcher and Connection monitor",
+   "prompt": "After deleting a lab's resource group, its connection monitor is still running and billing. Why?",
+   "options": [
+    "Connection monitors can't be deleted",
+    "Resource group deletion takes 30 days",
+    "Connection monitors belong to the regional Network Watcher, in NetworkWatcherRG, not to the lab's resource group",
+    "The monitor was attached to the VM's OS disk"
+   ],
+   "answer": 2,
+   "explanation": "Network Watcher resources are created in the NetworkWatcherRG resource group; delete the connection monitor explicitly.",
+   "why_not": [
+    "They can be deleted explicitly.",
+    "Deletion isn't delayed like that.",
+    null,
+    "Monitors aren't attached to disks."
+   ]
+  }
+ ]
+}

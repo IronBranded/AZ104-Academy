@@ -1,102 +1,292 @@
 {
-  "module": "02-02",
-  "title": "Database Security",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "02-02-q1",
-      "sub_skill": "Implement platform-level security configurations in Azure SQL",
-      "prompt": "A logical server has a Microsoft Entra admin assigned, and Conditional Access requires MFA for all users. An attacker connects successfully from an unmanaged device using the SQL administrator password. Why, and what closes it?",
-      "options": [
-        "The Entra admin assignment failed to apply; reassign it",
-        "SQL authentication is a separate login system that Conditional Access cannot see; enable Microsoft Entra-only authentication",
-        "Conditional Access does not apply to service endpoints; add a private endpoint",
-        "The attacker's device was compliant; tighten the device filter"
-      ],
-      "answer": 1,
-      "explanation": "SQL logins live inside the database engine and predate Entra entirely. Nothing from Domain 1 - MFA, PIM, Conditional Access - can see them. Setting the Entra admin is step one of two; Entra-only authentication is what disables SQL logins, including the original admin.",
-      "why_not": [
-        "The Entra admin assignment worked. It simply does not disable SQL authentication; that takes Entra-only authentication.",
-        null,
-        "The problem is the login type, not the network path. Conditional Access never sees a SQL login, whatever route the connection takes.",
-        "Device compliance is irrelevant. A SQL login never passes through Microsoft Entra, so no Conditional Access policy evaluates it."
-      ]
-    },
-    {
-      "id": "02-02-q2",
-      "sub_skill": "Implement platform-level security configurations in Azure SQL",
-      "prompt": "A compliance report states that national ID numbers are protected because Dynamic Data Masking is enabled. Write the rebuttal.",
-      "options": [
-        "DDM encrypts only at rest, so data in transit is exposed",
-        "DDM masks the result set but the data remains fully queryable; a WHERE clause recovers values one predicate at a time",
-        "DDM applies only to columns of type nvarchar",
-        "DDM is disabled whenever auditing is enabled"
-      ],
-      "answer": 1,
-      "explanation": "DDM is a presentation-layer control. It prevents casual exposure in an application and does nothing against someone who can run queries. Where the requirement is to protect data from the database administrator, the answer is Always Encrypted, where keys never reach the server.",
-      "why_not": [
-        "DDM is not encryption at all. It masks what a result set displays.",
-        null,
-        "DDM is not limited to one column type. Its weakness is that masked data stays fully queryable.",
-        "DDM and auditing are independent features; enabling one does not disable the other."
-      ]
-    },
-    {
-      "id": "02-02-q3",
-      "sub_skill": "Configure database auditing for Azure SQL Database and Azure SQL Managed Instance",
-      "prompt": "Auditing is enabled at both server and database level, to both a storage account and Log Analytics. What is the result?",
-      "options": [
-        "The database policy overrides the server policy; one set of records is written to both destinations",
-        "The two policies run side by side, so events are recorded twice, to each destination",
-        "Only the server policy applies; database-level auditing is ignored when a server policy exists",
-        "Log Analytics deduplicates the records automatically"
-      ],
-      "answer": 1,
-      "explanation": "Server and database policies run side by side. You get duplicate records, duplicate ingestion cost, and duplicate rows in every query. A server-level policy already covers every database including ones created later, so enable database-level auditing only for a requirement the server policy genuinely cannot meet.",
-      "why_not": [
-        "Neither policy overrides the other. They run side by side.",
-        null,
-        "Database-level auditing is not ignored. It runs alongside the server policy, which is how the duplicates arise.",
-        "Nothing deduplicates the records. You pay to ingest both copies."
-      ]
-    },
-    {
-      "id": "02-02-q4",
-      "sub_skill": "Configure Defender for Databases protection across Azure database services",
-      "prompt": "You enable the Defender for Azure SQL plan on a subscription containing one Azure SQL database, one Cosmos DB account, and SQL Server running on an Azure VM. What is protected?",
-      "options": [
-        "All three, since Defender for Databases is a single plan",
-        "Only the Azure SQL database; the other two need their own sub-plans",
-        "The Azure SQL database and the SQL Server on the VM, but not Cosmos DB",
-        "All three, but vulnerability assessment covers only the Azure SQL database"
-      ],
-      "answer": 1,
-      "explanation": "Defender for Databases has independent sub-plans: Azure SQL databases, SQL servers on machines, open-source relational databases, and Azure Cosmos DB. Each is toggled separately, so 'protect all database services' is several switches rather than one.",
-      "why_not": [
-        "Defender for Databases is a set of independently toggled sub-plans, not a single plan.",
-        null,
-        "SQL Server on a VM is covered by the separate SQL servers on machines sub-plan, which was not enabled.",
-        "The Cosmos DB account and SQL Server on the VM are not protected at all without their own sub-plans."
-      ]
-    },
-    {
-      "id": "02-02-q5",
-      "sub_skill": "Configure Defender for Databases protection across Azure database services",
-      "prompt": "You open a database's vulnerability assessment configuration and it asks you to select a storage account. What does this tell you?",
-      "options": [
-        "The database is using express configuration and needs a results container",
-        "The database is on the classic configuration",
-        "Defender for Databases is not enabled on the subscription",
-        "The scan results exceed the 1 MB per-rule limit"
-      ],
-      "answer": 1,
-      "explanation": "Express configuration requires no storage account and is enabled automatically when the plan is turned on. If the pane asks for one, you are on the legacy classic path - and reverting to classic from express requires disabling the plan and reconfiguring through PowerShell.",
-      "why_not": [
-        "Express configuration needs no storage account. Being asked for one means you are not on express.",
-        null,
-        "Being asked for a storage account identifies the classic configuration specifically. Express, which enabling the plan sets up automatically, never asks for one.",
-        "A storage account prompt identifies the configuration mode, not a limit on the size of results."
-      ]
-    }
-  ]
+ "module": "02-02",
+ "title": "Storage Accounts",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "02-02-q1",
+   "sub_skill": "Create and configure storage accounts",
+   "prompt": "You created a Premium block blobs storage account. The team now wants the same account converted to Standard general-purpose v2 to use Azure Files. What must you do?",
+   "options": [
+    "Change the account kind on the Configuration page",
+    "Create a new Standard general-purpose v2 account and copy the data to it",
+    "Run Set-AzStorageAccount -Kind StorageV2",
+    "Open a support request to convert it"
+   ],
+   "answer": 1,
+   "explanation": "You can't change a storage account to a different type after it's created; create a new account and copy the data.",
+   "why_not": [
+    "An account's type can't be changed after creation.",
+    null,
+    "Type changes aren't supported, whatever the tool.",
+    "Microsoft documents that you must create a new account and copy the data."
+   ]
+  },
+  {
+   "id": "02-02-q2",
+   "sub_skill": "Create and configure storage accounts",
+   "prompt": "Which storage account name is valid?",
+   "options": [
+    "Contoso-Data",
+    "cd",
+    "contosodata2026",
+    "contoso_data_archive"
+   ],
+   "answer": 2,
+   "explanation": "Storage account names are 3-24 characters of lowercase letters and numbers, and must be unique across Azure.",
+   "why_not": [
+    "Only lowercase letters and numbers are allowed; no uppercase and no hyphens.",
+    "Names must be at least 3 characters.",
+    null,
+    "Underscores aren't allowed."
+   ]
+  },
+  {
+   "id": "02-02-q3",
+   "sub_skill": "Create and configure storage accounts",
+   "prompt": "You need to move a storage account and its data from West Europe to North Europe. What is the supported approach?",
+   "options": [
+    "Create a new account in North Europe and copy the data, for example with AzCopy",
+    "Use Move-AzResource with a new location",
+    "Change the account's location property",
+    "Enable GRS and fail over permanently"
+   ],
+   "answer": 0,
+   "explanation": "Moving a storage account to another region means creating a copy of the account there and moving the data with AzCopy or another tool.",
+   "why_not": [
+    null,
+    "Resource moves change the resource group or subscription, never the region.",
+    "The region of an existing account can't be changed.",
+    "Failover goes to the paired region, which you can't choose; it isn't a move to an arbitrary region."
+   ]
+  },
+  {
+   "id": "02-02-q4",
+   "sub_skill": "Configure Azure Storage redundancy",
+   "prompt": "An application must keep reading blob data even during a regional outage, without anyone initiating a failover. Which redundancy option meets this at the lowest cost?",
+   "options": [
+    "GRS",
+    "ZRS",
+    "RA-GZRS",
+    "RA-GRS"
+   ],
+   "answer": 3,
+   "explanation": "Only the RA variants allow reads from the secondary region at any time. RA-GRS is cheaper than RA-GZRS.",
+   "why_not": [
+    "GRS data in the secondary region isn't readable unless there's a failover.",
+    "ZRS stays within one region; a regional outage affects all three zones.",
+    "It meets the requirement but costs more than RA-GRS; zone redundancy wasn't requested.",
+    null
+   ]
+  },
+  {
+   "id": "02-02-q5",
+   "sub_skill": "Configure Azure Storage redundancy",
+   "prompt": "A storage account uses ZRS. You must change it to GRS. What is correct?",
+   "options": [
+    "Select GRS on the Redundancy page; it converts immediately",
+    "There's no direct ZRS to GRS conversion; go through GZRS or LRS in two steps, waiting at least 24 hours between them",
+    "It's impossible; you must create a new account",
+    "Delete the zone copies with PowerShell first"
+   ],
+   "answer": 1,
+   "explanation": "ZRS to GRS requires ZRS → GZRS → GRS or ZRS → LRS → GRS, with at least 24 hours between conversions.",
+   "why_not": [
+    "ZRS to GRS isn't offered directly.",
+    null,
+    "It's possible through an intermediate option.",
+    "There's no such operation; conversion is the supported path."
+   ]
+  },
+  {
+   "id": "02-02-q6",
+   "sub_skill": "Configure Azure Storage redundancy",
+   "prompt": "You need zone redundancy for a Premium file shares account and also want geo-redundancy. What can you configure?",
+   "options": [
+    "GZRS",
+    "RA-GZRS",
+    "ZRS only; Premium storage accounts support LRS and ZRS, not geo-redundant options",
+    "GRS with zone pinning"
+   ],
+   "answer": 2,
+   "explanation": "Premium block blob, file share and page blob accounts support LRS and ZRS only.",
+   "why_not": [
+    "Premium file shares accounts don't support GZRS.",
+    "Premium accounts don't support any geo-redundant option.",
+    null,
+    "There's no such option; premium accounts support LRS or ZRS."
+   ]
+  },
+  {
+   "id": "02-02-q7",
+   "sub_skill": "Configure object replication",
+   "prompt": "You're configuring object replication from account A to account B. Configuration fails. Which prerequisite is most likely missing?",
+   "options": [
+    "Blob versioning on both accounts, or the change feed on account A",
+    "Hierarchical namespace on both accounts",
+    "GRS redundancy on account A",
+    "A stored access policy on the destination container"
+   ],
+   "answer": 0,
+   "explanation": "Object replication requires blob versioning on the source and destination accounts, and the change feed on the source.",
+   "why_not": [
+    null,
+    "Object replication isn't supported on accounts with a hierarchical namespace.",
+    "Object replication doesn't depend on the redundancy option.",
+    "Stored access policies are for SAS tokens, not replication."
+   ]
+  },
+  {
+   "id": "02-02-q8",
+   "sub_skill": "Configure object replication",
+   "prompt": "Object replication has run for a week. A batch job that uploads to the destination container fails with 409, and blobs that were in the source before the policy aren't at the destination. What explains both?",
+   "options": [
+    "The destination account needs the change feed",
+    "The batch job needs a user delegation SAS",
+    "Replication only runs once a day",
+    "The destination container is read-only while a rule targets it, and rules copy only new blobs by default"
+   ],
+   "answer": 3,
+   "explanation": "Writes to a destination container fail with 409 while replication is active. Pre-existing blobs are ignored unless you choose to copy them.",
+   "why_not": [
+    "The change feed is required on the source.",
+    "The failure is 409 Conflict from the rule, not authorization.",
+    "Replication is asynchronous and continuous; the defaults explain the missing blobs.",
+    null
+   ]
+  },
+  {
+   "id": "02-02-q9",
+   "sub_skill": "Configure object replication",
+   "prompt": "What is the key difference between GRS and object replication?",
+   "options": [
+    "Object replication is synchronous; GRS is asynchronous",
+    "GRS copies the whole account to the paired region; object replication copies block blobs from chosen containers to an account you choose",
+    "GRS supports only block blobs",
+    "Object replication makes the source read-only"
+   ],
+   "answer": 1,
+   "explanation": "Redundancy protects the whole account in its paired region. Object replication distributes selected block blobs to destinations you pick, in any region.",
+   "why_not": [
+    "Both are asynchronous.",
+    null,
+    "GRS covers the whole account, all data types; object replication supports block blobs only.",
+    "The destination container becomes read-only, not the source."
+   ]
+  },
+  {
+   "id": "02-02-q10",
+   "sub_skill": "Configure storage account encryption",
+   "prompt": "Compliance requires that you control and rotate the key that protects a storage account's Blob and Files data. What should you configure?",
+   "options": [
+    "Customer-managed keys in Azure Key Vault with soft delete and purge protection, accessed by a managed identity",
+    "Infrastructure encryption",
+    "Customer-provided keys on every request",
+    "A key expiration policy on the access keys"
+   ],
+   "answer": 0,
+   "explanation": "Customer-managed keys in Key Vault or Managed HSM protect Blob and Azure Files data. The vault needs soft delete and purge protection, and the identity needs get, wrapkey and unwrapkey.",
+   "why_not": [
+    null,
+    "It adds a second layer, but with Microsoft-managed keys.",
+    "That's for per-request Blob operations; it isn't account-wide key management and doesn't cover Azure Files.",
+    "Access keys authorize requests; they aren't the encryption key."
+   ]
+  },
+  {
+   "id": "02-02-q11",
+   "sub_skill": "Configure storage account encryption",
+   "prompt": "An existing storage account must now have double encryption of data at rest. What must you do?",
+   "options": [
+    "Enable infrastructure encryption on the Encryption page",
+    "Switch to customer-managed keys",
+    "Create a new storage account with infrastructure encryption enabled and move the data",
+    "Enable HTTPS-only transfer"
+   ],
+   "answer": 2,
+   "explanation": "To doubly encrypt data, you must create an account or encryption scope that is configured for infrastructure encryption.",
+   "why_not": [
+    "Infrastructure encryption must be enabled when the account is created.",
+    "CMK changes who manages the key; it doesn't add a second encryption layer.",
+    null,
+    "That protects data in transit, not at rest."
+   ]
+  },
+  {
+   "id": "02-02-q12",
+   "sub_skill": "Configure storage account encryption",
+   "prompt": "One storage account holds data for two customers, and each customer's containers must be encrypted with a different key. What should you use?",
+   "options": [
+    "Two access keys, key1 and key2",
+    "Object replication to two accounts",
+    "Infrastructure encryption",
+    "Encryption scopes, one per customer, set as the default scope on each customer's containers"
+   ],
+   "answer": 3,
+   "explanation": "Encryption scopes let you manage encryption with a key scoped to a container or blob, which creates boundaries between customers in the same account.",
+   "why_not": [
+    "Access keys authorize requests; they don't select encryption keys.",
+    "That copies data; it doesn't separate encryption keys within an account.",
+    "It uses a single Microsoft-managed key for the second layer.",
+    null
+   ]
+  },
+  {
+   "id": "02-02-q13",
+   "sub_skill": "Manage data by using Azure Storage Explorer and AzCopy",
+   "prompt": "You must copy 500 GB between two storage accounts. The administrator's laptop has a slow connection. Which approach avoids sending the data through the laptop?",
+   "options": [
+    "Download with Storage Explorer, then upload",
+    "azcopy copy from the source URL to the destination URL, which uses server-to-server APIs",
+    "azcopy sync from the laptop's local folder",
+    "Set up GRS on the source"
+   ],
+   "answer": 1,
+   "explanation": "AzCopy uses server-to-server APIs when copying between accounts, so data moves directly between storage servers.",
+   "why_not": [
+    "That routes all the data through the laptop.",
+    null,
+    "That copies from local storage, so the data must be on the laptop first.",
+    "GRS replicates to the paired region's hidden secondary, not to another account."
+   ]
+  },
+  {
+   "id": "02-02-q14",
+   "sub_skill": "Manage data by using Azure Storage Explorer and AzCopy",
+   "prompt": "You own a storage account and run azcopy login, then azcopy copy to upload a file. It fails with 403. What is the most likely fix?",
+   "options": [
+    "Run AzCopy as a local administrator",
+    "Regenerate the storage account keys",
+    "Assign yourself Storage Blob Data Contributor, or use a SAS token",
+    "Upgrade the account to Premium"
+   ],
+   "answer": 2,
+   "explanation": "As an owner of a storage account you aren't automatically given data permissions. Uploads with Entra authorization need a role such as Storage Blob Data Contributor.",
+   "why_not": [
+    "Local OS privileges don't affect Azure authorization.",
+    "Entra-authorized AzCopy doesn't use the keys.",
+    null,
+    "Account performance tier doesn't affect authorization."
+   ]
+  },
+  {
+   "id": "02-02-q15",
+   "sub_skill": "Manage data by using Azure Storage Explorer and AzCopy",
+   "prompt": "A container must always mirror a folder on a file server, in one direction only, transferring only changes on each run. Which command fits?",
+   "options": [
+    "azcopy sync",
+    "azcopy copy",
+    "azcopy make",
+    "Object replication"
+   ],
+   "answer": 0,
+   "explanation": "azcopy sync is one-way synchronisation between local storage and Blob Storage, or between containers.",
+   "why_not": [
+    null,
+    "copy transfers what you point it at on each run, rather than comparing source and destination.",
+    "make only creates a container or share.",
+    "Object replication copies between storage accounts, not from a file server."
+   ]
+  }
+ ]
 }

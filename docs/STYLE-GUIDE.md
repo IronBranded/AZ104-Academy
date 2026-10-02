@@ -13,13 +13,13 @@ convention that lives only in one author's head is not a convention.
 ## 1. Sourcing
 
 **Microsoft Learn is the only source of factual content.** Product documentation,
-the SC-500 study guide, and Microsoft Learn training modules. Nothing else.
+the AZ-104 study guide, and Microsoft Learn training modules. Nothing else.
 
 Third-party material — courses, blogs, practice-question vendors, forum posts —
 may be used **only** to sanity-check structure and emphasis: *is this topic
 weighted the way I think it is?* It is never the source of a claim. While writing
-appendix A4, four prep sites were found contradicting each other and the official
-page on this exam's duration and question count. That is the failure mode this
+the SC-500 guide this engine came from, four prep sites were found contradicting
+each other and the official page on an exam's duration and question count. That is the failure mode this
 rule exists to prevent.
 
 **Every module ends with a Sources block** listing the specific pages it draws
@@ -28,7 +28,7 @@ from, as inline autolinks:
 ```markdown
 ## Sources
 
-- Microsoft Learn - SC-500 skills measured: <https://learn.microsoft.com/...>
+- Microsoft Learn - AZ-104 skills measured: <https://learn.microsoft.com/...>
 - Azure Firewall rule processing logic: <https://learn.microsoft.com/azure/firewall/rule-processing>
 ```
 
@@ -76,8 +76,8 @@ terminal reads the lab.
 5. `## How it works under the hood` — mechanism, not menu paths
 6. `## Configuration surface` — a table of setting / default / set it to / why
 7. `## Common failure modes`
-8. `## How this is tested` — exam phrasing table, ending with an **AZ-500
-   divergence** paragraph
+8. `## How this is tested` — exam phrasing table, then the least-privileged
+   roles or settings the scenarios turn on
 9. `## Hands-on` — one line linking the lab
 10. `## Check yourself` — 5 reasoning questions, not recall
 11. `## Sources`
@@ -246,12 +246,13 @@ output is the same prose the exam asks for anyway.
 
 ---
 
-## 8. AZ-500 divergence
+## 8. Dated changes and exam notes
 
-**Every content module's `## How this is tested` ends with a divergence
-paragraph**, bolded as `**AZ-500 divergence.**` Say what moved, or say plainly that
-the area is new. Appendix A5 aggregates all of them, so a new module's note must be
-added there too — with a date if one exists.
+When a product changed in a way that makes older material wrong — a rename, a
+retired module, a setting that moved — say so in a blockquote opening with
+**`Dated change.`** (with the date) or **`Exam note.`** The site colours both as exam
+callouts. Microsoft Entra ID is the current name; mention Azure AD only to say it was
+renamed.
 
 ---
 

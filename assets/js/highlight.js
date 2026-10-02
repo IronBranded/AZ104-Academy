@@ -1,4 +1,4 @@
-/* highlight.js - SC-500 guide
+/* highlight.js - Academy engine
    Syntax highlighting, written rather than imported.
 
    Roughly 40% of this guide is code, across PowerShell, bash, KQL, JSON, Bicep,
@@ -150,5 +150,5 @@
     for (var i = 0; i < blocks.length; i++) highlightEl(blocks[i]);
   }
 
-  global.SC500Highlight = { mount: mount };
+  global.AcademyHighlight = { mount: mount };
 })(window);

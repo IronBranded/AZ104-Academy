@@ -1,102 +1,292 @@
 {
-  "module": "02-01",
-  "title": "Storage Account Security",
-  "schema": 1,
-  "questions": [
-    {
-      "id": "02-01-q1",
-      "sub_skill": "Manage access to storage, including access policies",
-      "prompt": "A contractor holds a SAS URL for a container, issued a year ago with no stored access policy. Their engagement ended six months ago and the URL still works. How can you revoke it?",
-      "options": [
-        "Delete the stored access policy it references",
-        "Remove the contractor's Entra account",
-        "Rotate the storage account key it was signed with",
-        "Set the account's SAS expiration policy to one day"
-      ],
-      "answer": 2,
-      "explanation": "A SAS with no stored access policy carries its permissions inside the signed token, so the only way to kill it early is to rotate the account key - which breaks every other consumer simultaneously. It has no Entra identity to remove, and the SAS expiration policy is a recommendation surface, not enforcement. This is the most common real finding in a storage review.",
-      "why_not": [
-        "This SAS was issued with no stored access policy, so there is none to delete.",
-        "An account-key SAS carries no Entra identity. Removing the contractor's account does not affect it.",
-        null,
-        "The SAS expiration policy is a recommendation surface, not enforcement, and it does not reach back to revoke a token already issued."
-      ]
-    },
-    {
-      "id": "02-01-q2",
-      "sub_skill": "Implement and configure security for storage accounts",
-      "prompt": "You set AllowSharedKeyAccess to false on a storage account. Which credentials stop working?",
-      "options": [
-        "The account keys",
-        "An account SAS",
-        "A service SAS",
-        "A user delegation SAS"
-      ],
-      "answer": [0, 1, 2],
-      "explanation": "Account SAS and service SAS are both signed with the account key, so disabling shared key kills them along with direct key use. A user delegation SAS is signed with a key Entra issues on behalf of a principal and survives. One switch collapses four authorization systems to two, and closes the listKeys path that makes Contributor a data-plane role.",
-      "why_not": [
-        null,
-        null,
-        null,
-        "A user delegation SAS is signed with a key Entra issues on behalf of a principal, not with the account key, so it keeps working."
-      ]
-    },
-    {
-      "id": "02-01-q3",
-      "sub_skill": "Configure Azure Storage firewall rules",
-      "prompt": "A storage account has its firewall set to Deny with one virtual network rule. A VM in that subnet, holding no role assignment and no key, receives 403. Is the firewall working correctly?",
-      "options": [
-        "No - the VNet rule should have granted the VM access",
-        "Yes - network rules subtract, they never grant; the request still needs an authorization system",
-        "No - VNet rules require the service endpoint plus a private endpoint",
-        "Yes - VNet rules apply only to the control plane"
-      ],
-      "answer": 1,
-      "explanation": "Being on an allowed network does not authorize anything. The firewall decided the request was permitted to arrive; one of the four authorization systems still has to accept it. Reading an allowed network as an implicit grant is the standard misconception here.",
-      "why_not": [
-        "Network rules only decide whether a request may arrive. The VM holds no role and no key, so nothing authorizes the request.",
-        null,
-        "A virtual network rule needs the service endpoint on the subnet, not a private endpoint as well - and either way the request still needs authorization.",
-        "The storage firewall filters data-plane requests. The 403 is the data plane refusing a request that nothing authorized."
-      ]
-    },
-    {
-      "id": "02-01-q4",
-      "sub_skill": "Implement Defender for Storage threat protection configurations",
-      "prompt": "Malware scanning is enabled with the default monthly cap on an account receiving 40 TB of uploads a month. What happens?",
-      "options": [
-        "Scanning throttles, so every blob is scanned more slowly",
-        "The cap is raised automatically and billed at the standard rate",
-        "Scanning stops for the rest of the month once the cap is reached, and uploads are no longer scanned",
-        "Uploads are blocked once the cap is reached"
-      ],
-      "answer": 2,
-      "explanation": "The default cap is 10,000 GB per storage account per month. When it is reached, uploads stop being scanned until the next month. Nothing about the storage account looks different, which makes it a detection gap you configured rather than one you were given.",
-      "why_not": [
-        "Nothing throttles. Once the cap is reached, uploads are simply not scanned until the next month.",
-        "The cap is not raised automatically. It stays at its configured value, which defaults to 10,000 GB per account per month.",
-        null,
-        "Uploads are not blocked. They succeed unscanned, which is why the gap is easy to miss."
-      ]
-    },
-    {
-      "id": "02-01-q5",
-      "sub_skill": "Manage access to storage, including access policies",
-      "prompt": "A requirement states that a shared access signature must be attributable to a named user and must not grant more than that user already has. Which type satisfies it?",
-      "options": [
-        "Account SAS",
-        "Service SAS bound to a stored access policy",
-        "User delegation SAS",
-        "Any SAS, provided the account has Entra authorization enabled"
-      ],
-      "answer": 2,
-      "explanation": "Only a user delegation SAS has a principal behind it. It is signed with a key Entra issues on that principal's behalf, cannot exceed their own RBAC, lives at most seven days, and is revocable by revoking the delegation key. It is Blob only.",
-      "why_not": [
-        "An account SAS is signed with the account key. No principal stands behind it.",
-        "A stored access policy makes a service SAS revocable, but it is still signed with the account key and has no principal behind it.",
-        null,
-        "Only a user delegation SAS is tied to a principal. Enabling Entra authorization on the account does not change how account-key SAS tokens are signed."
-      ]
-    }
-  ]
+ "module": "02-01",
+ "title": "Configuring Access to Storage",
+ "schema": 1,
+ "questions": [
+  {
+   "id": "02-01-q1",
+   "sub_skill": "Configure Azure Storage firewalls and virtual networks",
+   "prompt": "Only VMs in subnet Apps of VNet1 must reach a storage account's blob endpoint. What must you configure?",
+   "options": [
+    "A virtual network rule for subnet Apps, with a Microsoft.Storage service endpoint enabled on that subnet",
+    "An IP network rule for the subnet's address range 10.1.1.0/24",
+    "A resource lock on the storage account",
+    "A stored access policy on the container"
+   ],
+   "answer": 0,
+   "explanation": "Virtual network rules allow specific subnets. The subnet needs a Microsoft.Storage (or Microsoft.Storage.Global) service endpoint; the portal adds it for you when you add the rule.",
+   "why_not": [
+    null,
+    "IP rules accept only public IP addresses; private ranges are rejected.",
+    "Locks protect the resource from change; they don't filter network traffic.",
+    "A stored access policy constrains SAS tokens, not networks."
+   ]
+  },
+  {
+   "id": "02-01-q2",
+   "sub_skill": "Configure Azure Storage firewalls and virtual networks",
+   "prompt": "An IP network rule allows your company's public IP. A VM in the same Azure region as the storage account, with no service endpoint, isn't covered by any rule. Why can't you use an IP rule to control that VM's access?",
+   "options": [
+    "IP rules only work with IPv6",
+    "The VM must use a SAS instead",
+    "IP network rules have no effect on requests from the same Azure region, which use private Azure addresses",
+    "IP rules apply only to SMB traffic"
+   ],
+   "answer": 2,
+   "explanation": "Same-region requests use private addresses, so IP rules can't govern them. Use a virtual network rule for the VM's subnet.",
+   "why_not": [
+    "Storage firewall IP rules support only IPv4.",
+    "SAS is authorization, not network filtering; it doesn't change which network rules apply.",
+    null,
+    "Network rules apply to all protocols, REST and SMB."
+   ]
+  },
+  {
+   "id": "02-01-q3",
+   "sub_skill": "Configure Azure Storage firewalls and virtual networks",
+   "prompt": "After you set a storage account to allow only selected networks, you can still change its settings in the portal but can no longer list blobs in the portal's Containers view. Why?",
+   "options": [
+    "You lost your Owner role when the firewall was enabled",
+    "The firewall blocks all portal traffic",
+    "Blob listing requires the account key to be regenerated",
+    "The firewall applies to data-plane operations; changing settings is control plane, but reading blobs in the portal is data plane"
+   ],
+   "answer": 3,
+   "explanation": "Firewall rules restrict data-plane access only. Add your client IP to browse data from the portal.",
+   "why_not": [
+    "Firewall rules don't change role assignments.",
+    "Management operations still work; only data access is filtered.",
+    "Key regeneration is unrelated to network rules.",
+    null
+   ]
+  },
+  {
+   "id": "02-01-q4",
+   "sub_skill": "Create and use shared access signature (SAS) tokens",
+   "prompt": "An external partner needs read access to one blob for two days. You must not share account keys, and you want the most secure SAS type Microsoft recommends. What should you issue?",
+   "options": [
+    "An account SAS",
+    "A user delegation SAS",
+    "The storage account connection string",
+    "An ad hoc service SAS valid for one year"
+   ],
+   "answer": 1,
+   "explanation": "A user delegation SAS is signed with Microsoft Entra credentials rather than a key. Its maximum validity is 7 days, which covers two days.",
+   "why_not": [
+    "An account SAS is signed with the account key; Microsoft recommends a user delegation SAS where possible.",
+    null,
+    "That contains an account key and grants full access to all data.",
+    "It's key-signed and far longer than needed."
+   ]
+  },
+  {
+   "id": "02-01-q5",
+   "sub_skill": "Create and use shared access signature (SAS) tokens",
+   "prompt": "Which statement about a user delegation SAS is correct?",
+   "options": [
+    "It can reference a stored access policy",
+    "It's signed with key2 by default",
+    "It works only for Blob Storage",
+    "It's valid for at most 7 days, and regenerating the account keys doesn't invalidate it"
+   ],
+   "answer": 3,
+   "explanation": "A user delegation SAS lasts up to 7 days regardless of any SAS expiration policy. Key rotation doesn't affect it, because no account key signs it.",
+   "why_not": [
+    "Stored access policies work only with a service SAS.",
+    "It's signed with a user delegation key obtained with Entra credentials, not an account key.",
+    "It's supported for Blob, Queue, Table and Azure Files.",
+    null
+   ]
+  },
+  {
+   "id": "02-01-q6",
+   "sub_skill": "Create and use shared access signature (SAS) tokens",
+   "prompt": "You need a SAS that allows a tool to call Get Service Properties and to work across the Blob and Queue services. Which SAS type do you need?",
+   "options": [
+    "An account SAS",
+    "A service SAS",
+    "A user delegation SAS",
+    "A service SAS with a stored access policy"
+   ],
+   "answer": 0,
+   "explanation": "An account SAS can span one or more services and delegate service-level operations such as Get or Set Service Properties.",
+   "why_not": [
+    null,
+    "A service SAS covers one resource in one service and can't delegate service-level operations.",
+    "A user delegation SAS can't delegate the service-level operations an account SAS can.",
+    "It's still a service SAS: one service, no service-level operations."
+   ]
+  },
+  {
+   "id": "02-01-q7",
+   "sub_skill": "Configure stored access policies",
+   "prompt": "You've issued 40 service SAS tokens for container reports, all referencing stored access policy readers. One token has leaked. You must invalidate the tokens without disrupting anything else that uses the account keys. What should you do?",
+   "options": [
+    "Regenerate key1 and key2",
+    "Delete the leaked SAS token from the storage account",
+    "Delete or rename the stored access policy (or set its expiry in the past), then issue new tokens under a new policy",
+    "Revoke the user delegation keys"
+   ],
+   "answer": 2,
+   "explanation": "Changing or removing the stored access policy revokes every service SAS that references it, without touching the account keys.",
+   "why_not": [
+    "That works, but it breaks every other application and SAS that uses the keys.",
+    "SAS tokens aren't stored or tracked; there's nothing to delete.",
+    null,
+    "These are service SAS tokens signed with an account key; user delegation keys are unrelated."
+   ]
+  },
+  {
+   "id": "02-01-q8",
+   "sub_skill": "Configure stored access policies",
+   "prompt": "You deleted stored access policy readers to revoke some leaked tokens. A week later a colleague re-creates a policy named readers with a future expiry. What happens to the old tokens?",
+   "options": [
+    "They stay revoked permanently",
+    "Tokens that referenced readers and haven't otherwise expired become valid again",
+    "They're converted to user delegation SAS tokens",
+    "They work only from the original client IP"
+   ],
+   "answer": 1,
+   "explanation": "A SAS references the policy by name. Re-create a revoked policy under a new name.",
+   "why_not": [
+    "Microsoft documents that re-creating a policy with the same name revives the associated tokens.",
+    null,
+    "SAS types never convert.",
+    "Nothing about the policy re-creation adds an IP restriction."
+   ]
+  },
+  {
+   "id": "02-01-q9",
+   "sub_skill": "Configure stored access policies",
+   "prompt": "How many stored access policies can you define on a single blob container, and which SAS type can use them?",
+   "options": [
+    "Up to five; only a service SAS",
+    "Unlimited; any SAS type",
+    "One; account SAS only",
+    "Five; user delegation SAS only"
+   ],
+   "answer": 0,
+   "explanation": "A container supports up to five stored access policies, and only a service SAS can be associated with one.",
+   "why_not": [
+    null,
+    "There's a limit of five, and only a service SAS can reference one.",
+    "An account SAS must be ad hoc.",
+    "User delegation SAS tokens don't support stored access policies."
+   ]
+  },
+  {
+   "id": "02-01-q10",
+   "sub_skill": "Manage access keys",
+   "prompt": "An ad hoc account SAS signed with key1 has been posted publicly. It expires in three months. What is the only way to invalidate it immediately?",
+   "options": [
+    "Delete the stored access policy",
+    "Revoke the user delegation keys",
+    "Set a SAS expiration policy on the account",
+    "Regenerate key1"
+   ],
+   "answer": 3,
+   "explanation": "Regenerating the key that signed an ad hoc SAS is the only way to revoke it immediately.",
+   "why_not": [
+    "An account SAS can't use a stored access policy.",
+    "This SAS was signed with key1, not a user delegation key.",
+    "An expiration policy warns about long validity at creation; it doesn't revoke existing tokens.",
+    null
+   ]
+  },
+  {
+   "id": "02-01-q11",
+   "sub_skill": "Manage access keys",
+   "prompt": "You must rotate a storage account's keys without interrupting applications that use key1. What is the correct sequence?",
+   "options": [
+    "Switch applications to key2, regenerate key1, switch applications back to key1, then regenerate key2",
+    "Regenerate both keys, then update the applications",
+    "Regenerate key1 while applications still use it",
+    "Disable Shared Key access, rotate, then enable it again"
+   ],
+   "answer": 0,
+   "explanation": "Two keys exist so one is always valid: move clients to the other key, regenerate, and repeat.",
+   "why_not": [
+    null,
+    "Applications fail between the regeneration and the update.",
+    "The applications fail as soon as key1 changes.",
+    "That blocks all key-based access, so the applications fail too."
+   ]
+  },
+  {
+   "id": "02-01-q12",
+   "sub_skill": "Manage access keys",
+   "prompt": "Security requires that no one can access a storage account's data with account keys, including through SAS tokens signed with them, and that Conditional Access can protect it. What should you configure?",
+   "options": [
+    "A key expiration policy of 1 day",
+    "A ReadOnly lock on the storage account",
+    "Disallow Shared Key authorization (AllowSharedKeyAccess = false)",
+    "Deny all networks in the firewall"
+   ],
+   "answer": 2,
+   "explanation": "With Shared Key disallowed, requests authorized with an account key, including service and account SAS, fail with 403. Microsoft also requires it before Conditional Access can protect the account.",
+   "why_not": [
+    "A key expiration policy is only a rotation reminder; keys keep working.",
+    "A ReadOnly lock blocks listing keys, but anyone who already has a key can still use it on the data plane.",
+    null,
+    "That blocks every client, including Entra-authorized ones."
+   ]
+  },
+  {
+   "id": "02-01-q13",
+   "sub_skill": "Configure identity-based access for Azure Files",
+   "prompt": "Users with Microsoft Entra-joined Windows devices and hybrid identities must access an Azure file share with their own credentials. The devices have no network line of sight to domain controllers. Which identity source should you enable?",
+   "options": [
+    "On-premises AD DS",
+    "Microsoft Entra Kerberos",
+    "Microsoft Entra Domain Services",
+    "Storage account key"
+   ],
+   "answer": 1,
+   "explanation": "Microsoft Entra Kerberos issues the Kerberos tickets itself, so clients don't need domain controller line of sight. Hybrid identities still need an AD DS synced to Microsoft Entra ID.",
+   "why_not": [
+    "AD DS authentication requires clients to reach the domain controllers.",
+    null,
+    "Clients must be joined to the managed domain and reach its domain controllers.",
+    "A key isn't an identity source and gives every user full access."
+   ]
+  },
+  {
+   "id": "02-01-q14",
+   "sub_skill": "Configure identity-based access for Azure Files",
+   "prompt": "AD DS authentication is enabled for a storage account, but the on-premises identities are NOT synced to Microsoft Entra ID. All authenticated users must get read access to every share, with Windows ACLs providing finer control. What should you configure?",
+   "options": [
+    "Assign Storage File Data SMB Share Reader to each user in Azure RBAC",
+    "A stored access policy on each share",
+    "Nothing: the default share-level permission already grants read",
+    "The default share-level permission, set to Storage File Data SMB Share Reader"
+   ],
+   "answer": 3,
+   "explanation": "The default share-level permission applies to all authenticated identities, needs no sync, and covers every share in the account. Windows ACLs then enforce file and directory permissions.",
+   "why_not": [
+    "RBAC share-level assignments need identities that exist in Microsoft Entra ID.",
+    "That's for SAS tokens, not SMB identity access.",
+    "The default share-level permission is None until you set it.",
+    null
+   ]
+  },
+  {
+   "id": "02-01-q15",
+   "sub_skill": "Configure identity-based access for Azure Files",
+   "prompt": "A user holds Storage File Data SMB Share Contributor on a share but gets access denied when opening the share's root folder. What is the most likely cause?",
+   "options": [
+    "The role must be Storage Blob Data Contributor",
+    "Identity-based access supports only NFS shares",
+    "Windows ACLs on the root directory don't grant the user access; the share-level role only admits them to the share",
+    "The share needs a second identity source"
+   ],
+   "answer": 2,
+   "explanation": "Access needs both a share-level permission and file or directory permissions. Azure Files enforces Windows ACLs, including on the root directory.",
+   "why_not": [
+    "Blob roles don't apply to Azure Files SMB access.",
+    "It supports SMB shares; NFS isn't supported.",
+    null,
+    "A storage account can use only one identity source."
+   ]
+  }
+ ]
 }

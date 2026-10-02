@@ -1,7 +1,8 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Validates the SC-500 guide: structure, front matter, sections, links, quizzes.
+    Validates the Academy: structure, front matter, sections, links, quizzes,
+    the objectives data, and the engine's exam-neutrality rules.
 
 .DESCRIPTION
     Replaces the original scaffold validator and closes the eight gaps logged in
@@ -150,10 +151,12 @@ $RequiredKeys = @(
     'objective', 'sub_objectives', 'domain', 'domain_weight', 'status',
     'prerequisites', 'ms_learn_source', 'product_docs', 'last_verified',
     'portal', 'powershell_module', 'az_cli_command', 'kql_tables', 'licensing',
-    'azure_resources', 'lab_cost_estimate', 'free_practice_available',
-    'forensic_relevance'
+    'azure_resources', 'lab_cost_estimate', 'free_practice_available'
 )
-$ValidWeights = @('20-25%', '25-30%', 'n/a')
+# forensic_relevance was required by the SC-500 guide this engine came from. It
+# is optional here: AZ-104 is an administrator exam, and the engine renders the
+# field only when a lesson sets it.
+$ValidWeights = @('10-15%', '15-20%', '20-25%', '25-30%', 'n/a')
 $ValidStatus  = @('GA', 'Preview')
 
 $ContentSections = @(
@@ -164,7 +167,7 @@ $ContentSections = @(
 )
 $LabSections = @('## Prerequisites', '## Validation', '## Teardown')
 
-# Mirrors SC500FrontMatter.costLevel in assets/js/frontmatter.js: read the
+# Mirrors AcademyFrontMatter.costLevel in assets/js/frontmatter.js: read the
 # LEADING token, because estimates routinely say "back to Free in teardown"
 # later in the sentence and that must not downgrade a paid lab to $0.
 function Get-CostLevel {
@@ -321,9 +324,6 @@ foreach ($f in $contentFiles) {
                 Add-Issue Error $rel "Missing required section: $sec"
             }
         }
-        if ($fm.Body -notmatch '\*\*AZ-500 divergence\.\*\*') {
-            Add-Issue Warning $rel 'No AZ-500 divergence note in "How this is tested".'
-        }
     }
     if ($isExamModule -and $subs.Count -eq 0) {
         Add-Issue Error $rel 'sub_objectives is empty on an exam module.'
@@ -389,6 +389,82 @@ foreach ($f in $labFiles) {
     }
 }
 
+# ------------------------------------------------ 3b. objectives data ------
+# data/objectives/<exam>-<date>.json holds the same bullets as the snapshot,
+# with stable semantic ids and a planned owner module. The two must agree
+# exactly: same bullets, same order. Ids must be unique and never reused.
+
+$script:ObjectiveRecords = @()
+$objFiles = @(Get-ChildItem -LiteralPath (Join-RepoPath 'data/objectives') -Filter *.json -File -ErrorAction SilentlyContinue)
+if ($objFiles.Count -ne 1) {
+    Add-Issue Error 'data/objectives' "Expected exactly one objectives file, found $($objFiles.Count)."
+}
+else {
+    $objRel = ConvertTo-RelPath $objFiles[0].FullName
+    try {
+        $objDoc = Get-Content -LiteralPath $objFiles[0].FullName -Raw | ConvertFrom-Json
+        $script:ObjectiveRecords = @($objDoc.objectives)
+        $ids = @($script:ObjectiveRecords | ForEach-Object { $_.id })
+        $dupes = $ids | Group-Object | Where-Object Count -gt 1
+        foreach ($d in $dupes) { Add-Issue Error $objRel "Duplicate objective id: $($d.Name)" }
+        foreach ($o in $script:ObjectiveRecords) {
+            if ($o.id -notmatch '^[a-z]+\.[a-z]+\.[a-z0-9-]+$') { Add-Issue Error $objRel "Id is not semantic (domain.group.slug): $($o.id)" }
+            if ($o.module -notmatch '^\d{2}-\d{2}$') { Add-Issue Error $objRel "$($o.id): planned module missing or malformed." }
+        }
+        if ($manifest -and $objDoc.outline_version -and $manifest.outline_version -and $objDoc.outline_version -ne $manifest.outline_version) {
+            Add-Issue Error $objRel "outline_version $($objDoc.outline_version) differs from the manifest's $($manifest.outline_version)."
+        }
+    }
+    catch { Add-Issue Error $objRel "Invalid JSON: $($_.Exception.Message)" }
+}
+
+# Lessons that declare objective_ids must declare them for exactly their bullets.
+$idByText = @{}
+foreach ($o in $script:ObjectiveRecords) { $idByText[(ConvertTo-Norm $o.objective)] = $o.id }
+foreach ($f in $contentFiles) {
+    $fm = Read-FrontMatter (Get-Content -LiteralPath $f.FullName -Raw)
+    if (-not $fm -or -not $fm.Data.Contains('objective_ids')) { continue }
+    $want = @(@($fm.Data.sub_objectives) | ForEach-Object { $idByText[(ConvertTo-Norm $_)] })
+    $have = @($fm.Data.objective_ids)
+    if (($want -join '|') -ne ($have -join '|')) {
+        Add-Issue Error (ConvertTo-RelPath $f.FullName) "objective_ids do not match sub_objectives. Expected: $($want -join ', ')"
+    }
+}
+
+# ------------------------------------------- 3c. engine exam-neutrality ----
+# Domain colours live in assets/css/tokens.css and nowhere else. The favicon is
+# the one exception: a data: URI can't read CSS custom properties.
+$tokensPath = Join-RepoPath 'assets/css/tokens.css'
+if (Test-Path -LiteralPath $tokensPath) {
+    $domainHex = [regex]::Matches((Get-Content -LiteralPath $tokensPath -Raw), '--d-0\d:\s*(#[0-9a-fA-F]{6})') |
+        ForEach-Object { $_.Groups[1].Value.ToLowerInvariant() } | Sort-Object -Unique
+    $engineFiles = @(Get-ChildItem -LiteralPath (Join-RepoPath 'assets') -Recurse -Include *.css, *.js -File |
+        Where-Object { $_.FullName -notmatch '[\\/]vendor[\\/]' -and $_.Name -ne 'tokens.css' })
+    $engineFiles += @(Get-Item -LiteralPath (Join-RepoPath 'index.html') -ErrorAction SilentlyContinue)
+    foreach ($ef in $engineFiles) {
+        # Blank out /* block comments */ but keep their newlines, so a colour
+        # quoted in a comment isn't flagged and line numbers stay accurate.
+        $raw = Get-Content -LiteralPath $ef.FullName -Raw
+        $raw = [regex]::Replace($raw, '(?s)/\*.*?\*/', { param($m) $m.Value -replace '[^\n]', '' })
+        $n = 0
+        foreach ($line in ($raw -split '\n')) {
+            $n++
+            if ($line -match 'rel="icon"' -or $line -match '^\s*//') { continue }
+            foreach ($hex in $domainHex) {
+                if ($line.ToLowerInvariant().Contains($hex)) {
+                    Add-Issue Error (ConvertTo-RelPath $ef.FullName) "line ${n}: domain colour $hex hardcoded; use var(--d-NN)."
+                }
+            }
+        }
+    }
+}
+# Storage keys are built from AcademyExam.slug. A literal key would be shared by
+# every Academy on the same GitHub Pages origin.
+foreach ($jf in @(Get-ChildItem -LiteralPath (Join-RepoPath 'assets/js') -Filter *.js -File -ErrorAction SilentlyContinue)) {
+    $m = [regex]::Matches((Get-Content -LiteralPath $jf.FullName -Raw), "['""][a-z0-9]+:[a-z]+:v\d+['""]")
+    foreach ($x in $m) { Add-Issue Error (ConvertTo-RelPath $jf.FullName) "Literal storage key $($x.Value); build it from AcademyExam.slug." }
+}
+
 # ---------------------------------------------- 4. skills-measured diff ----
 
 $snapshotPath = Join-RepoPath 'docs/SKILLS-MEASURED-SNAPSHOT.md'
@@ -425,10 +501,27 @@ else {
         $mineSet = [System.Collections.Generic.HashSet[string]]::new(
             [string[]]$allSubObjectives, [System.StringComparer]::OrdinalIgnoreCase)
 
+        # A bullet owned (in the objectives data) by a module that isn't in the
+        # manifest yet is PLANNED: reported as a warning, so the build can grow
+        # module by module. A bullet with no owner at all is an error.
+        $plannedOwner = @{}
+        foreach ($o in $script:ObjectiveRecords) { $plannedOwner[(ConvertTo-Norm $o.objective)] = $o.module }
+        $builtModules = @($modules | ForEach-Object { $_.Id })
+        $plannedCount = 0
         foreach ($s in $liveSet) {
             if (-not $mineSet.Contains($s)) {
-                Add-Issue Error 'docs/SKILLS-MEASURED-SNAPSHOT.md' "Outline bullet not covered by any module: $s"
+                $owner = $plannedOwner[$s]
+                if ($owner -and $owner -notin $builtModules) { $plannedCount++ }
+                elseif ($owner) {
+                    Add-Issue Error 'docs/SKILLS-MEASURED-SNAPSHOT.md' "Outline bullet owned by $owner, but $owner does not list it: $s"
+                }
+                else {
+                    Add-Issue Error 'docs/SKILLS-MEASURED-SNAPSHOT.md' "Outline bullet not covered by any module and has no planned owner: $s"
+                }
             }
+        }
+        if ($plannedCount) {
+            Add-Issue Warning 'data/objectives' "$plannedCount outline bullet(s) are planned: owned by modules not written yet."
         }
         foreach ($s in $mineSet) {
             if (-not $liveSet.Contains($s)) {
@@ -574,7 +667,8 @@ $infos    = @($script:Issues | Where-Object Severity -eq 'Info')
 
 Write-Host ''
 Write-Host ('=' * 66)
-Write-Host "  SC-500 guide validation" -ForegroundColor Cyan
+$examCode = ([regex]::Match((Get-Content -LiteralPath (Join-RepoPath 'data/exam.js') -Raw -ErrorAction SilentlyContinue), "code:\s*'([^']+)'")).Groups[1].Value
+Write-Host "  $examCode Academy validation" -ForegroundColor Cyan
 Write-Host "  root: $Root"
 Write-Host ('=' * 66)
 Write-Host ("  content {0,-4} labs {1,-4} quizzes {2,-4} modules {3}" -f `

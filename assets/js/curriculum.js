@@ -1,4 +1,4 @@
-/* curriculum.js - SC-500 guide
+/* curriculum.js - Academy engine
    The objective coverage model, derived at runtime from files that already
    exist. There is no second mapping file to maintain.
 
@@ -104,7 +104,7 @@
      lesson. The section's own markdown is kept so a lesson can render it. */
   function parseDistinctions(md) {
     if (!md) return [];
-    var body = global.SC500FrontMatter ? global.SC500FrontMatter.parse(md).body : md;
+    var body = global.AcademyFrontMatter ? global.AcademyFrontMatter.parse(md).body : md;
     var parts = body.split(/^## /m).slice(1);
     var out = [];
     parts.forEach(function (chunk) {
@@ -130,7 +130,7 @@
   /* ---------------------------------------------------------------- build */
 
   function build(manifest, snapshotMd, lessonTexts, quizzes, a6Md, a6Index, training) {
-    var FM = global.SC500FrontMatter;
+    var FM = global.AcademyFrontMatter;
     var snap = parseSnapshot(snapshotMd || '');
 
     var upd = /^updated_at:\s*(\S+)/m.exec(snapshotMd || '');
@@ -338,7 +338,7 @@
   function load(manifest) {
     if (model) return Promise.resolve(model);
     if (job) return job;
-    if (!manifest && global.SC500App) manifest = global.SC500App.getManifest();
+    if (!manifest && global.AcademyApp) manifest = global.AcademyApp.getManifest();
     if (!manifest) return Promise.reject(new Error('manifest not loaded'));
 
     var ids = [], texts = {}, quizzes = {};
@@ -375,7 +375,7 @@
     return job;
   }
 
-  global.SC500Curriculum = {
+  global.AcademyCurriculum = {
     load: load,
     coverage: coverage,
     norm: norm,

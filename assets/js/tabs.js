@@ -1,4 +1,4 @@
-/* tabs.js - SC-500 guide
+/* tabs.js - Academy engine
    Collapsible depth.
 
    The brief asks for first-principles explanations and exam tips to be visually
@@ -21,7 +21,7 @@
     'check yourself':           { role: 'review',   label: 'Self-check' }
   };
 
-  var MODE_KEY = 'sc500:readmode:v1';
+  var MODE_KEY = (window.AcademyExam.slug + ':readmode:v1');
 
   function textOf(h) { return (h.textContent || '').trim().toLowerCase(); }
 
@@ -100,5 +100,5 @@
     else root.insertBefore(btn, root.firstChild);
   }
 
-  global.SC500Tabs = { mount: mount };
+  global.AcademyTabs = { mount: mount };
 })(window);

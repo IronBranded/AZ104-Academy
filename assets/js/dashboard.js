@@ -1,4 +1,4 @@
-/* dashboard.js - SC-500 guide
+/* dashboard.js - Academy engine
    The home page, as a learning dashboard rather than a table of contents.
 
    It answers, in this order:
@@ -28,8 +28,8 @@
     return n;
   }
   function link(text, href, cls) { var a = node('a', cls || null, text); a.href = href; return a; }
-  function D() { return global.SC500Domains; }
-  function P() { return global.SC500Progress; }
+  function D() { return global.AcademyDomains; }
+  function P() { return global.AcademyProgress; }
 
   /* ------------------------------------------------------------ measures */
 
@@ -143,6 +143,8 @@
   function objectiveTable(model, domainId) {
     var dom = model.domainById[domainId];
     var wrap = node('div', 'table-scroll');
+    wrap.setAttribute('tabindex', '0'); wrap.setAttribute('role', 'region');   // keyboard-scrollable, as in app.js
+    wrap.setAttribute('aria-label', 'Objective status: ' + D().info(domainId).short);
     var t = node('table', 'objtable');
     t.dataset.stack = 'true';
     var thead = node('thead'), hr = node('tr');
@@ -333,18 +335,35 @@
 
   /* ----------------------------------------------------------------- mount */
 
+  /* "Aligned to <exam> skills measured as of <date>": the outline version is
+     exam data (data/exam.js); the badge links to the exam-information page,
+     found in the manifest's appendix list by the path data/exam.js names. */
+  function outlineBadge(manifest) {
+    var E = window.AcademyExam;
+    var text = 'Aligned to ' + E.code + ' skills measured as of ' + E.outline.label;
+    var idx = -1;
+    (manifest.appendix || []).forEach(function (a, i) { if (a.content === E.examInfo) idx = i; });
+    var el = idx >= 0 ? node('a', 'outline-badge', text) : node('span', 'outline-badge', text);
+    if (idx >= 0) {
+      el.href = '#/appendix/' + idx;
+      el.title = 'Which outline this Academy follows, and when localized exams change';
+    }
+    return el;
+  }
+
   function mount(root, manifest) {
     root.textContent = '';
     var head = node('header', 'dash-head');
-    head.appendChild(node('h1', null, 'SC500 Academy'));
+    head.appendChild(node('h1', null, window.AcademyExam.academy));
     head.appendChild(node('p', 'dash-head__sub',
-      'Certification-first study for Exam SC-500: Implementing End-to-End Security Controls for Cloud and AI Workloads. Built from Microsoft Learn documentation, mapped to the official skills outline.'));
+      'Certification-first study for Exam ' + window.AcademyExam.code + ': ' + window.AcademyExam.title + '. Built from Microsoft Learn documentation, mapped to the official skills outline.'));
+    head.appendChild(outlineBadge(manifest));
     root.appendChild(head);
 
     var loading = node('p', 'loading', 'Loading the curriculum\u2026');
     root.appendChild(loading);
 
-    return global.SC500Curriculum.load(manifest).then(function (model) {
+    return global.AcademyCurriculum.load(manifest).then(function (model) {
       loading.remove();
       if (!model.snapshotOk) {
         root.appendChild(node('div', 'empty',
@@ -355,7 +374,7 @@
 
       var ds = node('section', 'domains');
       ds.setAttribute('aria-labelledby', 'domains-title');
-      var h2 = node('h2', null, 'SC-500 domains');
+      var h2 = node('h2', null, window.AcademyExam.code + ' domains');
       h2.id = 'domains-title';
       ds.appendChild(h2);
       ds.appendChild(node('p', 'lede',
@@ -378,7 +397,7 @@
     });
   }
 
-  global.SC500Dashboard = {
+  global.AcademyDashboard = {
     mount: mount,
     objectiveTable: objectiveTable,
     bulletState: bulletState,

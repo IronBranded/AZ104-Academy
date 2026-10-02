@@ -1,6 +1,6 @@
 # Security policy
 
-SC500 Academy is a static study site and a set of lab instructions. It has no server
+AZ104 Academy is a static study site and a set of lab instructions. It has no server
 and no user accounts, and it stores progress only in your browser. The realistic
 security problems are therefore of three kinds, and all three are in scope.
 

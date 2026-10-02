@@ -1,4 +1,4 @@
-/* nav.js - SC-500 guide
+/* nav.js - Academy engine
    Builds the sidebar from content/manifest.json. The manifest is the single
    source of truth for structure; this file never hardcodes a module.
 
@@ -20,7 +20,7 @@
   'use strict';
 
   var el;
-  var OPEN_KEY = 'sc500:nav:v1';
+  var OPEN_KEY = (window.AcademyExam.slug + ':nav:v1');
 
   function node(tag, cls, text) {
     var n = document.createElement(tag);
@@ -28,7 +28,7 @@
     if (text != null) n.textContent = text;
     return n;
   }
-  function D() { return global.SC500Domains; }
+  function D() { return global.AcademyDomains; }
 
   function openState(id, dflt) {
     try {
@@ -171,8 +171,8 @@
   }
 
   function markProgress() {
-    if (!el || !global.SC500Progress || !global.SC500Progress.isComplete) return;
-    var P = global.SC500Progress;
+    if (!el || !global.AcademyProgress || !global.AcademyProgress.isComplete) return;
+    var P = global.AcademyProgress;
 
     var links = el.querySelectorAll('[data-module-id]');
     var tally = {};
@@ -257,7 +257,7 @@
     });
   }
 
-  global.SC500Nav = {
+  global.AcademyNav = {
     mount: mount,
     setCurrent: setCurrent,
     refreshProgress: markProgress

@@ -1,3 +1,9 @@
+> **Provenance.** This record was written for SC500 Academy, whose engine this
+> repository inherited on 2026-09-29. It still describes how the engine is structured.
+> Where it names SC-500 content, modules or storage keys, read the AZ-104 equivalents:
+> exam identity now comes from `data/exam.js`, storage keys from its `az104` slug, and
+> objectives from `data/objectives/`. See CHANGELOG.md for what changed.
+
 # Certification-first UX redesign
 
 Status record for the redesign brief ("SC500 Academy Certification-First UX

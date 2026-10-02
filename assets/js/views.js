@@ -1,4 +1,4 @@
-/* views.js - SC-500 guide
+/* views.js - Academy engine
    Two derived views that answer questions the module pages cannot.
 
      #/cost       What can I afford to run this month?
@@ -10,7 +10,7 @@
 (function (global) {
   'use strict';
 
-  var FM = global.SC500FrontMatter;
+  var FM = global.AcademyFrontMatter;
   var cache = null;
 
   function node(tag, cls, text) {
@@ -45,14 +45,7 @@
   /* Hourly meters are named in the labs and in appendix A2. Flagging them here
      matters more than the level chip: a Low lab you forget costs nothing, and a
      HIGH one costs by the hour whether or not you are looking at it. */
-  var METERED = {
-    '02-04': 'Azure Firewall',
-    '03-03': 'API Management',
-    '03-04': 'Bastion + Defender for Servers',
-    '03-05': 'AKS node pool',
-    '03-06': 'Application Gateway WAF',
-    '04-05': 'Security Copilot SCUs'
-  };
+  var METERED = window.AcademyExam.metered || {};
 
   /* ------------------------------------------------------------ cost view */
 
@@ -79,8 +72,8 @@
         max:  ['Highest', 'Run once, deprovision in the same session.'],
         high: ['High', 'Hourly meters. Build the free parts first, start a timer when the meter lands.'],
         mid:  ['Medium', 'Real but contained. Same-day teardown.'],
-        low:  ['Low', 'Pennies, but Defender plans here bill at subscription scope.'],
-        none: ['No Azure cost', 'Microsoft 365 E5 only, or no billable resource.']
+        low:  ['Low', 'Pennies. Contained, but still torn down the same day.'],
+        none: ['No Azure cost', 'No billable Azure resource.']
       };
 
       ['max', 'high', 'mid', 'low', 'none'].forEach(function (lvl) {
@@ -135,7 +128,7 @@
     var wrap = node('div', 'ready');
     root.appendChild(wrap);
 
-    var P = global.SC500Progress;
+    var P = global.AcademyProgress;
     if (!P) { wrap.appendChild(node('div', 'empty', 'Progress tracking is unavailable.')); return; }
 
     load(manifest).then(function (rows) {
@@ -239,7 +232,7 @@
 
   /* Merge rather than assign, so load order between the view files never
      matters (practice.js, watchlist.js and review.js register here too). */
-  global.SC500Views = global.SC500Views || {};
-  global.SC500Views.cost = costView;
-  global.SC500Views.readiness = readinessView;
+  global.AcademyViews = global.AcademyViews || {};
+  global.AcademyViews.cost = costView;
+  global.AcademyViews.readiness = readinessView;
 })(window);

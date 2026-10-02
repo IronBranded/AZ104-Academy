@@ -1,4 +1,4 @@
-/* app.js - SC-500 guide
+/* app.js - Academy engine
    Router and page builder. Fetches Markdown at runtime, renders it, and builds
    the field card from the file's own front matter.
 
@@ -8,7 +8,7 @@
 (function (global) {
   'use strict';
 
-  var FM = global.SC500FrontMatter;
+  var FM = global.AcademyFrontMatter;
   var manifest = null;
   var index = {};                 // moduleId -> { module, domain }
   var contentEl, metaEl;
@@ -74,7 +74,7 @@
     }
   }
 
-  var REPO = 'https://github.com/IronBranded/SC500-Academy/blob/main/';
+  var REPO = window.AcademyExam.repo + '/blob/main/';
 
   function rewriteLinks(root, basePath) {
     var byPath = {};
@@ -151,14 +151,14 @@
      directly under the title. */
   /* Certification-first redesign: the note moved from directly under the
      title to a collapsed panel at the end. It is useful context and it is not
-     measured by SC-500, so it no longer sits between the learner and the
+     measured by the exam, so it no longer sits between the learner and the
      objective. Lessons get the same panel from lesson.js. */
   function tacticalCallout(root, data) {
     if (!data || !data.forensic_relevance) return;
     var d = document.createElement('details');
     d.className = 'beyond';
-    d.appendChild(node('summary', null, 'Beyond the exam: how this shows up in an investigation'));
-    d.appendChild(node('p', 'field__note', 'Not measured by SC-500. Kept for context.'));
+    d.appendChild(node('summary', null, 'Beyond the exam'));
+    d.appendChild(node('p', 'field__note', 'Not measured by ' + window.AcademyExam.code + '. Kept for context.'));
     d.appendChild(node('p', null, String(data.forensic_relevance)));
     root.appendChild(d);
   }
@@ -184,7 +184,7 @@
      dashboard's vocabulary. Colour is never the only label: nodes keep text. */
   function domainClassDefs() {
     var cs = getComputedStyle(document.documentElement);
-    return ['00', '01', '02', '03', '04'].map(function (id) {
+    return Object.keys(window.AcademyExam.domains).map(function (id) {
       var c = cs.getPropertyValue('--d-' + id).trim() || '#888';
       var t = cs.getPropertyValue('--d-' + id + '-tint').trim() || 'transparent';
       return 'classDef d' + id + ' stroke:' + c + ',stroke-width:2px,fill:' + t + ';';
@@ -503,8 +503,8 @@
       }
       buildField(parsed.data, route);
 
-      var L = global.SC500Lesson;
-      var S = global.SC500Sections;
+      var L = global.AcademyLesson;
+      var S = global.AcademySections;
       var asLesson = route.kind === 'module' && L && L.mountModule(contentEl, route, parsed.data);
 
       /* Optional layers. Each is absent until its own file is written, and the
@@ -515,29 +515,29 @@
         if (S && S.tagCallouts) S.tagCallouts(contentEl);
         if (S && S.tagTables) S.tagTables(contentEl);
       } else {
-        if (global.SC500Tabs && global.SC500Tabs.mount) global.SC500Tabs.mount(contentEl);
+        if (global.AcademyTabs && global.AcademyTabs.mount) global.AcademyTabs.mount(contentEl);
         if (S && S.mount) S.mount(contentEl);
       }
-      if (global.SC500Highlight && global.SC500Highlight.mount) global.SC500Highlight.mount(contentEl);
-      if (global.SC500Progress && global.SC500Progress.mountPage) global.SC500Progress.mountPage(contentEl, route);
+      if (global.AcademyHighlight && global.AcademyHighlight.mount) global.AcademyHighlight.mount(contentEl);
+      if (global.AcademyProgress && global.AcademyProgress.mountPage) global.AcademyProgress.mountPage(contentEl, route);
       renderDiagrams(contentEl);
       if (!asLesson) tacticalCallout(contentEl, parsed.data);
       if (route.kind === 'lab' && L && L.mountLab) {
         fmReady.then(function (fm) { if (parseRoute().moduleId === route.moduleId) L.mountLab(contentEl, route, fm); });
       }
-      if (global.SC500Outline && global.SC500Outline.mount) global.SC500Outline.mount(contentEl, metaEl);
-      if (global.SC500Quiz && global.SC500Quiz.mount) global.SC500Quiz.mount(contentEl, route);
+      if (global.AcademyOutline && global.AcademyOutline.mount) global.AcademyOutline.mount(contentEl, metaEl);
+      if (global.AcademyQuiz && global.AcademyQuiz.mount) global.AcademyQuiz.mount(contentEl, route);
       if (asLesson && L.enrich) L.enrich();
-      if (global.SC500Progress && global.SC500Progress.recordVisit) global.SC500Progress.recordVisit(route);
+      if (global.AcademyProgress && global.AcademyProgress.recordVisit) global.AcademyProgress.recordVisit(route);
 
-      if (global.SC500Nav) {
-        global.SC500Nav.setCurrent(route.kind, route.moduleId != null ? route.moduleId : route.idx);
-        global.SC500Nav.refreshProgress();
+      if (global.AcademyNav) {
+        global.AcademyNav.setCurrent(route.kind, route.moduleId != null ? route.moduleId : route.idx);
+        global.AcademyNav.refreshProgress();
       }
 
       document.title = (contentEl.querySelector('h1') || {}).textContent
-        ? contentEl.querySelector('h1').textContent + ' · SC500 Academy'
-        : 'SC500 Academy';
+        ? contentEl.querySelector('h1').textContent + ' \u00b7 ' + window.AcademyExam.academy
+        : window.AcademyExam.academy;
 
       contentEl.focus({ preventScroll: true });
       window.scrollTo(0, 0);
@@ -564,14 +564,14 @@
     contentEl.textContent = '';
     metaEl.textContent = '';
 
-    var h1 = node('h1', null, 'SC500 Academy');
+    var h1 = node('h1', null, window.AcademyExam.academy);
     contentEl.appendChild(h1);
     contentEl.appendChild(node('p', null,
-      'Twenty-two modules and labs for Exam SC-500, built from Microsoft Learn documentation. ' +
-      'Start with Module 0 - budget guardrails and just-in-time access - before creating any billable resource.'));
+      'Modules and labs for Exam ' + window.AcademyExam.code + ', built from Microsoft Learn documentation. ' +
+      'Start with Module 0 - budget guardrails and teardown discipline - before creating any billable resource.'));
 
-    if (global.SC500Progress && global.SC500Progress.mountDashboard) {
-      global.SC500Progress.mountDashboard(contentEl, manifest);
+    if (global.AcademyProgress && global.AcademyProgress.mountDashboard) {
+      global.AcademyProgress.mountDashboard(contentEl, manifest);
     } else {
       var box = node('div', 'empty');
       box.appendChild(node('strong', null, 'Progress tracking is not wired up yet.'));
@@ -580,21 +580,21 @@
       contentEl.appendChild(box);
     }
 
-    if (global.SC500Nav) global.SC500Nav.setCurrent('dashboard');
-    document.title = 'SC500 Academy';
+    if (global.AcademyNav) global.AcademyNav.setCurrent('dashboard');
+    document.title = window.AcademyExam.academy;
   }
 
   function showView(r) {
     var kind = r.view;
     contentEl.textContent = '';
     metaEl.textContent = '';
-    if (!global.SC500Views || !global.SC500Views[kind]) {
+    if (!global.AcademyViews || !global.AcademyViews[kind]) {
       return fail('That view is unavailable.',
         'The script that provides ' + VIEWS[kind] + ' did not load. Check the script tags in index.html.');
     }
-    document.title = VIEWS[kind] + ' · SC500 Academy';
-    global.SC500Views[kind](contentEl, manifest, r.arg1, r.arg2);
-    if (global.SC500Nav) global.SC500Nav.setCurrent(kind, r.arg1);
+    document.title = VIEWS[kind] + ' \u00b7 ' + window.AcademyExam.academy;
+    global.AcademyViews[kind](contentEl, manifest, r.arg1, r.arg2);
+    if (global.AcademyNav) global.AcademyNav.setCurrent(kind, r.arg1);
     contentEl.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
@@ -616,9 +616,9 @@
     get('content/manifest.json').then(function (r) { return r.json(); }).then(function (json) {
       manifest = json;
       buildIndex();
-      if (global.SC500Nav) global.SC500Nav.mount(manifest);
-      if (global.SC500Search && global.SC500Search.mount) global.SC500Search.mount(manifest);
-      if (global.SC500Palette && global.SC500Palette.mount) global.SC500Palette.mount(manifest);
+      if (global.AcademyNav) global.AcademyNav.mount(manifest);
+      if (global.AcademySearch && global.AcademySearch.mount) global.AcademySearch.mount(manifest);
+      if (global.AcademyPalette && global.AcademyPalette.mount) global.AcademyPalette.mount(manifest);
       window.addEventListener('hashchange', function () {
         /* In-page anchors (#part-3, #stage-check) are not routes. */
         if (location.hash === '' || location.hash.indexOf('#/') === 0) route();
@@ -644,5 +644,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  global.SC500App = { reroute: route, getManifest: function () { return manifest; }, enhance: enhance };
+  global.AcademyApp = { reroute: route, getManifest: function () { return manifest; }, enhance: enhance };
 })(window);

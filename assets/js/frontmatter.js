@@ -1,4 +1,4 @@
-/* frontmatter.js - SC-500 guide
+/* frontmatter.js - Academy engine
    A deliberately small YAML front matter parser.
 
    It does NOT implement YAML. It implements exactly the subset that
@@ -129,7 +129,7 @@
     return ({ none: '$0', low: 'Low', mid: 'Medium', high: 'HIGH', max: 'HIGHEST' })[costLevel(estimate)];
   }
 
-  global.SC500FrontMatter = {
+  global.AcademyFrontMatter = {
     parse: parse,
     costLevel: costLevel,
     costLabel: costLabel

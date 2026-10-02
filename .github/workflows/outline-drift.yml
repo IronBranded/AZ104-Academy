@@ -3,7 +3,7 @@ name: Outline drift
 # The one check this whole project is organised around, and the only one that
 # currently depends on someone remembering to run it.
 #
-# Three polls, one weekly job, one issue:
+# Two polls, one weekly job, one issue:
 #
 #   1. The skills-measured outline, diffed against docs/SKILLS-MEASURED-SNAPSHOT.md.
 #      Only the "## Skills measured" section is compared - the snapshot's front
@@ -13,11 +13,7 @@ name: Outline drift
 #      alerts that are not skills changes, and an alert you learn to ignore is
 #      worse than no alert.
 #
-#   2. The certification page's practice-assessment sentence, because appendix A4
-#      states it is unavailable and that is a dated claim with an expiry nobody
-#      controls.
-#
-#   3. The official training the guide links to: every learning path (title and
+#   2. The official training the guide links to: every learning path (title and
 #      exact module list) and every lab in content/official-training.json,
 #      checked against Microsoft's public Learn source (MicrosoftDocs/learn) and
 #      the lab repository. Added after the
@@ -45,9 +41,11 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $guideUrl = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500?accept=text/markdown'
-          $certUrl  = 'https://learn.microsoft.com/en-us/credentials/certifications/cloud-and-ai-security-engineer-associate/'
-          $headers  = @{ 'User-Agent' = 'sc500-academy-outline-drift-check' }
+          # The study guide URL is exam data, read from data/exam.js.
+          $examJs   = Get-Content -LiteralPath './data/exam.js' -Raw
+          $guideUrl = ([regex]::Match($examJs, "studyGuide:\s*'([^']+)'")).Groups[1].Value + '?accept=text/markdown'
+          if (-not $guideUrl.StartsWith('https://')) { throw 'studyGuide not found in data/exam.js' }
+          $headers  = @{ 'User-Agent' = 'academy-outline-drift-check' }
 
           function Get-SkillsSection {
               param([string] $Text)
@@ -61,11 +59,19 @@ jobs:
               }
               if (-not $end -or $end -le $start) { $end = $lines.Count + 1 }
 
-              # Trim and drop blank lines so reflowed whitespace is not reported
-              # as a change. Bullet text is what matters.
-              return @($lines[($start - 1)..($end - 2)] |
-                       ForEach-Object { $_.TrimEnd() } |
-                       Where-Object { $_ -ne '' })
+              # Trim, drop blank lines, and rejoin wrapped lines onto the line
+              # they continue, so reflowed text is not reported as a change.
+              # Bullet text is what matters, not where it breaks.
+              $out = [System.Collections.Generic.List[string]]::new()
+              foreach ($l in $lines[($start - 1)..($end - 2)]) {
+                  $t = $l.Trim()
+                  if ($t -eq '') { continue }
+                  $isStart = $t -match '^(#|-\s|\*\s|\||\d+\.\s)'
+                  if (-not $isStart -and $out.Count -gt 0 -and $out[$out.Count - 1] -notmatch '^#') {
+                      $out[$out.Count - 1] = $out[$out.Count - 1] + ' ' + $t
+                  } else { $out.Add($t) }
+              }
+              return @($out)
           }
 
           $live     = (Invoke-WebRequest -Uri $guideUrl -UseBasicParsing -Headers $headers).Content
@@ -95,7 +101,7 @@ jobs:
               $report.Add('')
               $report.Add('1. The affected module''s `sub_objectives` in its front matter, **and** its `## Sub-objectives covered` list.')
               $report.Add('2. `content/manifest.json`, if a module''s scope changed.')
-              $report.Add('3. `docs/SYLLABUS.md`.')
+              $report.Add('3. `data/objectives/*.json`: a new bullet gets a new semantic id and a planned module; an id is never reused.')
               $report.Add('4. `docs/SKILLS-MEASURED-SNAPSHOT.md` itself.')
               $report.Add('5. A quiz question for any genuinely new bullet - the coverage check will flag it otherwise.')
               $report.Add('')
@@ -106,27 +112,7 @@ jobs:
               Write-Host 'Skills-measured section: no change.'
           }
 
-          # --- second poll: the practice assessment ---------------------------
-
-          $cert   = (Invoke-WebRequest -Uri $certUrl -UseBasicParsing -Headers $headers).Content
-          $absent = $cert -match 'Practice Assessment for this exam is not currently available'
-
-          if (-not $absent) {
-              $changed = $true
-              $report.Add('## The practice-assessment sentence has gone from the certification page')
-              $report.Add('')
-              $report.Add('Appendix A4 states the practice assessment is not currently available. That sentence is no longer on the page, so either it has been published or the wording changed.')
-              $report.Add('')
-              $report.Add("Check <$certUrl> and update `content/appendix/a4-exam-logistics-and-scoring.md`.")
-              $report.Add('')
-              $report.Add('While you are there: Course SC-500T00-A was published on Microsoft Learn (page updated 2026-07-30). If the page now lists anything else under **Prepare for the exam**, record it in A4 and in `content/official-training.json`.')
-              $report.Add('')
-          }
-          else {
-              Write-Host 'Practice assessment: still listed as unavailable.'
-          }
-
-          # --- third poll: the official training this guide links to -------
+          # --- second poll: the official training this guide links to -------
           # Every learning path in content/official-training.json is checked
           # against Microsoft's public Learn source, which is plain YAML and
           # does not depend on scraping a rendered page.
@@ -212,7 +198,7 @@ jobs:
             } else {
               const created = await github.rest.issues.create({
                 owner, repo,
-                title: 'SC-500 certification surface has changed',
+                title: 'the exam certification surface has changed',
                 body,
                 labels: ['outline-drift']
               });
