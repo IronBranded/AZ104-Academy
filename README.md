@@ -1,183 +1,128 @@
-# SC500 Academy
+<h1 align="center">AZ-104 Academy</h1>
+
+<p align="center">
+  A certification-first, interactive study site for
+  <b>Microsoft Exam AZ-104: Microsoft Azure Administrator</b>.
+</p>
 
 <h3 align="center">
-  <a href="https://ironbranded.github.io/SC500-Academy/" target="_blank" rel="noopener noreferrer">
+  <a href="https://ironbranded.github.io/AZ104-Academy/" target="_blank" rel="noopener noreferrer">
     🟢 TRY THE ACADEMY🟢
   </a>
 </h3>
 
-____
-A dependency-free, static interactive study guide for **Exam SC-500: Implementing
-End-to-End Security Controls for Cloud and AI Workloads** (Microsoft Certified:
-Cloud and AI Security Engineer Associate).
+---
 
-Every concept is sourced from official Microsoft Learn documentation. Non-Microsoft
-material appears only as clearly labelled optional supplemental reading.
+## Objective
 
-**It is not a replacement for the documentation.** It is a map of it, plus the
-decisions the documentation does not make for you: which control answers which
-requirement, what each lab costs, what to tear down, and what the exam actually
-asks. Section *Using this with Microsoft Learn* below explains how the two fit
-together, and it matters more than it sounds - Microsoft Learn is available to you
-during most role-based exams, so knowing which page to open is itself a graded
-skill.
+The Academy has one job: help you pass AZ-104. Everything in it exists to help you:
 
-## Scope
+1. **Understand** each AZ-104 objective.
+2. **Remember** the concepts behind it.
+3. **Distinguish** similar services, settings and controls.
+4. **Choose** the right configuration in an exam-style scenario.
+5. **Perform** the configuration in a hands-on lab.
+6. **Read, modify and deploy** ARM templates and Bicep files.
+7. **Find** your weak areas.
+8. **Review** efficiently before the exam.
 
-| Domain | Weight |
+AZ-104 is an administrator exam: it measures whether you can implement, manage and monitor an Azure
+environment. The official skills measured list defines the scope. Architecture design, security
+engineering, and services outside the outline, such as VPN Gateway, ExpressRoute, Azure Firewall, AKS
+and Terraform, are not taught.
+
+## Alignment
+
+- Aligned to the **AZ-104 skills measured as of April 17, 2026**: all **82** official bullets, across
+  5 domains and 15 functional groups.
+- Every lesson is built from Microsoft Learn documentation and lists its sources.
+- Lessons teach generally available behavior; anything in preview is labeled as preview.
+- Microsoft updates the English exam first and localized versions about eight weeks later. The
+  Academy's exam-info page explains which outline applies to you.
+
+## Content
+
+Each exam module covers one official functional group. Every module has a lesson, a hands-on lab, a
+knowledge check, comparisons and flashcards: **212 questions** and **216 flashcards** in total.
+
+### Module 0 · Lab safety
+
+A prerequisite, not an exam objective. Do it before any lab.
+
+| Module | Lesson | Lab |
+| --- | --- | --- |
+| 00-00 | [Lab topology and conventions](https://ironbranded.github.io/AZ104-Academy/#/module/00-00) | — |
+| 00-01 | [Cost guardrails and budget alerts](https://ironbranded.github.io/AZ104-Academy/#/module/00-01) | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/00-01) |
+| 00-02 | [Reusable teardown checklist](https://ironbranded.github.io/AZ104-Academy/#/module/00-02) | — |
+
+### Domain 1 · Manage Azure identities and governance (20–25%)
+
+| Module | Official functional group | You'll be able to | Bullets | Lab |
+| --- | --- | --- | --- | --- |
+| [01-01](https://ironbranded.github.io/AZ104-Academy/#/module/01-01) | Manage Microsoft Entra users and groups | Create users and groups, manage their properties and licenses, manage external users, configure self-service password reset | 5 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/01-01) |
+| [01-02](https://ironbranded.github.io/AZ104-Academy/#/module/01-02) | Manage access to Azure resources | Manage built-in Azure roles, assign roles at different scopes, interpret access assignments | 3 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/01-02) |
+| [01-03](https://ironbranded.github.io/AZ104-Academy/#/module/01-03) | Manage Azure subscriptions and governance | Use Azure Policy, resource locks, tags, resource groups, subscriptions and management groups; manage costs with alerts, budgets and Azure Advisor | 7 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/01-03) |
+
+### Domain 2 · Implement and manage storage (15–20%)
+
+| Module | Official functional group | You'll be able to | Bullets | Lab |
+| --- | --- | --- | --- | --- |
+| [02-01](https://ironbranded.github.io/AZ104-Academy/#/module/02-01) | Configure access to storage | Configure storage firewalls and virtual networks, SAS tokens, stored access policies, access keys, and identity-based access for Azure Files | 5 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/02-01) |
+| [02-02](https://ironbranded.github.io/AZ104-Academy/#/module/02-02) | Configure and manage storage accounts | Create and configure storage accounts, redundancy, object replication and encryption; manage data with Storage Explorer and AzCopy | 5 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/02-02) |
+| [02-03](https://ironbranded.github.io/AZ104-Academy/#/module/02-03) | Configure Azure Files and Azure Blob Storage | Configure file shares, containers, access tiers, soft delete, Azure Files snapshots, blob lifecycle management and versioning | 7 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/02-03) |
+
+### Domain 3 · Deploy and manage Azure compute resources (20–25%)
+
+| Module | Official functional group | You'll be able to | Bullets | Lab |
+| --- | --- | --- | --- | --- |
+| [03-01](https://ironbranded.github.io/AZ104-Academy/#/module/03-01) | Automate deployment by using ARM templates or Bicep files | Interpret, modify and deploy ARM templates and Bicep files; export a deployment and convert ARM to Bicep | 5 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/03-01) |
+| [03-02](https://ironbranded.github.io/AZ104-Academy/#/module/03-02) | Create and configure virtual machines | Create VMs, configure encryption at host, move VMs, manage sizes and disks, use availability zones and sets, deploy scale sets | 7 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/03-02) |
+| [03-03](https://ironbranded.github.io/AZ104-Academy/#/module/03-03) | Provision and manage containers in the Azure portal | Manage Azure Container Registry, provision Container Instances and Container Apps, manage their sizing and scaling | 4 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/03-03) |
+| [03-04](https://ironbranded.github.io/AZ104-Academy/#/module/03-04) | Create and configure Azure App Service | Provision and scale App Service plans, create apps, configure TLS and certificates, custom DNS names, backup, networking and deployment slots | 8 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/03-04) |
+
+### Domain 4 · Implement and manage virtual networking (15–20%)
+
+| Module | Official functional group | You'll be able to | Bullets | Lab |
+| --- | --- | --- | --- | --- |
+| [04-01](https://ironbranded.github.io/AZ104-Academy/#/module/04-01) | Configure and manage virtual networks in Azure | Configure virtual networks, subnets, peering, public IP addresses and user-defined routes; troubleshoot connectivity | 5 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/04-01) |
+| [04-02](https://ironbranded.github.io/AZ104-Academy/#/module/04-02) | Configure secure access to virtual networks | Configure NSGs and application security groups, evaluate effective security rules, implement Azure Bastion, service endpoints and private endpoints | 5 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/04-02) |
+| [04-03](https://ironbranded.github.io/AZ104-Academy/#/module/04-03) | Configure name resolution and load balancing | Configure Azure DNS and internal or public load balancers; troubleshoot load balancing | 3 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/04-03) |
+
+### Domain 5 · Monitor and maintain Azure resources (10–15%)
+
+| Module | Official functional group | You'll be able to | Bullets | Lab |
+| --- | --- | --- | --- | --- |
+| [05-01](https://ironbranded.github.io/AZ104-Academy/#/module/05-01) | Monitor resources in Azure | Interpret metrics, configure and query logs, set up alert rules, action groups and alert processing rules, use Insights, Network Watcher and Connection monitor | 6 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/05-01) |
+| [05-02](https://ironbranded.github.io/AZ104-Academy/#/module/05-02) | Implement backup and recovery | Create Recovery Services and Backup vaults, configure backup policies, back up and restore, configure Site Recovery and fail over, use backup reports and alerts | 7 | [Lab](https://ironbranded.github.io/AZ104-Academy/#/lab/05-02) |
+
+## Inside every module
+
+- **Lesson.** Follows one sequence: Orient → Learn → Visualize → Distinguish → Practice → Check →
+  Review. Diagrams appear where a relationship is easier to see than to read, such as scope
+  inheritance, NSG evaluation order, load balancer anatomy and the Site Recovery lifecycle. Each
+  lesson ends with an Exam Lens: what the exam is likely to test, and the traps.
+- **Lab.** States its cost tier up front (free, low, medium or high) and ends with a mandatory
+  teardown. Parts that a lab subscription can't reasonably support, such as identity-based access
+  for Azure Files or customer-managed keys, are labeled as walkthroughs. The ARM and Bicep lab ships
+  with working templates and worked solutions.
+- **Knowledge check.** Questions mapped to the module's objectives, with every answer explained.
+- **Comparisons.** Side-by-side "which option?" tables for the services and settings the exam asks
+  you to tell apart.
+- **Flashcards.** The distinctions worth memorizing.
+
+## Study tools
+
+| Tool | What it's for |
 | --- | --- |
-| Manage identity, access, and governance | 20-25% |
-| Secure storage, databases, and networking | 25-30% |
-| Secure compute | 20-25% |
-| Manage and monitor security posture | 20-25% |
+| [Dashboard](https://ironbranded.github.io/AZ104-Academy/#/) | What to study next, and for each domain how many objectives you have studied, practiced and knowledge-checked. No readiness score and no pass prediction. |
+| [Readiness](https://ironbranded.github.io/AZ104-Academy/#/readiness) | Your next steps, computed from your quiz history. |
+| [Domain reviews](https://ironbranded.github.io/AZ104-Academy/#/domain/01) | An end-of-domain summary, the key distinctions, a mixed question set, and what needs another look. |
+| [Exam prep](https://ironbranded.github.io/AZ104-Academy/#/prep) | Questions by domain or objective, the ones you got wrong, the ones you haven't tried, and lessons marked *Review later*. |
+| [Mock exam](https://ironbranded.github.io/AZ104-Academy/#/exam) | A timed, weighted exam sampled across every module. |
+| [Flashcards](https://ironbranded.github.io/AZ104-Academy/#/cards) | Spaced repetition over the distinctions the exam tests. |
+| [Retention review](https://ironbranded.github.io/AZ104-Academy/#/review) | What has faded and what to re-test, module by module. |
+| [Objective coverage](https://ironbranded.github.io/AZ104-Academy/#/coverage) | Every official bullet, with the lesson, lab and questions that cover it. |
+| [Cost planner](https://ironbranded.github.io/AZ104-Academy/#/cost) | Every lab ordered by cost, so you know what you can afford to run. |
+| [Verification watchlist](https://ironbranded.github.io/AZ104-Academy/#/preview) | Lessons that cover preview features or are due for a fresh check against the documentation. |
 
-Skills-measured outline captured 2026-09-15 from <https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500>.
-The verbatim snapshot lives in `docs/SKILLS-MEASURED-SNAPSHOT.md` so outline drift is
-diffable, and a scheduled workflow diffs it weekly.
-
-**All 87 sub-objectives are mapped to exactly one module each**, and the validator
-fails the build if that stops being true.
-
----
-
-## What is in here
-
-| | |
-| --- | --- |
-| `content/` | 22 module files - four in **Module 0** (lab safety) and 18 mapped to the exam objectives. Theory only: why a control exists, how it works, how it is tested |
-| `labs/` | One lab per exam module. Numbered steps, portal **and** PowerShell, validation, and a mandatory teardown |
-| `content/appendix/` | Eleven appendices, including three case studies - see below |
-| `quizzes/` | One knowledge check per module. Reasoning questions, not recall; each is tagged with the sub-objective it tests |
-| `flashcards/` | A deck of the distinctions the exam turns on |
-| `tools/`, `docs/` | The validator, and the conventions it enforces |
-
-**The split between `content/` and `labs/` is deliberate.** Theory files contain no
-numbered configuration steps; labs contain no conceptual explanation. Someone doing a
-review pass reads `content/`. Someone at a terminal reads `labs/`.
-
-### The appendices, and when each becomes useful
-
-| | |
-| --- | --- |
-| **A1** PowerShell and Graph reference | When a lab stalls on a module or a cmdlet |
-| **A2** Licensing and lab cost matrix | Before you enable anything metered |
-| **A3** Glossary | As a review pass - it is organised by the distinctions the exam tests, so covering the right-hand column makes it a self-test |
-| **A4** Exam logistics and scoring | Once, early, and again the week before |
-| **A5** AZ-500 to SC-500 delta | Early, if you have AZ-500 background. It lists features that are gone, not merely renamed |
-| **A6** Choosing between overlapping controls | **After Domain 2, and again in the final week.** Fifteen sections of "which of these does the stem actually want", each ending in the attractive wrong answer |
-| **A7** Related topics with no bullet | Late, at recognition depth only. Services Microsoft links from the study guide without assessing them directly |
-| **A8** Timed portal drills | A week *after* the labs, portal-only, documentation closed |
-| **A9, A10, A11** Case studies | Near the end. Scenario read once, then questions that cut across modules |
-
-A6 and the case studies exist for one reason: a module can only ever test the controls
-inside it, and the exam tests choosing between controls taught in different modules.
-
----
-
-## Using this with Microsoft Learn
-
-**There is no official learning path for SC-500.** As of 2026-09-20 the certification
-page's *Prepare for the exam* section is empty and the practice assessment is not yet
-available. The official study surface is the study guide plus the product
-documentation - which is exactly what this repository is built from and points back at.
-
-**Every module ends in a Sources block naming the specific pages it draws from.** Those
-are not decoration and they are not padding; a padded Sources block launders unverified
-claims, so only pages that were actually read are listed. Work them:
-
-1. Read the module's *Why this exists* and *How it works under the hood*.
-2. **Open the two to four pages in its Sources block and read them.** The module tells
-   you what matters in them and why; the page tells you the detail.
-3. Do the lab.
-4. Come back to *How this is tested* and the knowledge check.
-
-**Why step 2 pays off twice.** Microsoft permits access to Microsoft Learn during most
-role-based exams. Looking up one fact you know exists is a thirty-second operation if
-you know which page you are heading for, and a five-minute loss if you are browsing.
-The pages worth knowing your way around by the end are listed in **A4 §5**.
-
-**Where the guide deliberately disagrees with older material.** Every module ends its
-*How this is tested* section with an **AZ-500 divergence** note, and **A5** aggregates
-them. A large body of AZ-500 material is still in circulation, some of it describing
-operations the platform now refuses. Where this guide and a third-party walkthrough
-disagree, check the Microsoft Learn page and trust that.
-
-**Re-verify before you sit.** Front matter carries `last_verified` for every file, the
-site's **Verification watchlist** shows what is preview and what is past its window,
-and a weekly workflow diffs the live outline against the snapshot. This exam is recent
-enough that the outline still moves.
-
----
-
-## Using this with the labs
-
-### Module 0 first, entirely
-
-`content/00-lab-safety/` sets a budget and spending alerts, moves you to **PIM-based
-just-in-time role activation instead of standing Global Administrator**, and
-establishes the teardown checklist every later lab follows. It is not exam content. It
-is what makes the rest survivable.
-
-Several objectives bill hourly whether or not you use them - Security Copilot, Azure
-Firewall, Bastion, Defender for Servers, AKS, API Management, Application Gateway.
-**Every lab states its cost before you create anything**, and the site renders that as
-a coloured chip so you can see it from the module list.
-
-### How a lab is built
-
-- **Method A - Portal** and **Method B - PowerShell** for anything that supports both.
-  Do the portal first, because that is what the exam shows you; do the PowerShell
-  second, because that is what you will actually reuse.
-- **Validation** - commands that prove the control works, rather than a screenshot that
-  proves a blade was open.
-- **Teardown** - six buckets: resources, subscription scope, directory scope,
-  soft-deleted remains, access, and a verification step. It names what a teardown script
-  cannot see, which is where the surprise charges live.
-
-`rg-sc500-core` is deliberately never torn down - it holds the budget, the action group
-and the shared workspace.
-
-### Where labs cannot be built
-
-Three objectives cannot be fully built on a Microsoft 365 E5 tenant: Conditional Access
-for agent identities, network controls for agents, and Microsoft Entra Private Access.
-**None of them is skipped or glossed.** Those labs split into *build-if-licensed* and
-*design-if-not*, where the design output is the same written reasoning the exam asks for
-anyway. The licensing gate is stated plainly at the top of each.
-
-### Then drill
-
-**A8** converts the cheapest parts of the labs into short, clock-bound, portal-only
-tasks with the documentation closed. Run them at least a week after the lab, so you are
-testing recall rather than short-term memory. SC-500 is scheduled at 120 minutes, which
-on Microsoft's own duration table is the row for exams that may contain interactive
-components - A4 §2 works through that reasoning.
-
----
-
-## A study sequence that works
-
-| Pass | What you do |
-| --- | --- |
-| **0** | Module 0, all of it. A2 and A4 once. A5 early if you know AZ-500 |
-| **1** | Domains in order, 1 → 4, lowest-cost labs first within each. Module, then its Sources pages, then its lab, then its knowledge check |
-| **2** | Review: *How this is tested* and the quizzes only, plus **A6** and **A3**. The site's review toggle collapses the explanation and leaves the exam tips |
-| **3** | Case studies A9-A11, the **mock exam** at `#/exam`, and **A8** drills |
-| **4** | The week before: A5 and A6 again, the exam sandbox, and diff the live skills-measured page against the snapshot |
-
-The site tracks all of this. **What to study next** (`#/review`) flags modules whose
-knowledge check is older than three weeks or scored under 80%, weighted by domain.
-Flashcards (`#/cards`) schedule themselves. Progress lives in your browser only, so
-export it before switching machines.
-
----
-
-## Licence
-
-MIT for code (scripts, tooling, site) / CC BY 4.0 for prose and labs
-
-Microsoft product names, documentation excerpts, and the SC-500 skills-measured outline
-remain the property of Microsoft Corporation and are used for educational reference.
-This project is not affiliated with or endorsed by Microsoft.
-
-Maintained by IronBranded.
+Your progress is stored only in your browser.
