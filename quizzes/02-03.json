@@ -20,7 +20,8 @@
     "Microsoft recommends v2 unless you have a specific reason for v1.",
     null,
     "Cool suits rarely accessed data; it isn't the general recommendation for new deployments."
-   ]
+   ],
+   "clue": "\"no specific reason to choose otherwise\" for a new share: Microsoft's recommended billing model."
   },
   {
    "id": "02-03-q2",
@@ -39,7 +40,8 @@
     "Cool has the highest transaction prices, the worst choice for a write-heavy migration.",
     "Hot has higher transaction prices than transaction optimized.",
     "Azure Files pay-as-you-go tiers are transaction optimized, hot and cool; there's no archive tier."
-   ]
+   ],
+   "clue": "\"millions of small writes\" on a pay-as-you-go share: the transaction optimized tier."
   },
   {
    "id": "02-03-q3",
@@ -58,7 +60,8 @@
     "Private allows no anonymous access.",
     "Hot is an access tier, not an access level.",
     null
-   ]
+   ],
+   "clue": "\"list the blobs\" and \"read them\" anonymously: the Container access level, not Blob."
   },
   {
    "id": "02-03-q4",
@@ -77,7 +80,8 @@
     null,
     "Container names must be at least 3 characters.",
     "Consecutive hyphens aren't allowed."
-   ]
+   ],
+   "clue": "Container naming: lowercase letters, numbers and single dashes, starting with a letter or number."
   },
   {
    "id": "02-03-q5",
@@ -96,7 +100,8 @@
     "Cool costs more per GB than cold and archive.",
     null,
     "Hot has the highest storage cost."
-   ]
+   ],
+   "clue": "\"seven years\", \"almost never read\", \"several hours is acceptable\": Archive."
   },
   {
    "id": "02-03-q6",
@@ -115,7 +120,8 @@
     "Changing the archived blob's tier before 180 days incurs the early-deletion fee.",
     "Lifecycle management can't rehydrate archived blobs.",
     "Archived blobs are offline and can't be read until rehydrated."
-   ]
+   ],
+   "clue": "\"urgently\" plus \"archived only 40 days ago\": copy it to a new hot blob with High priority instead of changing its tier."
   },
   {
    "id": "02-03-q7",
@@ -134,7 +140,8 @@
     "Deleting the container removes its blobs; blob soft delete doesn't cover container deletion.",
     "Soft delete doesn't prevent deletion.",
     null
-   ]
+   ],
+   "clue": "\"deletes the whole container\" with only blob soft delete on: nothing covers the container."
   },
   {
    "id": "02-03-q8",
@@ -153,7 +160,8 @@
     null,
     "There's no merge; the name conflict prevents the restore.",
     "Nothing is replaced automatically."
-   ]
+   ],
+   "clue": "\"created a new empty container named billing\": a container can't be restored while one with its name exists."
   },
   {
    "id": "02-03-q9",
@@ -172,7 +180,8 @@
     "Versioning applies to blobs, not Azure Files.",
     null,
     "That's a Blob Storage feature, not Azure Files."
-   ]
+   ],
+   "clue": "\"one folder\" deleted: share soft delete covers the whole share; snapshots restore files and folders."
   },
   {
    "id": "02-03-q10",
@@ -191,7 +200,8 @@
     "Soft delete doesn't block snapshots.",
     "Every tier supports snapshots.",
     "Snapshots work for SMB and NFS shares."
-   ]
+   ],
+   "clue": "\"nightly job\" failing with 409: the per-share snapshot limit has been reached."
   },
   {
    "id": "02-03-q11",
@@ -210,7 +220,8 @@
     "Lifecycle policies run once a day; you can't change the schedule.",
     "That moves cool blobs to hot on access; it doesn't stop re-archiving.",
     null
-   ]
+   ],
+   "clue": "\"back in archive the next day\": the rule needs to wait after the last tier change."
   },
   {
    "id": "02-03-q12",
@@ -229,7 +240,8 @@
     null,
     "Versioning doesn't record access times.",
     "Creation time doesn't reflect reads either."
-   ]
+   ],
+   "clue": "\"haven't been READ\": last access time tracking must be on before a rule can use it."
   },
   {
    "id": "02-03-q13",
@@ -248,7 +260,8 @@
     "That would permanently delete soft-deleted versions, not restore anything.",
     "Disabling versioning doesn't restore the current version.",
     "Rehydration applies to the archive tier, not deleted blobs."
-   ]
+   ],
+   "clue": "\"versioning\" on and \"no current version\" after undelete: promote a previous version."
   },
   {
    "id": "02-03-q14",
@@ -267,7 +280,8 @@
     "Redundancy doesn't reduce the number of stored versions.",
     null,
     "That doesn't affect blob versions."
-   ]
+   ],
+   "clue": "\"after enabling versioning\" costs grow: lifecycle rules that delete old versions."
   }
  ]
 }

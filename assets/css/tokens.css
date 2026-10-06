@@ -99,6 +99,7 @@
   --d-03: #8661c5;  --d-03-ink: #a88dd5;  --d-03-tint: #332d3a;
   --d-04: #da3a98;  --d-04-ink: #e57ab8;  --d-04-tint: #3a2231;
   --d-05: #d83b01;  --d-05-ink: #e57e57;  --d-05-tint: #3e271e;
+  --d-0A: #c9a227;  --d-0A-ink: #d9b85c;  --d-0A-tint: #33301f;
 
   --domain-00: var(--d-00);
   --domain-01: var(--d-01);
@@ -106,6 +107,7 @@
   --domain-03: var(--d-03);
   --domain-04: var(--d-04);
   --domain-05: var(--d-05);
+  --domain-0A: var(--d-0A);
 
   /* --- learning states: shape + text carry them, colour only reinforces ---- */
   --state-done:   #54b054;
@@ -198,6 +200,7 @@
   --d-03: #8661c5;  --d-03-ink: #7151a5;  --d-03-tint: #f7f4fb;
   --d-04: #bf0077;  --d-04-ink: #a3006a;  --d-04-tint: #fcf0f7;
   --d-05: #d83b01;  --d-05-ink: #b53201;  --d-05-tint: #fcf1ed;
+  --d-0A: #8f6b00;  --d-0A-ink: #735600;  --d-0A-tint: #fbf6e8;
 
   --state-done:   #107c10;
   --state-review: #4f3c00;
@@ -235,6 +238,7 @@
     --d-03: #8661c5; --d-03-ink: #7151a5; --d-03-tint: #f7f4fb;
     --d-04: #bf0077; --d-04-ink: #a3006a; --d-04-tint: #fcf0f7;
     --d-05: #d83b01; --d-05-ink: #b53201; --d-05-tint: #fcf1ed;
+    --d-0A: #8f6b00; --d-0A-ink: #735600; --d-0A-tint: #fbf6e8;
     --state-done: #107c10; --state-review: #4f3c00; --state-todo: #605e5c;
     --syn-comment: #6e6e6e; --syn-string: #0451a5; --syn-keyword: #5c2e91;
     --syn-fn: #0f6b73; --syn-variable: #a4501b; --syn-param: #484644;
@@ -257,5 +261,5 @@
    mark also carries an icon and a text label. Make sure borders survive. */
 @media (forced-colors: active) {
   :root { --d-00: CanvasText; --d-01: CanvasText; --d-02: CanvasText;
-          --d-03: CanvasText; --d-04: CanvasText; --d-05: CanvasText; }
+          --d-03: CanvasText; --d-04: CanvasText; --d-05: CanvasText; --d-0A: CanvasText; }
 }

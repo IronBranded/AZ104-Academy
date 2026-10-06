@@ -91,7 +91,7 @@
     var top = node('div', 'nav-group__top');
     var name = node('span', 'nav-group__name');
     if (D()) name.appendChild(D().icon(domain.id, 15));
-    name.appendChild(node('span', null, exam && D() ? D().info(domain.id).short : (D() ? 'Module 0 \u00b7 Lab safety' : domain.name)));
+    name.appendChild(node('span', null, exam && D() ? D().info(domain.id).short : (D() ? (D().info(domain.id).nav || D().info(domain.id).short) : domain.name)));
     top.appendChild(name);
     if (exam) top.appendChild(node('span', 'nav-group__weight', String(domain.weight).replace('-', '\u2013')));
     head.appendChild(top);
@@ -132,16 +132,23 @@
     el.appendChild(section('Study', [
       simpleLink('dashboard', 'Dashboard', '#/'),
       simpleLink('prep', 'Exam prep', '#/prep'),
-      simpleLink('coverage', 'Objective coverage', '#/coverage')
+      simpleLink('coverage', 'Objective coverage', '#/coverage'),
+      simpleLink('map', 'Resource map', '#/map'),
+      simpleLink('compare', 'Compare options', '#/compare'),
+      simpleLink('glossary', 'Glossary', '#/glossary')
     ]));
 
-    var zero = null;
+    /* Every non-exam group (Module 0A foundations, Module 0B lab safety) is
+       kept and placed first: they are where a beginner starts. The previous
+       version kept only the LAST non-exam domain, which silently dropped one
+       as soon as there were two. */
+    var starts = [], exams = [];
     manifest.domains.forEach(function (domain) {
       var exam = domain.weight && domain.weight !== 'n/a';
-      var g = group(domain, exam);
-      if (exam) el.appendChild(g); else zero = g;
+      (exam ? exams : starts).push(group(domain, exam));
     });
-    if (zero) el.appendChild(zero);
+    starts.forEach(function (g) { el.appendChild(g); });
+    exams.forEach(function (g) { el.appendChild(g); });
 
     el.appendChild(section('Practice', [
       simpleLink('exam', 'Mock exam', '#/exam'),

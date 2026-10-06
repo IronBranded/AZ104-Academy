@@ -20,7 +20,8 @@
     "A dynamic device rule still produces device members, and a Microsoft 365 group can't hold devices. Device-based dynamic groups must be security groups.",
     null,
     "Distribution lists are managed in Exchange or the Microsoft 365 admin center and don't hold devices for access management."
-   ]
+   ],
+   "clue": "\"contain Windows devices\": only security groups can hold devices; Microsoft 365 groups hold users only."
   },
   {
    "id": "01-01-q2",
@@ -39,7 +40,8 @@
     "Dynamic membership isn't allowed on role-assignable groups.",
     "The membership rule, not the group type, is the problem: role-assignable groups need assigned membership whatever their type.",
     "Nesting doesn't turn dynamic membership into an allowed path for role assignment, and it adds a second indirection an auditor would reject."
-   ]
+   ],
+   "clue": "\"assigned a Microsoft Entra role\" plus \"follow the department attribute\": role-assignable groups can't be dynamic."
   },
   {
    "id": "01-01-q3",
@@ -58,7 +60,8 @@
     "Owners manage a group; they don't become members, and they can't hand-edit a dynamic group's membership either.",
     "User type doesn't affect whether a department rule matches.",
     null
-   ]
+   ],
+   "clue": "\"dynamic group\" plus \"add a contractor\": you change the attribute or the rule, never the membership by hand."
   },
   {
    "id": "01-01-q4",
@@ -77,7 +80,8 @@
     null,
     "Rules are re-evaluated when attributes change; the value itself doesn't match.",
     "Dynamic group membership needs the organisation to own enough P1 licences, but they aren't assigned per user, and a licence wouldn't change the string comparison."
-   ]
+   ],
+   "clue": "\"trailing space\": dynamic rules compare the exact string, so \"Sales \" isn't \"Sales\"."
   },
   {
    "id": "01-01-q5",
@@ -96,7 +100,8 @@
     "MFA registration has no bearing on licence assignment.",
     "Dynamic membership doesn't block licence assignment.",
     "Job title is irrelevant to licensing; usage location is the prerequisite."
-   ]
+   ],
+   "clue": "\"licences available\" yet assignment fails for a new cloud user: usage location is required first."
   },
   {
    "id": "01-01-q6",
@@ -115,7 +120,8 @@
     "There's no delayed propagation to nested groups: nested groups are simply not supported for licensing.",
     null,
     "Usage location is a user property, and users without one inherit the tenant location under group-based licensing."
-   ]
+   ],
+   "clue": "\"Group B is a member of Group A\": group-based licensing stops at the first level of membership."
   },
   {
    "id": "01-01-q7",
@@ -134,7 +140,8 @@
     null,
     "Global Administrator is never the least-privileged answer for a single capability.",
     "Opening invitations to everyone, including existing guests, widens access for the whole tenant to solve one person's need."
-   ]
+   ],
+   "clue": "\"no admin role\" and \"least-privileged\" invite rights: the Guest Inviter role."
   },
   {
    "id": "01-01-q8",
@@ -153,7 +160,8 @@
     "The deny list stops the invitation from being sent at all.",
     "There's no built-in approval queue for blocked domain invitations.",
     null
-   ]
+   ],
+   "clue": "\"allow\" in one setting, \"deny\" in another: the most restrictive external setting wins."
   },
   {
    "id": "01-01-q9",
@@ -172,7 +180,8 @@
     "Administrators are enabled for SSPR by default; they just follow a different policy.",
     null,
     "Writeback matters only for users whose passwords are managed on-premises."
-   ]
+   ],
+   "clue": "\"Global Administrator account\" during an SSPR test: administrators get their own two-method policy."
   },
   {
    "id": "01-01-q10",
@@ -191,7 +200,8 @@
     "Without writeback, users whose passwords are managed on-premises are told to contact an administrator.",
     "Entra ID Free covers only cloud-user password change, not reset or writeback.",
     "Converting accounts isn't needed and would break the on-premises identity the scenario depends on."
-   ]
+   ],
+   "clue": "\"synchronised from on-premises\" and \"must work on-premises\": password writeback."
   }
  ]
 }

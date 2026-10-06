@@ -20,7 +20,8 @@
     null,
     "User Access Administrator manages access, not resources: it has only read access to resources.",
     "This role assigns roles and reads resources; it can't create or manage them."
-   ]
+   ],
+   "clue": "\"create and manage all resources\" but \"not grant access\": Contributor, not Owner."
   },
   {
    "id": "01-02-q2",
@@ -39,7 +40,8 @@
     "User Access Administrator holds all of Microsoft.Authorization, which includes managing access through Azure Policy.",
     "Contributor manages resources and can't assign roles at all.",
     null
-   ]
+   ],
+   "clue": "\"assign Azure roles\" but \"not manage Azure Policy\": the narrower Role Based Access Control Administrator."
   },
   {
    "id": "01-02-q3",
@@ -58,7 +60,8 @@
     "Contributor can read everything; writing the assignment is what's excluded.",
     "Policy assignments are Azure resources governed by Azure RBAC, not Entra roles.",
     "Policies can be assigned at management group, subscription, resource group or resource scope."
-   ]
+   ],
+   "clue": "\"Contributor\" trying to assign a policy: policy assignments are Microsoft.Authorization writes."
   },
   {
    "id": "01-02-q4",
@@ -77,7 +80,8 @@
     "Nothing prevents holding several roles at one scope; their permissions add up.",
     null,
     "The scenario has no deny assignment. A deny assignment would block the action, not be required to allow it."
-   ]
+   ],
+   "clue": "\"also assigned User Access Administrator\": RBAC adds permissions across assignments; NotActions isn't a deny."
   },
   {
    "id": "01-02-q5",
@@ -96,7 +100,8 @@
     null,
     "That works but multiplies assignments per user. Group assignments at a higher scope are simpler and count once.",
     "Microsoft Entra roles don't grant access to Azure resources."
-   ]
+   ],
+   "clue": "\"three subscriptions\", \"including future resource groups\", \"share a management group\": assign once, at the management group."
   },
   {
    "id": "01-02-q6",
@@ -115,7 +120,8 @@
     "By default the Global Administrator has no access to Azure resources.",
     "That is another directory role; it grants nothing on Azure resources.",
     null
-   ]
+   ],
+   "clue": "\"Global Administrator can't see any subscriptions\": elevate access first; Entra roles don't reach Azure resources."
   },
   {
    "id": "01-02-q7",
@@ -134,7 +140,8 @@
     null,
     "Owner has no DataActions and is privileged; it's the wrong kind of role and too much of it.",
     "Contributor manages resources but has no DataActions, and the scope is broader than needed."
-   ]
+   ],
+   "clue": "\"read blob data\" and \"one storage account\": a data role, scoped to that account."
   },
   {
    "id": "01-02-q8",
@@ -153,7 +160,8 @@
     null,
     "Role assignments aren't soft-deleted; removing one revokes it.",
     "Any role assignment can be removed."
-   ]
+   ],
+   "clue": "\"still can view RG1\" after removal: another assignment reaches RG1, inherited or through a group."
   },
   {
    "id": "01-02-q9",
@@ -172,7 +180,8 @@
     "Classic administrator roles are retired; that isn't where modern access comes from.",
     null,
     "Filtering by role still only shows direct assignments at subscription scope."
-   ]
+   ],
+   "clue": "\"empty list\" yet the user has access: the assignment is inherited or comes through a group."
   },
   {
    "id": "01-02-q10",
@@ -191,7 +200,8 @@
     "Check access doesn't list assignments at child scopes.",
     "Assignments inherit downwards, never upwards.",
     "Check access works at management group, subscription, resource group and resource scopes."
-   ]
+   ],
+   "clue": "\"Check access on a subscription\" for a resource-group assignment: Check access lists assignments at that scope and above."
   }
  ]
 }

@@ -435,7 +435,7 @@
   var VIEWS = {
     cost: 'Cost planner', readiness: 'Readiness', exam: 'Mock exam', cards: 'Flashcards',
     review: 'Retention review', preview: 'Verification watchlist', coverage: 'Objective coverage',
-    prep: 'Exam prep', domain: 'Domain review'
+    prep: 'Exam prep', domain: 'Domain review', map: 'Resource map', glossary: 'Glossary', compare: 'Compare options'
   };
 
   function parseRoute() {
@@ -551,7 +551,7 @@
   /* #/module/01-01/check and friends: scroll to a stage once it exists. The
      knowledge check is filled asynchronously, so retry briefly. */
   function jumpTo(anchor) {
-    var id = /^(orient|learn|visualize|distinguish|practice|check|review)$/.test(anchor) ? 'stage-' + anchor : anchor;
+    var id = /^(orient|understand|visualize|learn|validate|distinguish|practice|check|review)$/.test(anchor) ? 'stage-' + anchor : anchor;
     var tries = 0;
     (function attempt() {
       var el = document.getElementById(id);

@@ -20,7 +20,8 @@
     null,
     "It has a default value, so it isn't required.",
     "The client's location plays no part."
-   ]
+   ],
+   "clue": "\"defaultValue [resourceGroup().location]\" and no value passed: the default comes from the target resource group."
   },
   {
    "id": "03-01-q2",
@@ -39,7 +40,8 @@
     "uniqueString is deterministic: the same input returns the same value.",
     "It's the same resource in the same group, so it's an update, not a conflict.",
     "It isn't random; it's a hash of the input."
-   ]
+   ],
+   "clue": "\"uniqueString(resourceGroup().id)\" deployed \"twice to the same resource group\": the same input gives the same name."
   },
   {
    "id": "03-01-q3",
@@ -58,7 +60,8 @@
     "File order doesn't determine deployment order.",
     null,
     "Bicep infers the dependency; explicit dependsOn isn't needed."
-   ]
+   ],
+   "clue": "\"There's no dependsOn\" but the NIC references vnet by its symbolic name: Bicep infers the order."
   },
   {
    "id": "03-01-q4",
@@ -77,7 +80,8 @@
     "Copy loops create multiple instances; they don't order deployment.",
     "Outputs don't affect deployment order.",
     null
-   ]
+   ],
+   "clue": "\"parent account isn't found\" sometimes: ARM JSON needs an explicit dependsOn."
   },
   {
    "id": "03-01-q5",
@@ -96,7 +100,8 @@
     null,
     "That removes flexibility; it isn't the minimal change.",
     "Parameter values outside allowedValues are rejected at deployment."
-   ]
+   ],
+   "clue": "\"allowedValues\" excludes the value the team needs: add it to the list."
   },
   {
    "id": "03-01-q6",
@@ -115,7 +120,8 @@
     "Variables are stored in the template and are no more secret.",
     "Outputs are recorded in deployment history.",
     "Deployment mode doesn't affect what's logged."
-   ]
+   ],
+   "clue": "\"password visible in the deployment history\": the parameter type must be securestring."
   },
   {
    "id": "03-01-q7",
@@ -134,7 +140,8 @@
     "A condition controls whether the resource deploys, not which values are allowed.",
     null,
     "A description documents; it doesn't enforce anything."
-   ]
+   ],
+   "clue": "\"can only pass\" two values in Bicep: the @allowed decorator."
   },
   {
    "id": "03-01-q8",
@@ -153,7 +160,8 @@
     "existing references something already deployed; it doesn't create it.",
     "Outputs return values; they don't deploy resources.",
     null
-   ]
+   ],
+   "clue": "\"needs no explicit dependsOn\" for a child resource: declare it with parent."
   },
   {
    "id": "03-01-q9",
@@ -172,7 +180,8 @@
     "That would deploy their resources as part of your deployment.",
     "That would redeploy, and potentially reconfigure, their workspace.",
     "Parameters pass values in; they don't read a resource's current properties."
-   ]
+   ],
+   "clue": "\"another team already deployed\" and \"without redeploying it\": the existing keyword."
   },
   {
    "id": "03-01-q10",
@@ -191,7 +200,8 @@
     null,
     "Complete mode deploys; it deletes what's missing.",
     "Deployments never move resources."
-   ]
+   ],
+   "clue": "\"complete mode\" with a template that defines only storage1: anything else in the group is deleted."
   },
   {
    "id": "03-01-q11",
@@ -210,7 +220,8 @@
     "Validation checks the template is deployable; it doesn't list per-resource changes.",
     null,
     "Export produces a template from current resources; it doesn't preview changes."
-   ]
+   ],
+   "clue": "\"see exactly which resources would be created, modified or deleted, without changing anything\": what-if."
   },
   {
    "id": "03-01-q12",
@@ -229,7 +240,8 @@
     "That duplicates the template and invites drift.",
     "Mode doesn't select values; parameters do.",
     "Outputs return values; they don't feed inputs."
-   ]
+   ],
+   "clue": "\"one Bicep file for dev and prod\" with different values: one parameters file per environment."
   },
   {
    "id": "03-01-q13",
@@ -248,7 +260,8 @@
     "Manually created resources may have no deployment entry, and history gives JSON.",
     "build compiles Bicep you already have; it doesn't read Azure.",
     null
-   ]
+   ],
+   "clue": "\"created manually in the portal\" and you need Bicep: export the resource group template as Bicep."
   },
   {
    "id": "03-01-q14",
@@ -267,7 +280,8 @@
     null,
     "Decompile converts JSON to Bicep; it doesn't retrieve history.",
     "The activity log records operations, not the template."
-   ]
+   ],
+   "clue": "\"exact template used by a deployment last Tuesday\", not current state: the deployment history."
   },
   {
    "id": "03-01-q15",
@@ -286,7 +300,8 @@
     "Warnings don't stop deployment; the output is functionally equivalent.",
     "The fix is to edit the Bicep file.",
     "Round trips produce functionally equivalent, not identical, templates."
-   ]
+   ],
+   "clue": "\"decompile\" with warnings: decompilation is best-effort and needs review."
   }
  ]
 }

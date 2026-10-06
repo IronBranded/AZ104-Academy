@@ -66,37 +66,57 @@ terminal reads the lab.
 
 ### Required sections, in order
 
-**Content file:**
+Every exam lesson follows one teaching sequence. The validator enforces the
+headings; the lesson engine (`assets/js/lesson.js`) groups them into stages.
 
-1. Front matter
-2. `# Title`, then a blockquote with objective and domain
-3. `## Sub-objectives covered` — verbatim bullets
-4. `## Why this exists` — first principles, in plain language, **before any
-   Microsoft product name appears**
-5. `## How it works under the hood` — mechanism, not menu paths
-6. `## Configuration surface` — a table of setting / default / set it to / why
-7. `## Common failure modes`
-8. `## How this is tested` — exam phrasing table, then the least-privileged
-   roles or settings the scenarios turn on
-9. `## Hands-on` — one line linking the lab
-10. `## Check yourself` — 5 reasoning questions, not recall
-11. `## Sources`
+> PROBLEM -> PLAIN ENGLISH -> MENTAL MODEL -> TERMINOLOGY -> RELATIONSHIPS ->
+> HOW IT WORKS -> CONFIGURE -> VALIDATE -> DISTINGUISH -> TROUBLESHOOT ->
+> EXAM LENS -> KNOWLEDGE CHECK -> TEACH IT BACK -> REVIEW
+
+**Content file (exam module):**
+
+| Heading | Stage | What it must do |
+| --- | --- | --- |
+| `## Sub-objectives covered` | Orient | Verbatim bullets from the snapshot |
+| `## The administrative problem` | Understand | The operational requirement, **before** the service is named |
+| `## In plain English` | Understand | The idea with no jargon; compatible with the precise version later |
+| `## Words you need to know` | Understand | A two-column table, `Term` and `In plain English`, at least three terms. The glossary view is built from these tables |
+| `## Mental model` | Understand | A diagram or analogy, an everyday-idea to Azure-name table, and one sentence saying it's a teaching model |
+| `## Where it fits` | Understand | The ten-question table: contains, depends on, depended on by, who manages, networking, monitoring, protection, recovery, cost, safe removal |
+| `## How it works under the hood` | Learn | Mechanism, not menu paths |
+| `## Configuration surface` | Learn | Commands and the setting / default / exam-angle table |
+| `## Worked example` | Learn | A realistic requirement, the decision, the configuration and how it's proven |
+| `## Validate the result` | Validate | Observable checks that prove the desired state; never "the command succeeded" |
+| `## Common failure modes` | Distinguish | Quoted symptom, then cause and fix |
+| `## How this is tested` | Distinguish | Rendered as the **Exam Lens** |
+| `## Hands-on` | Practice | One line linking the lab |
+| `## Check yourself` | Check | Reasoning questions, not recall |
+| `## Teach it back` | Check | Prompts the learner answers out loud, without notes |
+| `## Key takeaways` | Review | 3 to 5 points |
+| `## Sources` | Review | Microsoft Learn pages the lesson was checked against |
+
+**Foundation primer (Module 0A):** `## The problem`, `## In plain English`,
+`## Words you need to know`, `## Mental model`, `## Where this shows up in AZ-104`,
+`## Check yourself`, `## Teach it back`, `## Key takeaways`, `## Sources`. Primers
+teach prerequisite knowledge only to the depth an AZ-104 lesson needs, stay
+skippable, and never turn into AZ-900.
 
 **Lab file:**
 
-1. `# Lab <id> - Title`
-2. Cost, licensing, time, and any warning callouts
-3. `## Prerequisites` — PIM roles, modules, anything that must already exist
-4. Numbered `## Part N` sections, each with **Method A - Portal** and
-   **Method B - PowerShell** where both exist
-5. `## Validation` — commands that prove the control works, plus a portal
-   equivalent
-6. `## Teardown` — the six buckets (below). **The validator requires this exact
-   heading.**
+1. `# Lab <id> - Title`, then objective, cost, licensing and warning callouts
+2. `## Why this matters` — the administrative problem the lab solves
+3. `## The desired state` — what will be true at the end, each item checked later
+4. `## Prerequisites`
+5. Numbered `## Part N` sections, with portal and command-line methods where both exist
+6. `## Validation` — commands and portal checks, then a `### Validation checklist`
+   of `- [ ]` items. Each item names an **observed result**. The lab counts as
+   **validated** when these are ticked
+7. `## What just happened?` — reconnect the steps to the lesson's mental model
+8. `## Teardown` — the six buckets, ending in a `- [ ]` verification checklist.
+   The lab counts as **practised** only when validation and teardown are both ticked
 
-> `## How this is tested` is not in the original scaffold template. It was added
-> because Section 7 of the master prompt requires exam tips. `tools/New-Module.ps1`
-> should emit it.
+Optional, licence-gated parts are never checklist items: a learner without the
+licence must still be able to finish the lab honestly.
 
 ---
 
@@ -289,7 +309,9 @@ editing a question never touches content.
     "prompt": "...",
     "options": ["...", "..."],
     "answer": 1,
-    "explanation": "Why this is right, and what the distractors are testing."
+    "explanation": "Why this is right, and what the distractors are testing.",
+    "why_not": [null, "Why option B is weaker", "..."],
+    "clue": "\"phrase from the scenario\": what it points to."
   }]
 }
 ```
@@ -301,4 +323,10 @@ editing a question never touches content.
   to them.
 - `explanation` says why the correct answer is correct **and** what the distractors
   are testing. An explanation that only restates the answer is not finished.
-- 3-5 questions. Reasoning, not recall.
+- `why_not` explains each wrong option in place (null for correct ones). A
+  distractor must be wrong for a real conceptual reason, never because it is
+  absurd.
+- `clue` names the **scenario clue**: the phrase in the prompt that decides the
+  answer, and what it points to. The validator requires it.
+- Original scenarios only. Never exam dumps, recalled questions or leaked material.
+- Reasoning, not recall.

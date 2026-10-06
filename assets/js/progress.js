@@ -30,7 +30,7 @@
 
   /* ----------------------------------------------------------- persistence */
 
-  function blank() { return { v: 1, items: {}, pages: {}, quiz: {}, answers: {}, marks: {}, last: null }; }
+  function blank() { return { v: 1, items: {}, pages: {}, quiz: {}, answers: {}, marks: {}, secs: {}, prefs: {}, last: null }; }
 
   function load() {
     if (state) return state;
@@ -43,6 +43,8 @@
       state.quiz = state.quiz || {};
       state.answers = state.answers || {};
       state.marks = state.marks || {};
+      state.secs = state.secs || {};      // checkbox id -> lab section (validation | teardown | other)
+      state.prefs = state.prefs || {};
       if (state.last === undefined) state.last = null;
     } catch (e) {
       state = blank();
@@ -100,6 +102,23 @@
 
   /* -------------------------------------------------------- page controls */
 
+  /* Which lab section a checkbox sits in: the nearest preceding h2. Lab
+     checklists under "## Validation" decide VALIDATED; the whole page
+     (validation + teardown) decides PRACTISED. */
+  function sectionOf(root, el) {
+    /* Document order, not sibling order: sections.js wraps some sections
+       (Validation, Teardown) in a <section>, so the h2 is no longer a sibling
+       of the list that follows it. */
+    var heads = root.querySelectorAll('h2'), found = null;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].compareDocumentPosition(el) & 4 /* FOLLOWING */) found = heads[i];
+      else break;
+    }
+    if (!found) return null;
+    var t = (found.textContent || '').replace(/\u00a7$/, '').trim().toLowerCase();
+    return /^validation/.test(t) ? 'validation' : /^teardown/.test(t) ? 'teardown' : 'other';
+  }
+
   function mountPage(root, route) {
     var boxes = root.querySelectorAll('input[type="checkbox"]');
     var s = load();
@@ -112,6 +131,10 @@
         var li = box.closest('li') || box.parentNode;
         var label = (li ? li.textContent : '').trim().slice(0, 160);
         var id = key + ':' + hash(label);
+        if (route.kind === 'lab') {
+          var sec = sectionOf(root, box);
+          if (sec && s.secs[id] !== sec) { s.secs[id] = sec; registered = true; }
+        }
 
         /* Register every item the first time the page is seen, so "0 of 16
            steps" is reported from the first visit instead of "Not read". */
@@ -176,7 +199,7 @@
     reset.textContent = 'Reset this page';
     armConfirm(reset, 'Reset this page', 'Confirm reset', function () {
       var s = load(), k = pageKey(route), prefix = k + ':';
-      Object.keys(s.items).forEach(function (id) { if (id.indexOf(prefix) === 0) delete s.items[id]; });
+      Object.keys(s.items).forEach(function (id) { if (id.indexOf(prefix) === 0) { delete s.items[id]; delete s.secs[id]; } });
       delete s.pages[k];
       delete s.quiz[k];
       if (route.kind === 'module') {
@@ -423,6 +446,7 @@
         var s = load();
         Object.keys(incoming.items || {}).forEach(function (k) { if (incoming.items[k]) s.items[k] = true; });
         Object.keys(incoming.pages || {}).forEach(function (k) { if (incoming.pages[k]) s.pages[k] = true; });
+        Object.keys(incoming.secs || {}).forEach(function (k) { s.secs[k] = incoming.secs[k]; });
         Object.keys(incoming.quiz || {}).forEach(function (k) { s.quiz[k] = s.quiz[k] || incoming.quiz[k]; });
         /* Per-question answers: the more recent answer wins, because the
            latest attempt is what "checked" and "needs review" are based on. */
@@ -472,7 +496,28 @@
 
   /* ------------------------------------------------ per-question answers */
 
+  /* RETAINED: a question is retained when it is answered correctly again at
+     least RETAIN_DAYS after it was first answered correctly, with no wrong
+     answer in between. A wrong answer resets it. This is demonstrated recall,
+     not a prediction. */
+  var RETAIN_DAYS = 7, DAY = 86400000;
   function recordAnswer(qid, ok, meta) {
+    var s = load();
+    var prev = s.answers[qid] || null;
+    var firstOk = prev ? (prev.firstOk || (prev.ok ? prev.at : null)) : null;
+    var retainedAt = prev ? (prev.retainedAt || null) : null;
+    recordAnswerBase(qid, ok, meta);
+    var a = s.answers[qid];
+    if (ok) {
+      if (!firstOk) firstOk = a.at;
+      else if (!retainedAt && Date.parse(a.at) - Date.parse(firstOk) >= RETAIN_DAYS * DAY) retainedAt = a.at;
+    } else { firstOk = null; retainedAt = null; }
+    a.firstOk = firstOk;
+    a.retainedAt = retainedAt;
+    save();
+  }
+
+  function recordAnswerBase(qid, ok, meta) {
     var s = load();
     var prev = s.answers[qid];
     s.answers[qid] = {
@@ -566,7 +611,51 @@
   }
   function lastVisit() { return load().last; }
 
+  /* retained  >= 80% of the questions retained (see recordAnswer)
+     due       knowledge-checked, and the earliest re-test date has passed
+     wait      knowledge-checked, re-test not due yet (dueAt)
+     none      not knowledge-checked yet
+     noq       no questions */
+  function retention(qids) {
+    if (!qids || !qids.length) return { state: 'noq', kept: 0 };
+    var s = load(), kept = 0, first = null, answered = 0;
+    qids.forEach(function (q) {
+      var a = s.answers[q];
+      if (!a) return;
+      answered++;
+      if (a.ok && a.retainedAt) kept++;
+      var f = a.ok && !a.retainedAt ? (a.firstOk || a.at) : null;
+      if (f && (!first || f < first)) first = f;
+    });
+    if (!answered) return { state: 'none', kept: 0 };
+    if (kept / qids.length >= 0.8) return { state: 'retained', kept: kept };
+    if (checkState(qids, false) !== 'checked') return { state: 'none', kept: kept };
+    var due = first ? Date.parse(first) + RETAIN_DAYS * DAY : Date.now();
+    return { state: Date.now() >= due ? 'due' : 'wait', dueAt: new Date(due).toISOString().slice(0, 10), kept: kept };
+  }
+
+  function sectionStats(kind, moduleId, section) {
+    var s = load(), prefix = kind + ':' + moduleId + ':', total = 0, done = 0;
+    for (var k in s.items) {
+      if (k.indexOf(prefix) === 0 && s.secs[k] === section) { total++; if (s.items[k]) done++; }
+    }
+    return { total: total, done: done };
+  }
+  /* VALIDATED: every item in the lab's Validation checklist is ticked. */
+  function isValidated(moduleId) {
+    var st = sectionStats('lab', moduleId, 'validation');
+    return st.total > 0 && st.done === st.total;
+  }
+  function getPref(k) { return load().prefs[k]; }
+  function setPref(k, v) { var s = load(); s.prefs[k] = v; save(); notify(); }
+
   global.AcademyProgress = {
+    retention: retention,
+    retainDays: RETAIN_DAYS,
+    sectionStats: sectionStats,
+    isValidated: isValidated,
+    getPref: getPref,
+    setPref: setPref,
     mountPage: mountPage,
     mountDashboard: mountDashboard,
     isComplete: isComplete,

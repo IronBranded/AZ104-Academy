@@ -129,7 +129,22 @@
 
   /* ---------------------------------------------------------------- build */
 
-  function build(manifest, snapshotMd, lessonTexts, quizzes, a6Md, a6Index, training) {
+  /* "## Words you need to know" tables are the glossary: | Term | Meaning |.
+     One source, so the glossary view, search and lessons can't disagree. */
+  function parseWords(body) {
+    var mm = /^##\s+Words you need to know\s*$([\s\S]*?)(?=^##\s|(?![\s\S]))/m.exec(body || '');
+    if (!mm) return [];
+    var out = [];
+    mm[1].split(/\r?\n/).forEach(function (line) {
+      if (!/^\s*\|/.test(line) || /^\s*\|\s*-{3}/.test(line)) return;
+      var cells = line.split('|').slice(1, -1).map(function (c) { return c.replace(/\*\*|`/g, '').trim(); });
+      if (cells.length < 2 || !cells[0] || /^term$/i.test(cells[0])) return;
+      out.push({ term: cells[0], meaning: cells[1] });
+    });
+    return out;
+  }
+
+  function build(manifest, snapshotMd, lessonTexts, quizzes, a6Md, a6Index, training, comparisons) {
     var FM = global.AcademyFrontMatter;
     var snap = parseSnapshot(snapshotMd || '');
 
@@ -150,7 +165,9 @@
       questions: {},        // qid -> question with lessonId, bulletId, domainId
       distinctions: parseDistinctions(a6Md),
       a6Index: a6Index,     // index into manifest.appendix, or -1
-      unmapped: []          // front-matter sub-objectives that match no official bullet
+      unmapped: [],         // front-matter sub-objectives that match no official bullet
+      glossary: [],         // { term, meaning, lessonId } from "Words you need to know"
+      comparisons: []       // data/comparisons.json
     };
 
     /* Manifest domains by normalised name, so the snapshot can find its id. */
@@ -233,6 +250,7 @@
         if (m.domainById[d.id] && lesson.exam) m.domainById[d.id].lessonIds.push(mod.id);
 
         m.lessons[mod.id] = lesson;
+        parseWords(body).forEach(function (w) { w.lessonId = mod.id; m.glossary.push(w); });
         m.order.push(mod.id);
       });
     });
@@ -271,14 +289,30 @@
       });
     });
 
+    /* Structured comparisons (data/comparisons.json), joined to lessons. */
+    m.comparisons = (comparisons && Array.isArray(comparisons.comparisons)) ? comparisons.comparisons : [];
+    m.comparisons.forEach(function (c) {
+      (c.modules || []).forEach(function (lid) {
+        var L = m.lessons[lid];
+        if (L) (L.compareIds = L.compareIds || []).push(c.id);
+      });
+    });
+
     /* Official training, joined on the objective heading text. An entry
        that matches no objective is reported, not dropped. */
     m.training = training && training.course ? training : null;
     m.trainingUnmapped = [];
     if (m.training) {
       (training.paths || []).forEach(function (p) {
-        var o = objByNorm[norm(p.objective)];
-        if (o) o.path = p; else m.trainingUnmapped.push(p.title);
+        /* A learning path names the objectives it serves: one (objective) or
+           several (objectives, for Microsoft's per-domain paths). A path with
+           none, such as the prerequisites path, attaches only through its
+           modules' lessons. */
+        var objs = p.objectives || (p.objective ? [p.objective] : []);
+        objs.forEach(function (ot) {
+          var o = objByNorm[norm(ot)];
+          if (o) o.path = p; else m.trainingUnmapped.push(p.title + ' (' + ot + ')');
+        });
         /* Module-level: each module names the lesson(s) it serves. A lesson id
            that does not exist is reported, not silently dropped. */
         (p.module_list || []).forEach(function (mod) {
@@ -321,7 +355,7 @@
     var lessons = bullet.lessonIds.map(function (id) { return m.lessons[id]; }).filter(Boolean);
     var hasLab = lessons.some(function (l) { return l.hasLab; });
     var visual = lessons.some(function (l) { return l.hasVisual; });
-    var distinctions = lessons.some(function (l) { return l.distinctionNs.length > 0; });
+    var distinctions = lessons.some(function (l) { return l.distinctionNs.length > 0 || (l.compareIds && l.compareIds.length > 0); });
     var status = !lessons.length ? 'missing' : (bullet.questionIds.length ? 'covered' : 'partial');
     return {
       status: status,
@@ -361,13 +395,14 @@
     });
     var a6Path = a6Index >= 0 ? manifest.appendix[a6Index].content : A6_FALLBACK;
 
-    var snapshot = '', a6 = '', training = null;
+    var snapshot = '', a6 = '', training = null, comparisons = null;
+    tasks.push(getJson('data/comparisons.json').then(function (c) { comparisons = c; }));
     tasks.push(getJson('content/official-training.json').then(function (t) { training = t; }));
     tasks.push(getText(SNAPSHOT).then(function (t) { snapshot = t; }));
     tasks.push(getText(a6Path).then(function (t) { a6 = t; }));
 
     job = Promise.all(tasks).then(function () {
-      model = build(manifest, snapshot, texts, quizzes, a6, a6Index, training);
+      model = build(manifest, snapshot, texts, quizzes, a6, a6Index, training, comparisons);
       model.a6Path = a6Path;
       job = null;
       return model;
@@ -382,6 +417,7 @@
     get: function () { return model; },
     /* exposed for tests and for the coverage view's self-check */
     _parseSnapshot: parseSnapshot,
-    _parseDistinctions: parseDistinctions
+    _parseDistinctions: parseDistinctions,
+    _parseWords: parseWords
   };
 })(window);

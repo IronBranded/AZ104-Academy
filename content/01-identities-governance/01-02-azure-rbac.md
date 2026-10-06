@@ -8,7 +8,7 @@ objective_ids: ["id.access.builtin-roles", "id.access.scopes", "id.access.interp
 domain: "Manage Azure identities and governance"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["00-00", "01-01"]
+prerequisites: ["0A-03", "0A-05", "0A-11", "00-00", "01-01"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/role-based-access-control/overview"
@@ -41,7 +41,11 @@ free_practice_available: true
 - Assign roles at different scopes
 - Interpret access assignments
 
-## Why this exists
+## The administrative problem
+
+Your new team can sign in, but they can't see a single VM. A contractor needs to restart VMs in one resource
+group and nothing else. An auditor asks who can delete the production subscription. Each of these is a question about
+**access to Azure resources**, and the answer is never "make them Global Administrator".
 
 Module 01-01 put people into the directory and into groups. That alone lets them do
 nothing to a virtual machine or a storage account. Reaching Azure resources takes a
@@ -57,6 +61,78 @@ Azure role-based access control (Azure RBAC) answers one question for every requ
 *may this identity perform this action on this resource?* It answers from role
 assignments, and reading those assignments correctly is what the third bullet of
 this objective tests.
+
+## In plain English
+
+Signing in proves *who* you are. It doesn't let you touch any Azure resource. For that, someone must give you a
+**role** at a **scope**:
+
+- A **role** is a named list of allowed operations: **Reader** can look, **Contributor** can change, **Owner** can
+  change and grant access to others.
+- A **scope** is where the role applies: a management group, a subscription, a resource group or one resource.
+  Whatever you grant at a scope is **inherited** by everything below it.
+- A **role assignment** joins the three: *this principal* gets *this role* at *this scope*.
+
+Permissions add up across assignments: if any assignment allows an action, you have it. Only a **deny assignment**
+takes something away. And Azure roles are separate from Microsoft Entra roles: a directory admin isn't a resource admin
+unless someone assigns them an Azure role.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Azure RBAC** | Azure role-based access control: the system that decides who may do what to Azure resources. |
+| **Security principal** | Who receives access: a user, a group, a service principal or a managed identity. |
+| **Role definition** | A named list of allowed actions, such as Reader, Contributor or Owner. |
+| **Scope** | Where a role applies: management group, subscription, resource group or resource. |
+| **Role assignment** | A principal, a role and a scope joined together. This is what actually grants access. |
+| **Inheritance** | An assignment at a scope also applies to every scope below it. |
+| **Deny assignment** | A block that overrides any role. You can't create one directly; Azure creates them for some features. |
+| **Least privilege** | The smallest role at the narrowest scope that still lets someone do their job. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: A role assignment joins who, what and where
+  accDescr: A role assignment connects a security principal, such as a user or group, to a role definition, such as Reader or Contributor, at a scope such as a resource group. The assignment applies at that scope and is inherited by every resource below it.
+  WHO["Who<br/>user, group, managed identity"] --> RA["Role assignment"]:::d01
+  WHAT["What<br/>role: Reader, Contributor, Owner"] --> RA
+  WHERE["Where<br/>scope: subscription, resource group, resource"] --> RA
+  RA --> INH["Applies here and to everything below"]
+```
+
+Three questions, always in this order: who, what, where. A wrong answer to any one of them is the usual
+cause of "access denied" and of over-privileged accounts. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A keycard | Role assignment |
+| Which doors a card type opens | Role definition |
+| Building, floor or single room | Scope |
+| A master key for a floor opens every room on it | Inheritance |
+| Building security staff vs. HR records staff | Azure roles vs. Microsoft Entra roles |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Role assignment |
+| --- | --- |
+| What contains it? | It is attached to a scope: a management group, subscription, resource group or resource. |
+| What does it depend on? | A principal from the tenant the subscription trusts, and a role definition. |
+| What depends on it? | Every request that principal makes at that scope and below. |
+| Who can manage it? | Owner, User Access Administrator, or Role Based Access Control Administrator at the scope. |
+| How is it networked? | Not networked. Resource Manager checks it on every control-plane request. |
+| How is it monitored? | The activity log records role assignment writes and deletes. |
+| How is it protected? | Assign to groups, at the narrowest scope, and review regularly. |
+| How is it recovered? | Re-create it. A deleted principal leaves an assignment showing "Identity not found" to clean up. |
+| What does it cost? | Free. |
+| How is it removed safely? | Remove it at the scope where it was made; an inherited assignment can't be removed lower down. |
+
+See it with its neighbours on the [resource map](#/map/role-assignment).
 
 ## How it works under the hood
 
@@ -261,6 +337,33 @@ every cloud and don't change if a role is renamed.
 | Condition on a privileged assignment | none | Conditions tab | Constrain which roles a delegate can assign |
 | Elevate access | Off | Microsoft Entra ID > Properties | Per-user, root scope, turn it off afterwards |
 
+## Worked example
+
+**Requirement.** The operations group must start, stop and restart VMs in `rg-app`, and nowhere else. They must not
+be able to delete VMs or grant access.
+
+1. **Decide.** The task is on Azure resources, so it's an **Azure role**, not a Microsoft Entra role. **Virtual Machine
+   Contributor** manages VMs; Contributor would be broader than needed; Owner could grant access.
+2. **Configure.** Assign **Virtual Machine Contributor** to the **group**, at the **resource group** scope `rg-app`.
+3. **Observe.** Members see and manage VMs in `rg-app`; other resource groups show nothing new.
+4. **Validate.** Use Check access for one member, as below. If the scenario said "and nothing else, not even delete",
+   you'd note that built-in roles can't be trimmed; a custom role would be the next step.
+
+## Validate the result
+
+Read the assignments the way Azure evaluates them, including groups and inheritance:
+
+```powershell
+# Everything this user holds, directly and through groups, at every scope
+Get-AzRoleAssignment -SignInName <upn> -ExpandPrincipalGroups |
+    Select-Object RoleDefinitionName, Scope, DisplayName
+```
+
+- In the portal, **Access control (IAM)** > **Check access** at the resource group shows the user's assignments there
+  *and inherited from above*.
+- Then test as the user: the allowed action succeeds, and an action outside the role or outside the scope fails with an
+  authorization error. A successful assignment you never tested isn't validated.
+
 ## Common failure modes
 
 1. **"I'm Global Administrator but see no subscriptions."** Entra roles grant nothing in
@@ -326,6 +429,14 @@ empty resource group, a test user and role assignments, so it costs nothing.
    Contributor. Can they delete a VM? What would it take to prevent it?
 5. Your Global Administrator elevated access last month to fix a subscription. What does
    that account hold now, at what scope, and how do you remove it?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain who, what and where using a building's keycards.
+- Explain why a Global Administrator can't see a VM until something else happens.
+- Explain why removing a user's direct assignment might not remove their access.
 
 ## Key takeaways
 

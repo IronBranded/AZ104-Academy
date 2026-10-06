@@ -3,7 +3,7 @@
  "outline_version": "2026-04-17",
  "outline_label": "Skills measured as of April 17, 2026",
  "source_url": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104",
- "retrieved": "2026-09-29",
+ "retrieved": "2026-10-06",
  "source_updated_at": "2026-03-19",
  "_note": "Objective text is verbatim from the source page. Ids are this repo's: stable and semantic, so a reorder of the official outline does not renumber anything. 'module' is the planned owner module; the validator treats an objective whose module is not yet written as planned (warning), and an objective with no owner as an error. Changes to 'module' are objective-mapping changes: review them in the pull request diff.",
  "objectives": [

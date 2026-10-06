@@ -20,7 +20,8 @@
     "That's data protection inside storage, not Azure Backup or Site Recovery.",
     "Key vaults store secrets and keys.",
     null
-   ]
+   ],
+   "clue": "\"VMs and Azure file shares\" plus \"Site Recovery\": a Recovery Services vault."
   },
   {
    "id": "05-02-q2",
@@ -39,7 +40,8 @@
     "Redundancy can't be changed once items are protected.",
     "CRR requires a GRS vault.",
     "Soft delete protects against deletion, not regional loss."
-   ]
+   ],
+   "clue": "\"already protects 20 VMs with LRS\": redundancy can't change after protection, so create a new GRS vault."
   },
   {
    "id": "05-02-q3",
@@ -58,7 +60,8 @@
     "The vault type, not the count, is the issue.",
     null,
     "There's no separate Site Recovery vault; Site Recovery uses Recovery Services vaults."
-   ]
+   ],
+   "clue": "\"managed disks and Azure Blobs\": those workloads use a Backup vault."
   },
   {
    "id": "05-02-q4",
@@ -77,7 +80,8 @@
     null,
     "It's set at creation, before any backups.",
     "They support LRS, GRS and ZRS."
-   ]
+   ],
+   "clue": "A Backup vault's redundancy is a creation-time choice."
   },
   {
    "id": "05-02-q5",
@@ -96,7 +100,8 @@
     "Standard runs once a day with up to 5 days of snapshots.",
     "A VM has one backup policy.",
     "VMs are protected by Recovery Services vault policies."
-   ]
+   ],
+   "clue": "\"every 4 hours\": hourly schedules need the Enhanced policy."
   },
   {
    "id": "05-02-q6",
@@ -115,7 +120,8 @@
     "There's no waiting period that allows it.",
     "Soft delete doesn't affect the policy type.",
     null
-   ]
+   ],
+   "clue": "\"switched back to a Standard policy\": an Enhanced-protected VM can't move back."
   },
   {
    "id": "05-02-q7",
@@ -134,7 +140,8 @@
     null,
     "Restoring disks doesn't need the original VM.",
     "Its availability depends on GRS and CRR, not on the original VM existing."
-   ]
+   ],
+   "clue": "\"VM was deleted\": Replace existing needs the VM to still exist."
   },
   {
    "id": "05-02-q8",
@@ -153,7 +160,8 @@
     "It works but takes far longer and costs more.",
     null,
     "Region doesn't matter for one file."
-   ]
+   ],
+   "clue": "\"one configuration file\" and \"the VM must keep running\": file recovery."
   },
   {
    "id": "05-02-q9",
@@ -172,7 +180,8 @@
     "The replica VM is created only at failover, in the target region.",
     "Replication doesn't need a VPN gateway.",
     "Site Recovery doesn't use backup policies."
-   ]
+   ],
+   "clue": "\"in the source region\" when enabling replication: the Mobility service extension and a cache storage account."
   },
   {
    "id": "05-02-q10",
@@ -191,7 +200,8 @@
     "Those resemble backup settings, not replication.",
     "Default retention is 1 day.",
     null
-   ]
+   ],
+   "clue": "\"default replication policy\": crash-consistent points every 5 minutes, kept for 1 day."
   },
   {
    "id": "05-02-q11",
@@ -210,7 +220,8 @@
     null,
     "That interrupts protection.",
     "That tests backup, not Site Recovery failover."
-   ]
+   ],
+   "clue": "\"without affecting production or ongoing replication\": a test failover into an isolated network."
   },
   {
    "id": "05-02-q12",
@@ -229,7 +240,8 @@
     "Vault redundancy doesn't reprotect VMs.",
     null,
     "Test failovers don't change protection."
-   ]
+   ],
+   "clue": "\"after failing over\" and \"are they protected now\": not until you reprotect."
   },
   {
    "id": "05-02-q13",
@@ -248,7 +260,8 @@
     "Built-in alerts already exist; they just need routing.",
     "Classic backup alerts are deprecated.",
     "Storage doesn't send notifications."
-   ]
+   ],
+   "clue": "\"built-in alerts are enabled\" but \"nobody was emailed\": an alert processing rule must route them to an action group."
   },
   {
    "id": "05-02-q14",
@@ -267,7 +280,8 @@
     null,
     "Redundancy doesn't affect reporting.",
     "Alerts and reports are independent."
-   ]
+   ],
+   "clue": "\"reports show no data\" while backups run fine: the vault's diagnostic settings aren't sending to a workspace."
   }
  ]
 }

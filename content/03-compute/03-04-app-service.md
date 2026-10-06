@@ -13,7 +13,7 @@ objective_ids: ["cmp.appservice.plan", "cmp.appservice.plan-scaling", "cmp.appse
 domain: "Deploy and manage Azure compute resources"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["02-01", "03-02"]
+prerequisites: ["0A-01", "0A-07", "02-01", "03-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans"
@@ -52,7 +52,11 @@ free_practice_available: false
 - Configure networking settings for an App Service
 - Configure deployment slots for an App Service
 
-## Why this exists
+## The administrative problem
+
+A company wants to run its website and APIs without patching servers. They need their own domain name with HTTPS,
+enough capacity for busy days, a way to release new versions without downtime, a backup in case a release goes wrong,
+and access to a database that sits in a private network.
 
 App Service runs web apps and APIs without you managing servers. An administrator still decides a
 lot:
@@ -66,6 +70,82 @@ lot:
 
 The single most useful thing to know for this module is that **features are unlocked by the plan's
 tier**. Most "can we do X?" questions are really "is the plan's tier high enough?"
+
+## In plain English
+
+**Azure App Service** runs web apps and APIs on servers that Microsoft manages. Two pieces matter:
+
+- An **App Service plan** is the compute you pay for: a region, an operating system, a **pricing tier** and a number
+  of **instances**. Every app in the plan runs on those instances.
+- A **web app** is your application, running on a plan, reachable at `https://<app>.azurewebsites.net`.
+
+Most "can we do X?" questions come down to the plan's tier. Higher tiers unlock features: custom domains, backups,
+virtual network integration, autoscale and **deployment slots**. You **scale up** by changing the tier and **scale
+out** by adding instances.
+
+A **deployment slot** is a second, live copy of the app, such as *staging*. You deploy there, test it, then **swap**
+it with production.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **App Service plan** | The compute behind your apps: region, OS, pricing tier and instance count. |
+| **Pricing tier** | The plan level, such as Basic, Standard or Premium. It decides features and limits. |
+| **Scale up** | Move the plan to a bigger or higher tier. |
+| **Scale out** | Add instances to the plan, manually or with autoscale. |
+| **Web app** | An application hosted on an App Service plan. |
+| **Custom domain** | Your own name, such as www.contoso.com, mapped to the app with DNS records. |
+| **TLS binding** | The certificate that secures a custom domain over HTTPS. |
+| **Deployment slot** | A live copy of the app, such as staging, that can be swapped with production. |
+| **Swap** | Exchanging two slots, so tested code becomes production without downtime. |
+| **VNet integration** | Lets the app reach resources in a virtual network (outbound). |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Plan, app and slots
+  accDescr: An App Service plan provides the compute: region, operating system, tier and instances. Scaling up changes the tier; scaling out adds instances. Web apps run on the plan. Each app has a production slot and, on higher tiers, extra deployment slots such as staging that can be swapped with production.
+  PLAN["App Service plan<br/>tier · instances"]:::d03 --> APP["Web app"]:::d03
+  APP --> PROD["Production slot"]
+  APP --> STG["Staging slot"]
+  STG <-- "swap" --> PROD
+  UP["Scale up: tier"] -.-> PLAN
+  OUT["Scale out: instances"] -.-> PLAN
+```
+
+The plan is what you pay for and what decides the features; the app is what users reach. When a feature is
+missing, look at the plan's tier first. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| Renting a furnished office floor | App Service plan |
+| A business operating on that floor | Web app |
+| Moving to a bigger floor, or renting more floors | Scale up, scale out |
+| A rehearsal stage next to the main stage | Deployment slot |
+| Swapping the rehearsed show onto the main stage | Slot swap |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | App Service plan and web app |
+| --- | --- |
+| What contains it? | A resource group. An app runs on a plan in the same region. |
+| What does it depend on? | The plan's tier for features; DNS records at your DNS host for custom domains; a storage account for custom backups. |
+| What depends on it? | Users and clients, deployment slots, certificates bound to the app. |
+| Who can manage it? | Contributor or Website Contributor on the app; plan changes need rights on the plan. |
+| How is it networked? | Public endpoint with access restrictions; private endpoint for inbound; VNet integration for outbound. |
+| How is it monitored? | App Service metrics, logs and diagnostics. |
+| How is it protected? | HTTPS Only, minimum TLS version, access restrictions, managed identity. |
+| How is it recovered? | Backups and restore; swap a slot back after a bad release. |
+| What does it cost? | The plan bills per instance by tier, whether or not the apps are busy. |
+| How is it removed safely? | Delete apps and slots, then the plan (it bills until deleted); remove DNS records that point at the app. |
+
+See it with its neighbours on the [resource map](#/map/app-service).
 
 ## How it works under the hood
 
@@ -271,6 +351,31 @@ az webapp deployment slot swap --name "<app>" --resource-group "<rg>" --slot sta
 | Deployment slots | 0 in Basic, **5 in Standard** | Deployment slots | Swap warms up first |
 | Autoscale | Off | Plan > Scale out | **Standard and higher** |
 
+## Worked example
+
+**Requirement.** Releases must be tested in production conditions and switched over with no downtime, and the site
+must scale out automatically on busy afternoons.
+
+1. **Decide.** Zero-downtime release: **deployment slots** and a **swap**. Automatic scale out: **autoscale**. Both need
+   at least the **Standard** tier, so a Basic plan must be scaled up first.
+2. **Configure.** Scale the plan up to Standard, create a **staging** slot, deploy there, then swap. Add an autoscale
+   rule on the plan.
+3. **Observe.** After the swap, production serves the new version; the old one sits in staging, ready to swap back.
+4. **Validate.** Check the tier, the slots and the security settings, as below.
+
+## Validate the result
+
+```powershell
+az appservice plan show --name <plan> --resource-group <rg> --query "sku.name" -o tsv            # S1 or higher for slots
+az webapp deployment slot list --name <app> --resource-group <rg> --query "[].name" -o tsv      # staging
+az webapp show --name <app> --resource-group <rg> --query "{httpsOnly:httpsOnly}" -o table
+az webapp config show --name <app> --resource-group <rg> --query "{minTls:minTlsVersion}" -o table
+```
+
+- Browse to the staging slot's own URL before swapping: it should already show the new version.
+- After the swap, production shows it, and swapping back restores the previous release.
+- For a custom domain, browse to it over HTTPS and check the certificate the browser shows.
+
 ## Common failure modes
 
 1. **"Add binding is unavailable."** The plan is Free or Shared. Scale up to Basic or higher.
@@ -327,6 +432,14 @@ own a domain.
 4. Before a swap, staging has `FEATURE_X=on` (not sticky) and `DB=staging-db` (sticky). Production has
    `FEATURE_X=off` and `DB=prod-db` (sticky). What does production have after the swap?
 5. Why can't the free managed certificate be used for `*.contoso.com`, and what would you buy instead?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain the plan and the app using an office floor and the business on it.
+- Explain scale up versus scale out, and which one autoscale does.
+- Explain how deployment slots give a zero-downtime release and a quick rollback.
 
 ## Key takeaways
 

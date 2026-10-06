@@ -31,10 +31,16 @@ environment. The official skills measured list defines the scope. Architecture d
 engineering, and services outside the outline, such as VPN Gateway, ExpressRoute, Azure Firewall, AKS
 and Terraform, are not taught.
 
+It's **beginner-first in how it explains Azure** and **certification-first in what it teaches**. Every
+lesson starts with the administrative problem, explains it in plain English, shows how the resource
+relates to the others, and only then configures it, validates it and asks the exam question. You don't
+need to know Azure already; you do need to work through it.
+
 ## Alignment
 
 - Aligned to the **AZ-104 skills measured as of April 17, 2026**: all **82** official bullets, across
-  5 domains and 15 functional groups.
+  5 domains and 15 functional groups. Re-checked against the live study guide on 2026-10-06: no drift
+  ([audit](docs/CURRICULUM-AUDIT-2026-10-06.md)).
 - Every lesson is built from Microsoft Learn documentation and lists its sources.
 - Lessons teach generally available behavior; anything in preview is labeled as preview.
 - Microsoft updates the English exam first and localized versions about eight weeks later. The
@@ -43,11 +49,35 @@ and Terraform, are not taught.
 ## Content
 
 Each exam module covers one official functional group. Every module has a lesson, a hands-on lab, a
-knowledge check, comparisons and flashcards: **212 questions** and **216 flashcards** in total.
+knowledge check, comparisons and flashcards: **212 questions**, each with a scenario clue, and **216
+flashcards** in total.
 
-### Module 0 · Lab safety
+### Module 0A · Understanding Azure
 
-A prerequisite, not an exam objective. Do it before any lab.
+Short primers for anyone new to Azure: the prerequisite ideas the exam lessons assume, at the depth
+AZ-104 needs and no deeper. Not exam objectives. Skip them if you already know this; the dashboard
+lets you.
+
+| Primer | Topic |
+| --- | --- |
+| 0A-01 | [Cloud computing and datacenters](https://ironbranded.github.io/AZ104-Academy/#/module/0A-01) |
+| 0A-02 | [Azure regions and availability](https://ironbranded.github.io/AZ104-Academy/#/module/0A-02) |
+| 0A-03 | [Tenants, subscriptions and resource groups](https://ironbranded.github.io/AZ104-Academy/#/module/0A-03) |
+| 0A-04 | [Azure resources and resource providers](https://ironbranded.github.io/AZ104-Academy/#/module/0A-04) |
+| 0A-05 | [Identity, authentication and authorization](https://ironbranded.github.io/AZ104-Academy/#/module/0A-05) |
+| 0A-06 | [Virtual machines and virtualization](https://ironbranded.github.io/AZ104-Academy/#/module/0A-06) |
+| 0A-07 | [Networking: IP addresses, subnets, routing and DNS](https://ironbranded.github.io/AZ104-Academy/#/module/0A-07) |
+| 0A-08 | [Storage and persistent data](https://ironbranded.github.io/AZ104-Academy/#/module/0A-08) |
+| 0A-09 | [Monitoring: metrics and logs](https://ironbranded.github.io/AZ104-Academy/#/module/0A-09) |
+| 0A-10 | [Backup, recovery and resilience](https://ironbranded.github.io/AZ104-Academy/#/module/0A-10) |
+| 0A-11 | [Azure Resource Manager](https://ironbranded.github.io/AZ104-Academy/#/module/0A-11) |
+| 0A-12 | [Portal, Cloud Shell, PowerShell, Azure CLI, ARM and Bicep](https://ironbranded.github.io/AZ104-Academy/#/module/0A-12) |
+| 0A-13 | [How Azure resources fit together](https://ironbranded.github.io/AZ104-Academy/#/module/0A-13) |
+
+### Module 0B · Safe lab foundations
+
+A prerequisite, not an exam objective. Do it before any lab: subscription and region choice, naming
+and tagging, budget alerts, least-privilege access, and a teardown you verify.
 
 | Module | Lesson | Lab |
 | --- | --- | --- |
@@ -97,18 +127,24 @@ A prerequisite, not an exam objective. Do it before any lab.
 
 ## Inside every module
 
-- **Lesson.** Follows one sequence: Orient → Learn → Visualize → Distinguish → Practice → Check →
-  Review. Diagrams appear where a relationship is easier to see than to read, such as scope
-  inheritance, NSG evaluation order, load balancer anatomy and the Site Recovery lifecycle. Each
-  lesson ends with an Exam Lens: what the exam is likely to test, and the traps.
-- **Lab.** States its cost tier up front (free, low, medium or high) and ends with a mandatory
-  teardown. Parts that a lab subscription can't reasonably support, such as identity-based access
-  for Azure Files or customer-managed keys, are labeled as walkthroughs. The ARM and Bicep lab ships
-  with working templates and worked solutions.
-- **Knowledge check.** Questions mapped to the module's objectives, with every answer explained.
-- **Comparisons.** Side-by-side "which option?" tables for the services and settings the exam asks
-  you to tell apart.
+- **Lesson.** One teaching sequence: **Orient → Understand → Learn → Validate → Distinguish →
+  Practice → Check → Review**. *Understand* comes first: the administrative problem, the idea in plain
+  English, the words you need, a mental model with a diagram, and *where it fits*, the ten questions
+  every resource answers (what contains it, what it depends on, what depends on it, who manages it,
+  and how it's networked, monitored, protected, recovered, billed and removed). Then how it works,
+  how to configure it, a worked example, how to **validate** the result, the comparisons and failure
+  modes, and the **Exam Lens**. Each lesson ends with *Teach it back*: explain it without notes.
+- **Lab.** Starts with why it matters and the desired state, and states its cost tier (free, low,
+  medium or high). It ends with a **validation checklist** of results you must observe and a mandatory,
+  verified **teardown**. Parts that a lab subscription can't reasonably support are labeled as
+  walkthroughs. The ARM and Bicep lab ships with working templates and worked solutions.
+- **Knowledge check.** Original scenario questions mapped to the module's objectives. Every answer
+  shows the correct answer, why, why not the others, the **scenario clue**, and the official objective.
+- **Comparisons.** Structured side-by-side comparisons (purpose, scope, layer, when to use, key
+  difference, limitation, dependency, how to validate, AZ-104 takeaway), plus the "which option?"
+  tables in appendix A6.
 - **Flashcards.** The distinctions worth memorizing.
+- **Official training.** The Microsoft Learn modules from course AZ-104T00-A that cover the lesson.
 
 ## Study tools
 
@@ -121,8 +157,29 @@ A prerequisite, not an exam objective. Do it before any lab.
 | [Mock exam](https://ironbranded.github.io/AZ104-Academy/#/exam) | A timed, weighted exam sampled across every module. |
 | [Flashcards](https://ironbranded.github.io/AZ104-Academy/#/cards) | Spaced repetition over the distinctions the exam tests. |
 | [Retention review](https://ironbranded.github.io/AZ104-Academy/#/review) | What has faded and what to re-test, module by module. |
+| [Resource map](https://ironbranded.github.io/AZ104-Academy/#/map) | How the resources you administer contain and depend on each other, with the ten questions answered for each one. |
+| [Compare options](https://ironbranded.github.io/AZ104-Academy/#/compare) | Every structured comparison in one place, filterable by domain. |
+| [Glossary](https://ironbranded.github.io/AZ104-Academy/#/glossary) | Every term the lessons define, in plain English, with the lesson that teaches it. |
 | [Objective coverage](https://ironbranded.github.io/AZ104-Academy/#/coverage) | Every official bullet, with the lesson, lab and questions that cover it. |
 | [Cost planner](https://ironbranded.github.io/AZ104-Academy/#/cost) | Every lab ordered by cost, so you know what you can afford to run. |
 | [Verification watchlist](https://ironbranded.github.io/AZ104-Academy/#/preview) | Lessons that cover preview features or are due for a fresh check against the documentation. |
 
-Your progress is stored only in your browser.
+## Progress
+
+Five states, tracked separately, and none of them is a pass prediction:
+
+| State | Means |
+| --- | --- |
+| **Studied** | You marked the lesson studied. |
+| **Practised** | You finished the lab, including its verified teardown. |
+| **Validated** | You ticked every check in the lab's validation checklist, each one a result you observed. |
+| **Knowledge checked** | You answered the lesson's questions correctly on their latest attempt. |
+| **Retained** | You answered them correctly again at least seven days later. |
+
+Your progress is stored only in your browser. Export it from the dashboard to move it between devices.
+
+## Running it
+
+It's a static GitHub Pages site with no build step: every page is Markdown and JSON fetched at
+runtime by a hash router. To preview locally, serve the folder (`python -m http.server 8080`) rather
+than opening `index.html` from disk.

@@ -10,7 +10,7 @@ objective_ids: ["cmp.iac.interpret", "cmp.iac.modify-arm", "cmp.iac.modify-bicep
 domain: "Deploy and manage Azure compute resources"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["01-03"]
+prerequisites: ["0A-04", "0A-11", "0A-12", "01-03"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax"
@@ -43,7 +43,11 @@ free_practice_available: false
 - Deploy resources by using an Azure Resource Manager template or a Bicep file
 - Export a deployment as an Azure Resource Manager template or convert an Azure Resource Manager template to a Bicep file
 
-## Why this exists
+## The administrative problem
+
+A team builds the same environment again and again: for development, for testing, for each new customer. Built
+by hand, no two are quite the same, and nobody can say exactly what was clicked. An administrator needs a way to
+describe an environment once, review it, deploy it the same way every time, and read what someone else deployed.
 
 Every change to an Azure resource, whether it comes from the portal, the CLI or PowerShell, is a
 request to **Azure Resource Manager**. A template is simply that request written down: which
@@ -60,6 +64,79 @@ There are two languages for the same thing:
 The exam doesn't ask you to write a template from nothing. It asks you to **read** one (what does it
 deploy, and where do the values come from?), **change** one (add a parameter, a resource, a
 dependency), **deploy** one safely, and **get** one, by export or conversion.
+
+## In plain English
+
+A **template** is a file that describes the resources you want and their settings. You give it to Azure Resource
+Manager, and Resource Manager creates or updates whatever is needed to match it. This is **declarative**: you say what
+the end state is, not the steps to get there.
+
+There are two languages for the same thing:
+
+- **ARM templates** are JSON, the format Resource Manager accepts.
+- **Bicep** is shorter and easier to read. It **compiles to an ARM template** before deployment.
+
+Both have the same parts: **parameters** (values you supply at deployment, such as a name), **variables** (values
+worked out inside the file), **resources** (what to create) and **outputs** (values returned afterwards). You can also
+go the other way: **export** an existing deployment as a template, or **decompile** JSON into Bicep.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Infrastructure as code** | Describing resources in files that can be reviewed, versioned and deployed again. |
+| **ARM template** | A JSON file that declares resources for Azure Resource Manager to deploy. |
+| **Bicep file** | A simpler language for the same declarations; it compiles to an ARM template. |
+| **Parameter** | A value supplied when you deploy, such as a name or a SKU. |
+| **Variable** | A value computed inside the template from parameters and functions. |
+| **Output** | A value the deployment returns, such as a resource ID. |
+| **Deployment scope** | Where a deployment targets: resource group, subscription, management group or tenant. |
+| **What-if** | A preview of the changes a deployment would make, without making them. |
+| **Decompile** | Convert an ARM template's JSON into a Bicep file, as a best-effort starting point. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: A template is a description that Resource Manager makes real
+  accDescr: A Bicep file compiles to an ARM template. The ARM template, with parameter values supplied at deployment time, is sent to Azure Resource Manager, which creates or updates the resources so they match. An existing resource group or deployment can be exported back to an ARM template, and an ARM template can be decompiled to Bicep.
+  B["Bicep file"] -- "compiles to" --> J["ARM template (JSON)"]:::d03
+  P["Parameter values"] --> D["Deployment"]
+  J --> D --> ARM["Azure Resource Manager"] --> R["Resources match the template"]
+  R -. "export" .-> J
+  J -. "decompile" .-> B
+```
+
+A template is a description, not a script. Deploying the same template twice should leave the same result,
+which is what makes it safe to repeat. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| An architect's drawing | ARM template or Bicep file |
+| The blanks on a form (name, size) | Parameters |
+| Building inspectors checking the drawing against the site | What-if |
+| Measuring an existing house to draw its plan | Export |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | A template deployment |
+| --- | --- |
+| What contains it? | A deployment record at its scope: a resource group, subscription, management group or tenant. |
+| What does it depend on? | Permission to create the resources at that scope; registered resource providers; the Bicep CLI for Bicep files. |
+| What depends on it? | The resources it created, and anyone redeploying from the same file. |
+| Who can manage it? | Whoever can write the resources at the target scope, such as Contributor. |
+| How is it networked? | Not networked itself; the resources it declares may be. |
+| How is it monitored? | The deployment history at its scope and the activity log. |
+| How is it protected? | Secure parameters for secrets, what-if before deploying, review in source control. |
+| How is it recovered? | Redeploy the last good version of the file. |
+| What does it cost? | Deploying is free; the resources bill as usual. |
+| How is it removed safely? | Deleting a deployment record doesn't delete the resources; delete the resources, or the resource group. |
+
+See it with its neighbours on the [resource map](#/map/rg).
 
 ## How it works under the hood
 
@@ -263,6 +340,39 @@ Export-AzResourceGroup -ResourceGroupName '<rg>' -Path './exported.json'
 | Deployment history | Up to 800, old entries auto-deleted | Resource group > Deployments | Exact template, JSON only |
 | Export as Bicep | Portal only | Export template | CLI and PowerShell export JSON; decompile it |
 
+## Worked example
+
+**Requirement.** A Bicep file deploys a storage account. You must make the SKU selectable at deployment time,
+defaulting to `Standard_LRS`, and allow only LRS or ZRS.
+
+1. **Decide.** A selectable value is a **parameter**; restricting it is the `@allowed` decorator; the default is the
+   parameter's default value.
+2. **Configure.** Add the parameter, then use `skuName` in the resource's `sku.name`:
+
+   ```bicep
+   @allowed([
+     'Standard_LRS'
+     'Standard_ZRS'
+   ])
+   param skuName string = 'Standard_LRS'
+   ```
+
+3. **Observe.** Run what-if first: it should show a **Modify** or **NoChange** for the account, not a Delete.
+4. **Validate.** Deploy, then check the deployment's state and the resulting SKU, as below.
+
+## Validate the result
+
+```powershell
+az bicep build --file storage.bicep                                       # compiles cleanly
+az deployment group what-if --resource-group <rg> --template-file storage.bicep --parameters skuName=Standard_ZRS
+az deployment group list --resource-group <rg> --query "[].{name:name, state:properties.provisioningState}" -o table
+az storage account list --resource-group <rg> --query "[].{name:name, sku:sku.name}" -o table
+```
+
+- The deployment's **provisioningState** is **Succeeded**, and the resource has the value you passed.
+- Deploy the same file a second time: nothing should change. If it does, the template isn't describing the real state.
+- After an export or decompile, build the result before trusting it: both are starting points that can need clean-up.
+
 ## Common failure modes
 
 1. **"The deployment deleted our database."** It ran in **complete** mode, and the database wasn't in
@@ -322,6 +432,14 @@ compiled and linted in CI.
 4. Name three reasons an exported template may fail to redeploy as-is.
 5. After decompiling an ARM template, the Bicep file uses `concat()` and an explicit `dependsOn` where a
    hand-written file wouldn't. Is it wrong? What would you change?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain the difference between a template and a script using a drawing and a list of instructions.
+- Explain where each value in a template comes from: parameter, variable, or hardcoded.
+- Explain how Bicep and ARM JSON relate, and how you'd turn one into the other.
 
 ## Key takeaways
 

@@ -76,8 +76,11 @@ retirement date. Assume something has moved.
 ```
 
 Checks front-matter schema, `domain_weight` and `status` values, `last_verified`
-format and age, internal relative links, the presence of `## Teardown` in every
-lab, and that `manifest.json` points at files that exist.
+format and age, internal relative links, and that `manifest.json` points at files
+that exist. Since the 2026-10-06 pass it also requires the full lesson anatomy
+(docs/STYLE-GUIDE.md, section 2), the primer anatomy for Module 0A, a validation
+checklist and a teardown checklist in every lab, a `clue` on every question, and
+ids in `data/comparisons.json` and `data/resources.json` that resolve.
 
 Weekly, or before a release:
 
@@ -104,6 +107,18 @@ themes and fails on any WCAG 2.0/2.1 A or AA violation.
 **If you changed any file under `assets/`, bump `CACHE_VERSION` in `sw.js`.** The
 live site serves its code cache-first for offline use, so an unbumped version
 means returning visitors run stale code alongside new content.
+
+### Smoke-test every route
+
+```text
+npm install --no-save jsdom@24
+python -m http.server 8080 &
+node tools/smoke-test.js
+```
+
+Loads every lesson, lab, appendix and study view headlessly and fails if a page
+throws, shows an error box, or renders without a heading. It found the lab
+checklist bug the 2026-10-06 pass fixed; run it whenever you touch `assets/js`.
 
 ### Serve the site and click through
 

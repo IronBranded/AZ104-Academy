@@ -10,7 +10,7 @@ objective_ids: ["sto.accounts.create", "sto.accounts.redundancy", "sto.accounts.
 domain: "Implement and manage storage"
 domain_weight: "15-20%"
 status: GA
-prerequisites: ["02-01"]
+prerequisites: ["0A-02", "0A-08", "02-01"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview"
@@ -45,7 +45,12 @@ free_practice_available: false
 - Configure storage account encryption
 - Manage data by using Azure Storage Explorer and AzCopy
 
-## Why this exists
+## The administrative problem
+
+A team needs somewhere to keep application data, reports and file shares. Before anyone uploads a byte, an
+administrator has to make choices that are hard or impossible to change later: what kind of account, how many copies
+in how many places, who holds the encryption key, and how data will be moved in and out by the people and scripts that
+use it.
 
 A storage account is the container for blobs, files, queues and tables, and most of its
 important decisions are made **when you create it**. The type can never change afterwards.
@@ -54,6 +59,82 @@ redundancy, can change later but take time and sometimes cost money.
 
 This module is about those decisions, and about the two tools administrators use to move data
 in and out: **AzCopy** from the command line and **Storage Explorer** on the desktop.
+
+## In plain English
+
+A **storage account** is a named container for Azure Storage data: blobs, file shares, queues and tables. Its
+name becomes part of every address (`https://<name>.blob.core.windows.net`), so it must be unique across all of Azure.
+
+When you create one you decide:
+
+- its **type and performance**: Standard general-purpose v2 for most needs, or a Premium type for low latency. The
+  type can never change;
+- its **redundancy**: how many copies Azure keeps, and where: one datacenter (**LRS**), three zones (**ZRS**), or a
+  second region as well (**GRS**, **GZRS**, with read-access variants);
+- its **encryption**: data is always encrypted at rest; you choose whether Microsoft or you (in Azure Key Vault)
+  manages the key.
+
+**Object replication** copies new blobs from containers in one account to containers in another, asynchronously. And
+two tools move data: **AzCopy** on the command line and **Storage Explorer** on the desktop.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Storage account** | A named, regional container for blobs, file shares, queues and tables, with its own endpoints and settings. |
+| **General-purpose v2** | The standard account type for blobs, files, queues and tables. |
+| **Redundancy** | How many copies Azure keeps of your data, and where: LRS, ZRS, GRS, GZRS and read-access variants. |
+| **Primary / secondary region** | Where data is written first, and the paired region that holds the geo-redundant copy. |
+| **Object replication** | Asynchronous copying of block blobs from a source account's container to a destination account's container. |
+| **Microsoft-managed key** | The default: Azure creates and rotates the encryption key. |
+| **Customer-managed key** | A key you keep in Azure Key Vault, which the account reaches through a managed identity. |
+| **AzCopy** | A command-line tool for copying data to, from and between storage accounts. |
+| **Storage Explorer** | A desktop app for browsing and managing storage data. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Decisions made when a storage account is created
+  accDescr: A storage account has a globally unique name and a region. At creation you choose its type and performance, which can never change; its redundancy, which decides how many copies exist and where; and its encryption key, Microsoft-managed or customer-managed in Key Vault. Data moves in and out with AzCopy or Storage Explorer, and object replication copies blobs to another account.
+  SA["Storage account<br/>unique name, one region"]:::d02
+  SA --> T["Type + performance<br/>fixed at creation"]
+  SA --> R["Redundancy<br/>LRS · ZRS · GRS · GZRS"]
+  SA --> K["Encryption key<br/>Microsoft or customer-managed"]
+  TOOLS["AzCopy · Storage Explorer"] -.-> SA
+  SA -. "object replication" .-> SA2["Another account"]
+```
+
+Make the creation-time decisions on purpose. Redundancy can change later, sometimes slowly; the account
+type can't change at all. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A self-storage unit with your company's name on the door | Storage account |
+| Copies in one building, across town, or in another city | LRS, ZRS, GRS |
+| Using the facility's lock or bringing your own | Microsoft-managed or customer-managed key |
+| A moving van and a hand cart | AzCopy and Storage Explorer |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Storage account |
+| --- | --- |
+| What contains it? | A resource group, in one region. The name is globally unique, 3 to 24 lowercase letters and numbers. |
+| What does it depend on? | A unique name; Key Vault and a managed identity for customer-managed keys; a second account for object replication. |
+| What depends on it? | Containers, shares, apps, backups and logs written to it, and replication policies. |
+| Who can manage it? | Storage Account Contributor or Contributor for configuration; data roles for the data. |
+| How is it networked? | Public endpoints behind its firewall, or private endpoints (02-01, 04-02). |
+| How is it monitored? | Capacity and transaction metrics; resource logs through a diagnostic setting; Storage insights. |
+| How is it protected? | Encryption at rest, firewall, a delete lock, soft delete and versioning (02-03). |
+| How is it recovered? | Redundancy for hardware, zone or regional failures; soft delete and versioning for deletions. |
+| What does it cost? | Capacity by redundancy and tier, plus operations and data transfer. |
+| How is it removed safely? | Deleting the account deletes all its data. Check locks, replication policies and anything still writing to it. |
+
+See it with its neighbours on the [resource map](#/map/storage).
 
 ## How it works under the hood
 
@@ -261,6 +342,33 @@ azcopy sync './reports' 'https://<account>.blob.core.windows.net/<container>' --
 | Cross-tenant object replication | **Disallowed** (accounts since Dec 15, 2023) | Configuration | Use full resource IDs |
 | Object replication copy scope | **New blobs only** | Replication rule | Choose "everything" to include existing blobs |
 
+## Worked example
+
+**Requirement.** Reports must survive the loss of an entire region, and a reporting app in that second region must
+be able to read them at any time without waiting for a failover.
+
+1. **Decide.** Surviving a region means **geo-redundant** storage. Reading the secondary *without a failover* means the
+   **read-access** variant: **RA-GRS**, or **RA-GZRS** if the primary must also survive a zone outage.
+2. **Configure.** Set the account's redundancy (or create it with that setting).
+3. **Observe.** The account shows a secondary endpoint with a `-secondary` suffix.
+4. **Validate.** Check the SKU, and read a blob from the secondary endpoint, as below.
+
+## Validate the result
+
+```powershell
+(Get-AzStorageAccount -ResourceGroupName <rg> -Name <account>).Sku.Name        # Standard_RAGRS
+(Get-AzStorageAccount -ResourceGroupName <rg> -Name <account>).Encryption.RequireInfrastructureEncryption
+Get-AzStorageObjectReplicationPolicy -ResourceGroupName <rg> -StorageAccountName <destination> |
+    Select-Object PolicyId, SourceAccount
+```
+
+- For redundancy, the SKU name is the proof: `Standard_LRS`, `Standard_ZRS`, `Standard_GRS`, `Standard_RAGRS`,
+  `Standard_GZRS` or `Standard_RAGZRS`.
+- For object replication, upload a new blob to the source container and confirm it appears in the destination after a
+  short delay. Existing blobs aren't copied unless the rule says so.
+- For AzCopy, list the destination after the copy: a command that exited without error is not the same as data that
+  arrived.
+
 ## Common failure modes
 
 1. **"We need to change our Premium account to Standard."** Types can't change. Create a new account
@@ -317,6 +425,14 @@ would leave a key vault you can't purge for weeks.
    can be enabled later?
 5. You must copy 200 GB between two storage accounts from a laptop on a slow network. Which tool and
    command, and why doesn't the laptop's bandwidth matter?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain LRS, ZRS and GRS using where you'd keep copies of an important document.
+- Explain why the account type and some encryption options must be right at creation.
+- Explain the difference between geo-redundancy and object replication.
 
 ## Key takeaways
 

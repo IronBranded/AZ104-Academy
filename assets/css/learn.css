@@ -1004,3 +1004,87 @@ a.outline-badge:hover, a.outline-badge:focus-visible { color: var(--ink); border
 @media (max-width: 640px) {
   .diagram svg { min-width: 30rem; }
 }
+
+/* ------------------------------------------------------------------------
+   Beginner-first additions (Module 0A, lesson anatomy, explore views)
+   ------------------------------------------------------------------------ */
+
+.stage[data-stage="understand"] table td:first-child,
+.stage[data-stage="understand"] table th[scope="row"] { font-weight: var(--w-heading, 600); }
+
+.teachback {
+  margin-top: var(--s-6);
+  padding: var(--s-4);
+  border-left: 3px solid var(--d, var(--accent));
+  background: var(--d-tint, var(--paper-sink));
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.teachback h3 { margin-top: 0; }
+
+.kc__clue {
+  border-left: 3px solid var(--call-exam, var(--accent));
+  padding-left: var(--s-3);
+}
+
+/* Structured comparison: options as columns, the eight questions as rows. */
+.cmp--grid { margin-bottom: var(--s-6); }
+.cmp__q { color: var(--ink-soft); margin: 0 0 var(--s-3); }
+.cmp-grid { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+.cmp-grid th, .cmp-grid td { text-align: left; vertical-align: top; padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--rule); }
+.cmp-grid thead th { border-bottom: 2px solid var(--d, var(--rule)); }
+.cmp-grid tbody th { color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+.cmp__takeaway {
+  margin: var(--s-3) 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--d-tint, var(--paper-sink));
+  border-radius: var(--radius);
+}
+.cmp__takeaway strong { color: var(--d-ink, var(--ink)); }
+.cmp__meta { font-size: var(--t-sm); color: var(--ink-soft); }
+.explore-filter { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: var(--s-4) 0; }
+.explore-filter .btn[aria-pressed="true"] { border-color: var(--ink); font-weight: 600; }
+
+/* Resource map */
+.resmap { display: grid; grid-template-columns: minmax(14rem, 1fr) minmax(0, 2fr); gap: var(--s-6); align-items: start; margin-top: var(--s-4); }
+.resmap__side h2 { font-size: var(--t-md); margin: var(--s-4) 0 var(--s-2); }
+.resmap__tree, .resmap__tree ul { list-style: none; margin: 0; padding-left: var(--s-4); }
+.resmap__tree { padding-left: 0; }
+.resmap__tree li { position: relative; margin: var(--s-1) 0; }
+.resmap__tree ul { border-left: 1px solid var(--rule); margin-left: var(--s-2); }
+.resmap__group { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.resmap__btn, .resmap__chip {
+  font: inherit; font-size: var(--t-sm); cursor: pointer;
+  background: var(--paper-raise); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: var(--s-1) var(--s-2);
+}
+.resmap__btn[aria-pressed="true"], .resmap__chip[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 600; }
+.resmap__btn:focus-visible, .resmap__chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.resmap__detail {
+  position: sticky; top: calc(var(--h-topbar, 3rem) + var(--s-3));
+  border-top: 4px solid var(--d, var(--rule));
+  background: var(--paper-raise); border-radius: var(--radius-lg); padding: var(--s-4) var(--s-5, 1.25rem);
+}
+.resmap__name { margin: 0; }
+.resmap__name:focus { outline: none; }
+.resmap__type { font-family: var(--face-mono); font-size: var(--t-xs); color: var(--ink-faint); margin: var(--s-1) 0 var(--s-3); }
+.resmap__plain { margin-top: 0; }
+.resmap__qs { margin: 0; }
+.resmap__qs dt { font-weight: 600; margin-top: var(--s-3); color: var(--d-ink, var(--ink)); }
+.resmap__qs dd { margin: var(--s-1) 0 0; }
+.resmap__rel { display: inline-flex; flex-wrap: wrap; gap: var(--s-1); }
+.resmap__lessons { margin-top: var(--s-4); font-size: var(--t-sm); }
+
+/* Glossary */
+.explore-search { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-4) 0 var(--s-2); }
+.explore-search input { font: inherit; padding: var(--s-1) var(--s-2); min-width: min(22rem, 100%); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); color: var(--ink); }
+.gloss { margin: 0; }
+.gloss__item { padding: var(--s-3) 0; border-bottom: 1px solid var(--rule); }
+.gloss__item dt { font-weight: 600; }
+.gloss__item dd { margin: var(--s-1) 0 0; max-width: var(--measure, 70ch); }
+
+@media (max-width: 860px) {
+  .resmap { grid-template-columns: 1fr; }
+  .resmap__detail { position: static; }
+  .cmp-grid tbody th { white-space: normal; }
+}

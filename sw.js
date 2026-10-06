@@ -39,7 +39,7 @@
    would evict every other Academy's offline copy on each update. */
 importScripts('data/exam.js');
 var CACHE_PREFIX = self.AcademyExam.slug + '-';
-var CACHE_VERSION = CACHE_PREFIX + 'v1';
+var CACHE_VERSION = CACHE_PREFIX + 'v2';
 var SHELL = [
   './',
   'index.html',
@@ -53,6 +53,8 @@ var SHELL = [
   'assets/css/learn.css',
   'docs/SKILLS-MEASURED-SNAPSHOT.md',
   'content/official-training.json',
+  'data/comparisons.json',
+  'data/resources.json',
   'assets/js/theme.js',
   'assets/js/vendor/marked.min.js',
   'assets/js/frontmatter.js',
@@ -73,6 +75,7 @@ var SHELL = [
   'assets/js/dashboard.js',
   'assets/js/review.js',
   'assets/js/palette.js',
+  'assets/js/explore.js',
   'assets/js/app.js'
 ];
 

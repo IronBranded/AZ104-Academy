@@ -1,11 +1,110 @@
 {
- "generated": "2026-09-29",
+ "generated": "2026-10-06",
  "skills_source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104",
  "outline_version": "2026-04-17",
  "domains": [
   {
+   "id": "0A",
+   "name": "Understanding Azure",
+   "weight": "n/a",
+   "folder": "0A-foundations",
+   "modules": [
+    {
+     "id": "0A-01",
+     "title": "Cloud Computing and Datacenters",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-01-cloud-computing.md",
+     "lab": null
+    },
+    {
+     "id": "0A-02",
+     "title": "Azure Regions and Availability",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-02-regions-and-availability.md",
+     "lab": null
+    },
+    {
+     "id": "0A-03",
+     "title": "Tenants, Subscriptions and Resource Groups",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-03-tenants-subscriptions-resource-groups.md",
+     "lab": null
+    },
+    {
+     "id": "0A-04",
+     "title": "Azure Resources and Resource Providers",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-04-resources-and-providers.md",
+     "lab": null
+    },
+    {
+     "id": "0A-05",
+     "title": "Identity, Authentication and Authorization",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-05-identity-authn-authz.md",
+     "lab": null
+    },
+    {
+     "id": "0A-06",
+     "title": "Virtual Machines and Virtualization",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-06-virtual-machines.md",
+     "lab": null
+    },
+    {
+     "id": "0A-07",
+     "title": "Networking: IP Addresses, Subnets, Routing and DNS",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-07-networking-basics.md",
+     "lab": null
+    },
+    {
+     "id": "0A-08",
+     "title": "Storage and Persistent Data",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-08-storage-basics.md",
+     "lab": null
+    },
+    {
+     "id": "0A-09",
+     "title": "Monitoring: Metrics and Logs",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-09-monitoring-basics.md",
+     "lab": null
+    },
+    {
+     "id": "0A-10",
+     "title": "Backup, Recovery and Resilience",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-10-backup-and-resilience.md",
+     "lab": null
+    },
+    {
+     "id": "0A-11",
+     "title": "Azure Resource Manager",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-11-azure-resource-manager.md",
+     "lab": null
+    },
+    {
+     "id": "0A-12",
+     "title": "Portal, Cloud Shell, PowerShell, Azure CLI, ARM and Bicep",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-12-admin-tools.md",
+     "lab": null
+    },
+    {
+     "id": "0A-13",
+     "title": "How Azure Resources Fit Together",
+     "objective": "(Foundation primer - prerequisite knowledge for AZ-104, not an exam objective)",
+     "content": "content/0A-foundations/0A-13-how-resources-fit-together.md",
+     "lab": null
+    }
+   ]
+  },
+  {
    "id": "00",
-   "name": "Lab Safety and Environment Setup",
+   "name": "Safe Lab Foundations",
    "weight": "n/a",
    "folder": "00-lab-safety",
    "modules": [

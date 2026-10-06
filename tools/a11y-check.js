@@ -56,7 +56,11 @@ const ROUTES = [
   '#/module/05-01',          // alert pipeline diagram, KQL code blocks
   '#/domain/05',             // Monitor & Maintain domain review
   '#/module/05-02',          // Site Recovery lifecycle diagram
-  '#/module/00-02',          // Module 0 lesson
+  '#/module/00-02',          // Module 0B lesson
+  '#/module/0A-13',          // Module 0A primer: resource relationships
+  '#/map/vm',                // resource map with a selection
+  '#/compare',               // structured comparisons
+  '#/glossary',              // glossary built from the lessons
   '#/lab/01-01',             // lab mode header and part tracker
   '#/lab/00-01',             // lab with a cost chip
   '#/domain/01',             // domain review

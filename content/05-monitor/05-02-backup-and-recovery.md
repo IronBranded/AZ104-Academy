@@ -12,7 +12,7 @@ objective_ids: ["mon.backup.rsv", "mon.backup.backup-vault", "mon.backup.policy"
 domain: "Monitor and maintain Azure resources"
 domain_weight: "10-15%"
 status: GA
-prerequisites: ["03-02", "05-01"]
+prerequisites: ["0A-02", "0A-10", "03-02", "05-01"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/backup/backup-azure-recovery-services-vault-overview"
@@ -48,7 +48,11 @@ free_practice_available: false
 - Perform a failover to a secondary region by using Site Recovery
 - Configure and interpret reports and alerts for backups
 
-## Why this exists
+## The administrative problem
+
+A file server's data is encrypted by ransomware. A developer drops a production table. And next month, an entire
+Azure region might have a long outage. The business has told you how much data it can afford to lose and how long it
+can be down. You need protection that matches each of those failures, and proof that it works before you need it.
 
 Two different questions, two different services:
 
@@ -59,6 +63,80 @@ Two different questions, two different services:
 
 Most scenario questions are decided by which of the two the requirement describes, then by which **vault**,
 **policy** or **failover** step fits.
+
+## In plain English
+
+Two services, for two different problems:
+
+- **Azure Backup** keeps **recovery points**: copies of a VM, a file share or other data as it was at a moment, on a
+  schedule set by a **backup policy**. When something is deleted or corrupted, you **restore** from a recovery point.
+- **Azure Site Recovery** continuously **replicates** VMs to another region. When the primary region is unavailable,
+  you **fail over** and run the VMs from the replica.
+
+Both store their settings and data in a **vault**: a **Recovery Services vault** (VMs, file shares, Site Recovery) or
+an **Azure Backup vault** (newer workloads such as blobs and managed disks). A vault's storage redundancy should be
+set before anything is protected. **Soft delete** keeps deleted backup data for a period, so a backup can't simply be
+erased by mistake or by an attacker.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Recovery Services vault** | Holds backups of VMs and file shares, and Site Recovery replication settings. |
+| **Backup vault** | The newer vault type for workloads such as blobs, managed disks and some databases. |
+| **Backup policy** | When backups run and how long recovery points are kept. |
+| **Recovery point** | One restorable copy, from a known time. |
+| **Restore** | Recovering data or a VM from a recovery point. |
+| **Replication** | Continuously copying a VM's disks to another region. |
+| **Failover** | Starting the replicated VM in the secondary region. |
+| **Test failover** | A failover into an isolated network, to prove recovery without affecting production. |
+| **Reprotect** | After a failover, replicating back in the other direction. |
+| **Soft delete for backups** | Deleted backup data is kept for a period and can be recovered. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Backup goes back in time; Site Recovery moves the workload
+  accDescr: Azure Backup takes recovery points of a VM on a schedule from a backup policy and stores them in a vault, so you can restore the data as it was. Azure Site Recovery continuously replicates the VM to a secondary region, so you can fail over and run it there when the primary region is unavailable. A test failover into an isolated network proves recovery without affecting production.
+  VM["Production VM<br/>primary region"]:::d05
+  VM -- "scheduled backup (policy)" --> V["Vault: recovery points"]:::d05
+  V -- "restore: data as it was" --> VM
+  VM -- "continuous replication" --> REP["Replica<br/>secondary region"]:::d05
+  REP -- "failover / test failover" --> RUN["VM running in secondary region"]
+```
+
+Read the requirement for a time ("restore last Tuesday") or a place ("keep running if the region is down"). Time
+means Backup; place means Site Recovery. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| Dated photocopies in a fireproof cabinet | Backup recovery points in a vault |
+| A twin office in another city kept in sync | Site Recovery replica |
+| Moving staff to the twin office during a flood | Failover |
+| A fire drill | Test failover |
+| A shredder that waits two weeks before shredding | Soft delete for backups |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Recovery Services vault |
+| --- | --- |
+| What contains it? | A resource group. |
+| What does it depend on? | Storage redundancy, chosen before the first item is protected; backup and replication policies. |
+| What depends on it? | Protected items (VMs, file shares) and replicated items. |
+| Who can manage it? | Backup Contributor, Backup Operator, Site Recovery Contributor. |
+| How is it networked? | Failover targets a network in the secondary region; optional private endpoints. |
+| How is it monitored? | Backup jobs, built-in Azure Monitor alerts, backup reports through diagnostic settings. |
+| How is it protected? | Soft delete, RBAC, Cross Region Restore with geo-redundant storage. |
+| How is it recovered? | It is the recovery mechanism: restore from recovery points, fail over replicas. |
+| What does it cost? | Per protected instance plus backup storage; Site Recovery per protected instance plus replica storage. |
+| How is it removed safely? | Stop protection and delete backup data (soft-deleted items count), then delete the vault. |
+
+See it with its neighbours on the [resource map](#/map/rsv).
 
 ## How it works under the hood
 
@@ -230,6 +308,32 @@ AddonAzureBackupJobs
 | ASR recovery point retention | **1 day** | Replication policy | App-consistent snapshots off by default |
 | Built-in job-failure alerts | **On** | Vault > Properties > Monitoring settings | Route with an alert processing rule |
 
+## Worked example
+
+**Requirement.** A line-of-business VM must be restorable to any day in the last 30 days, and must keep running
+within an hour if its region becomes unavailable.
+
+1. **Decide.** "Any day in the last 30" is **Azure Backup** with a daily policy keeping 30 daily recovery points.
+   "Keep running if the region is down" is **Site Recovery** to a secondary region. One requirement doesn't replace the
+   other.
+2. **Configure.** A Recovery Services vault, its redundancy set first; enable backup with the policy; enable
+   replication to the target region.
+3. **Observe.** A first backup job completes; the replicated item reaches **Protected**.
+4. **Validate.** Restore something and run a **test failover**, as below.
+
+## Validate the result
+
+```powershell
+az backup item list -g <rg> -v <vault> --query "[].{item:properties.friendlyName, status:properties.protectionStatus}" -o table
+az backup job list  -g <rg> -v <vault> --query "[].{op:properties.operation, status:properties.status}" -o table
+```
+
+- A backup is validated by a **restore**: restore a file or a disk and check its content. A green job list is not
+  proof that you can get data back.
+- In the vault, **Replicated items** shows the VM **Protected**; run a **test failover** into an isolated virtual
+  network, confirm the VM starts there, then clean up the test failover.
+- Backup alerts are validated when one reaches the action group, for example after a deliberately failed job.
+
 ## Common failure modes
 
 1. **"We need GRS now, but the vault is LRS."** Redundancy locked when the first item was protected. Create a new GRS
@@ -285,6 +389,14 @@ optional. It's the highest-cost lab in the Academy, and its teardown order matte
    the original VM is gone?
 5. Order these Site Recovery steps for a real regional outage, and say which happens only in drills: reprotect,
    commit, failover, test failover, clean up, fail back.
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain Backup versus Site Recovery using photocopies and a twin office.
+- Explain why a successful backup job isn't the same as a proven restore.
+- Explain why a vault's redundancy should be set before anything is protected.
 
 ## Key takeaways
 

@@ -12,7 +12,7 @@ objective_ids: ["id.gov.policy", "id.gov.locks", "id.gov.tags", "id.gov.resource
 domain: "Manage Azure identities and governance"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["00-01", "01-02"]
+prerequisites: ["0A-03", "0A-11", "00-01", "01-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/governance/policy/overview"
@@ -49,7 +49,12 @@ free_practice_available: true
 - Manage costs by using alerts, budgets, and Azure Advisor recommendations
 - Configure management groups
 
-## Why this exists
+## The administrative problem
+
+An organization with dozens of subscriptions needs rules that hold no matter who deploys: resources only in
+approved regions, every resource tagged with its cost center, production databases that nobody can delete by
+accident, and a warning before the monthly bill runs over budget. Access control alone can't do this: an Owner is
+allowed to do almost anything, including the wrong thing.
 
 Module 01-02 answered *who may act*. Governance answers three different questions:
 
@@ -61,6 +66,81 @@ All three are applied to the same hierarchy you met in 01-02: management groups,
 subscriptions, resource groups, resources. Most scenario questions in this module come
 down to two things: **which control** answers the requirement, and **what inherits** down
 the hierarchy.
+
+## In plain English
+
+Governance adds controls that apply to *what* exists, not *who* acts:
+
+- **Azure Policy** describes how resources must look ("only these regions", "must have a CostCenter tag") and acts
+  when they're created or changed: deny them, audit them, or fix them.
+- **Resource locks** stop deletion (**CanNotDelete**) or any change (**ReadOnly**), even for an Owner, until someone
+  removes the lock.
+- **Tags** are name-value labels such as `CostCenter=42`. They help with cost reports and ownership, and they
+  **aren't inherited**: a resource group's tags stay on the group.
+- **Resource groups, subscriptions and management groups** are the containers these controls attach to. Policy, role
+  assignments and locks set at one level flow down to everything below.
+- **Budgets, cost alerts and Advisor** watch spending and suggest savings. A budget alert warns; it doesn't stop
+  anything.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Azure Policy** | Rules about what resources may exist and how they must be configured, enforced on create and update. |
+| **Policy definition** | One rule, with an effect such as deny, audit or modify. |
+| **Initiative** | A group of policy definitions assigned together. |
+| **Policy assignment** | A definition or initiative applied at a scope. |
+| **Remediation task** | Fixes existing non-compliant resources for modify and deployIfNotExists policies, using a managed identity. |
+| **Resource lock** | CanNotDelete or ReadOnly protection that applies to everyone, including Owners. |
+| **Tag** | A name-value label on a resource, resource group or subscription. Not inherited. |
+| **Management group** | A container of subscriptions, so governance can be assigned once for many of them. |
+| **Budget** | A spending threshold for a scope that sends alerts. It doesn't stop resources. |
+| **Azure Advisor** | A service that recommends changes for cost, reliability, security, performance and operations. |
+
+## Mental model
+
+```mermaid
+flowchart TD
+  accTitle: Governance controls attach to the scope hierarchy
+  accDescr: Management groups contain subscriptions, which contain resource groups, which contain resources. Azure Policy assignments, role assignments and resource locks set at any level apply to every level below. Tags are set on each item and are not inherited. Budgets watch spending at a subscription or resource group.
+  MG["Management group"]:::d01 --> SUB["Subscription"]:::d01 --> RG["Resource group"]:::d01 --> R["Resource"]
+  POL["Policy: what may exist"] -.-> MG
+  LCK["Lock: what must not change"] -.-> RG
+  TAG["Tags: labels, not inherited"] -.-> R
+  BUD["Budget: spending alerts"] -.-> SUB
+```
+
+RBAC answers *who may act*; governance answers *what is allowed* and *what must not change*. A scenario
+usually names one of these three, and the matching control is the answer. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A building code every builder must follow | Azure Policy |
+| A "do not remove" seal on a fire extinguisher | CanNotDelete lock |
+| Asset labels with a cost-center number | Tags |
+| A division with many departments | Management group with subscriptions |
+| A spending alert from your bank | Budget alert |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Policy assignment |
+| --- | --- |
+| What contains it? | A scope: management group, subscription or resource group (or a single resource). |
+| What does it depend on? | A policy definition or initiative; a managed identity for modify and deployIfNotExists effects. |
+| What depends on it? | Every create and update request in scope is evaluated against it. |
+| Who can manage it? | Resource Policy Contributor or Owner at the scope. |
+| How is it networked? | Not networked. |
+| How is it monitored? | Policy compliance results and the activity log. |
+| How is it protected? | Exemptions are explicit, time-bound and auditable. |
+| How is it recovered? | Re-assign it; remediation tasks fix existing resources. |
+| What does it cost? | Free for Azure resources. |
+| How is it removed safely? | Delete it where it was assigned: deleting a resource group doesn't remove a subscription-scope assignment. |
+
+See it with its neighbours on the [resource map](#/map/policy-assignment).
 
 ## How it works under the hood
 
@@ -331,6 +411,38 @@ az account management-group subscription add --name az104-sandbox --subscription
 | Require authorization to create management groups | Off: anyone can create | Management groups > Settings | Restrict who can change the hierarchy |
 | Advisor lookback | 7 days | Advisor > Configuration | 14–90 days for monthly workloads |
 
+## Worked example
+
+**Requirement.** Every resource in the Finance subscription must carry a `CostCenter` tag. Existing resources must
+get it from their resource group, and nobody may delete the `rg-ledger` resource group.
+
+1. **Decide.** "Must carry a tag" is **Policy**, not RBAC. Copying from the resource group means a **modify** effect,
+   such as the built-in *Inherit a tag from the resource group*, because tags aren't inherited on their own. "Nobody may
+   delete" is a **CanNotDelete lock**.
+2. **Configure.** Assign the policy at the subscription with a managed identity, then create a **remediation task** for
+   existing resources. Add a CanNotDelete lock on `rg-ledger`.
+3. **Observe.** New resources get the tag at creation; existing ones only after remediation runs.
+4. **Validate.** Check compliance, a resource's tags and the lock, as below.
+
+## Validate the result
+
+Check each control on its own, because each fails differently:
+
+```powershell
+# Policy assignments at the subscription and below
+Get-AzPolicyAssignment -Scope "/subscriptions/<sub-id>" -IncludeDescendent | Select-Object Name, Scope
+
+# A remediated resource now has the tag
+(Get-AzResource -ResourceGroupName <rg> -Name <resource>).Tags
+
+# The lock and its level
+Get-AzResourceLock -ResourceGroupName rg-ledger | Select-Object Name, @{ n = 'Level'; e = { $_.Properties.level } }
+```
+
+- **Policy > Compliance** (or `az policy state summarize`) shows what's still non-compliant.
+- Try the blocked action: deleting the locked resource group must fail, even as Owner.
+- A budget is validated when its alert reaches the action group; a test email is not proof that thresholds are set.
+
 ## Common failure modes
 
 1. **"The deny policy didn't delete my non-compliant VMs."** A deny never touches existing
@@ -394,6 +506,14 @@ nothing.
    break, and what should you export first?
 5. Why would you exempt a resource from an assignment rather than exclude it, and what does the
    compliance report show in each case?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain RBAC, Policy and locks as three different questions.
+- Explain why tagging a resource group doesn't tag the resources in it, and how to fix that.
+- Explain what a budget does and doesn't do when spending crosses it.
 
 ## Key takeaways
 

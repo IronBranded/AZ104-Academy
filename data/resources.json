@@ -1,0 +1,743 @@
+{
+ "_note": "Resource relationship map rendered at #/map by assets/js/explore.js. A conceptual teaching model: each resource answers the ten questions every lesson answers. Facts come from the Academy lessons and Microsoft Learn (retrieved 2026-10-06).",
+ "verified": "2026-10-06",
+ "tree": {
+  "id": "tenant",
+  "children": [
+   {
+    "id": "subscription",
+    "children": [
+     {
+      "id": "rg",
+      "children": [
+       {
+        "id": "vnet",
+        "children": [
+         {
+          "id": "subnet",
+          "children": [
+           {
+            "id": "nic",
+            "children": [
+             {
+              "id": "vm"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "id": "storage"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "groups": [
+  {
+   "name": "Identity and governance",
+   "ids": [
+    "tenant",
+    "mg",
+    "subscription",
+    "rg",
+    "user-group",
+    "role-assignment",
+    "policy-assignment"
+   ]
+  },
+  {
+   "name": "Networking",
+   "ids": [
+    "vnet",
+    "subnet",
+    "nsg",
+    "public-ip",
+    "nic",
+    "lb",
+    "private-endpoint"
+   ]
+  },
+  {
+   "name": "Compute",
+   "ids": [
+    "vm",
+    "disk",
+    "app-service",
+    "acr"
+   ]
+  },
+  {
+   "name": "Storage",
+   "ids": [
+    "storage"
+   ]
+  },
+  {
+   "name": "Monitoring and recovery",
+   "ids": [
+    "workspace",
+    "rsv"
+   ]
+  }
+ ],
+ "resources": [
+  {
+   "id": "tenant",
+   "name": "Microsoft Entra tenant",
+   "type": "Directory (not an Azure resource)",
+   "plain": "Your organization's identity directory: where every user, group and app identity lives, and the sign-in service subscriptions trust.",
+   "lessons": [
+    "0A-03",
+    "0A-05",
+    "01-01"
+   ],
+   "q": {
+    "contains": "Nothing: it is the top of the identity side.",
+    "dependsOn": "A domain name (at least <name>.onmicrosoft.com).",
+    "dependents": "Subscriptions trust it to authenticate; users, groups and managed identities live in it.",
+    "manage": "Microsoft Entra roles, such as Global Administrator and User Administrator.",
+    "network": "Not applicable: sign-in happens against Microsoft Entra ID.",
+    "monitor": "Microsoft Entra sign-in and audit logs.",
+    "protect": "Least-privilege Entra roles, MFA, Conditional Access, two emergency access accounts.",
+    "recover": "Deleted users and Microsoft 365 groups can be restored for 30 days.",
+    "cost": "Microsoft Entra ID Free is included; P1 and P2 are per-user licences.",
+    "remove": "Outside AZ-104. Every subscription that trusts it must be moved or canceled first."
+   },
+   "rel": {
+    "dependents": [
+     "subscription",
+     "user-group",
+     "mg"
+    ]
+   }
+  },
+  {
+   "id": "mg",
+   "name": "Management group",
+   "type": "Microsoft.Management/managementGroups",
+   "plain": "A folder for subscriptions, so policy and access can be assigned once for many of them.",
+   "lessons": [
+    "0A-03",
+    "01-03"
+   ],
+   "q": {
+    "contains": "The tenant root management group or a parent management group, up to six levels deep (not counting root and subscriptions).",
+    "dependsOn": "The tenant.",
+    "dependents": "Child management groups and subscriptions inherit its policy and role assignments.",
+    "manage": "Management Group Contributor, or Owner on the management group.",
+    "network": "Not networked.",
+    "monitor": "Policy compliance across everything under it.",
+    "protect": "Policy and role assignments made here apply below. Locks can't be applied to a management group.",
+    "recover": "Re-create it and move subscriptions back; assignments made on it must be re-created.",
+    "cost": "Free.",
+    "remove": "Move its subscriptions and child groups out first: it must be empty to delete."
+   },
+   "rel": {
+    "contains": [
+     "tenant"
+    ],
+    "dependents": [
+     "subscription",
+     "policy-assignment",
+     "role-assignment"
+    ]
+   }
+  },
+  {
+   "id": "subscription",
+   "name": "Subscription",
+   "type": "Subscription",
+   "plain": "The billing and management container that resource groups live in. It trusts exactly one Microsoft Entra tenant; a tenant can have many subscriptions.",
+   "lessons": [
+    "0A-03",
+    "01-03"
+   ],
+   "q": {
+    "contains": "A management group (the root one by default).",
+    "dependsOn": "A billing account or offer, and the one tenant it trusts.",
+    "dependents": "Resource groups, every resource in them, budgets, resource provider registrations.",
+    "manage": "Owner or Contributor at subscription scope; billing roles for billing.",
+    "network": "Each virtual network belongs to one subscription; peering can connect subscriptions.",
+    "monitor": "The activity log (keep it longer with a subscription diagnostic setting) and Cost Management.",
+    "protect": "Policy and RBAC at this scope, budgets, locks.",
+    "recover": "Changing its directory permanently deletes its Azure role assignments: plan before moving it.",
+    "cost": "The billing boundary: all its resources' charges roll up here.",
+    "remove": "Delete or move its resources, then cancel it in Cost Management + Billing."
+   },
+   "rel": {
+    "contains": [
+     "mg",
+     "tenant"
+    ],
+    "dependents": [
+     "rg",
+     "policy-assignment",
+     "role-assignment"
+    ]
+   }
+  },
+  {
+   "id": "rg",
+   "name": "Resource group",
+   "type": "Microsoft.Resources/resourceGroups",
+   "plain": "A container for resources that share a lifecycle: deployed, managed and deleted together.",
+   "lessons": [
+    "0A-03",
+    "01-03"
+   ],
+   "q": {
+    "contains": "A subscription.",
+    "dependsOn": "The subscription, and a location where Azure stores the group's metadata.",
+    "dependents": "Every resource in it. Each resource belongs to exactly one resource group, and can sit in a different region from it.",
+    "manage": "Roles at resource group scope inherit to everything in it.",
+    "network": "None itself. Its resources can connect to resources in other groups.",
+    "monitor": "Activity log filtered to the group; cost by resource group.",
+    "protect": "Locks, Policy and RBAC at resource group scope.",
+    "recover": "There's no undo for the group; only resources with their own soft delete can come back.",
+    "cost": "Free; shows the total of its resources.",
+    "remove": "Check for locks, then delete it: every resource in it is deleted too."
+   },
+   "rel": {
+    "contains": [
+     "subscription"
+    ],
+    "dependents": [
+     "vnet",
+     "storage",
+     "vm",
+     "workspace",
+     "rsv"
+    ]
+   }
+  },
+  {
+   "id": "user-group",
+   "name": "Users and groups",
+   "type": "Microsoft Entra directory objects (not Azure resources)",
+   "plain": "The people and groups that sign in and receive access, licences and roles.",
+   "lessons": [
+    "0A-05",
+    "01-01"
+   ],
+   "q": {
+    "contains": "The tenant, not a subscription or resource group.",
+    "dependsOn": "The tenant. A licence needs the user's usage location; dynamic groups need Entra ID P1.",
+    "dependents": "Role assignments, licences and app access target them.",
+    "manage": "User Administrator, Groups Administrator, Guest Inviter.",
+    "network": "Not networked.",
+    "monitor": "Sign-in and audit logs.",
+    "protect": "MFA, Conditional Access, self-service password reset.",
+    "recover": "Deleted users and Microsoft 365 groups: restorable for 30 days.",
+    "cost": "Free objects; licences are per user.",
+    "remove": "Check what the group grants (roles, licences, apps) before deleting it."
+   },
+   "rel": {
+    "contains": [
+     "tenant"
+    ],
+    "dependents": [
+     "role-assignment"
+    ]
+   }
+  },
+  {
+   "id": "role-assignment",
+   "name": "Role assignment",
+   "type": "Microsoft.Authorization/roleAssignments (extension resource)",
+   "plain": "The link between who (a principal), what (a role) and where (a scope).",
+   "lessons": [
+    "01-02"
+   ],
+   "q": {
+    "contains": "Attached to a scope: management group, subscription, resource group or resource.",
+    "dependsOn": "A principal and a role definition.",
+    "dependents": "Every request that principal makes at that scope and below.",
+    "manage": "Owner, User Access Administrator, Role Based Access Control Administrator.",
+    "network": "Not networked.",
+    "monitor": "Activity log entries for role assignment writes and deletes.",
+    "protect": "Narrowest scope, assign to groups, review regularly.",
+    "recover": "Re-create it. Deleting a principal leaves an \"Identity not found\" assignment to clean up.",
+    "cost": "Free.",
+    "remove": "Remove it at the scope where it was made; an inherited assignment can't be removed lower down."
+   },
+   "rel": {
+    "contains": [
+     "mg",
+     "subscription",
+     "rg"
+    ],
+    "dependsOn": [
+     "user-group"
+    ]
+   }
+  },
+  {
+   "id": "policy-assignment",
+   "name": "Policy assignment",
+   "type": "Microsoft.Authorization/policyAssignments",
+   "plain": "A rule (or set of rules) applied to a scope, evaluated whenever resources are created or updated.",
+   "lessons": [
+    "01-03"
+   ],
+   "q": {
+    "contains": "A scope such as a management group, subscription or resource group.",
+    "dependsOn": "A policy definition or initiative; a managed identity for modify and deployIfNotExists.",
+    "dependents": "Every create and update request in scope is evaluated against it.",
+    "manage": "Resource Policy Contributor or Owner.",
+    "network": "Not networked.",
+    "monitor": "Policy compliance; activity log.",
+    "protect": "Exemptions are explicit, time-bound and auditable.",
+    "recover": "Re-assign it; remediation tasks fix existing resources.",
+    "cost": "Free for Azure resources.",
+    "remove": "Delete it where it was assigned: deleting a resource group doesn't remove subscription-scope assignments."
+   },
+   "rel": {
+    "contains": [
+     "mg",
+     "subscription",
+     "rg"
+    ]
+   }
+  },
+  {
+   "id": "vnet",
+   "name": "Virtual network",
+   "type": "Microsoft.Network/virtualNetworks",
+   "plain": "Your private network in one region and one subscription.",
+   "lessons": [
+    "0A-07",
+    "04-01"
+   ],
+   "q": {
+    "contains": "A resource group; one region and one subscription.",
+    "dependsOn": "A non-overlapping private address space.",
+    "dependents": "Subnets, and through them NICs, private endpoints, Bastion and load balancer backends. Anything connected must be in the same region and subscription.",
+    "manage": "Network Contributor.",
+    "network": "Private addresses; connects to other virtual networks by peering (not transitive).",
+    "monitor": "Network insights, Network Watcher, virtual network flow logs.",
+    "protect": "NSGs on subnets, no public IPs by default, locks.",
+    "recover": "Redeploy from a template: keep the design as code.",
+    "cost": "No charge for the network itself; peering traffic is charged per GB.",
+    "remove": "Delete what is connected to its subnets first (or the resource group), and remove peerings on both sides."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "subnet"
+    ]
+   }
+  },
+  {
+   "id": "subnet",
+   "name": "Subnet",
+   "type": "Microsoft.Network/virtualNetworks/subnets",
+   "plain": "A slice of a virtual network's address space where resources are placed.",
+   "lessons": [
+    "0A-07",
+    "04-01",
+    "04-02"
+   ],
+   "q": {
+    "contains": "A virtual network.",
+    "dependsOn": "A range inside the network's address space. Azure reserves five addresses in every subnet.",
+    "dependents": "NICs, private endpoints, NSG and route table associations, service endpoints.",
+    "manage": "Network Contributor.",
+    "network": "Its route table decides next hops; its NSG filters traffic.",
+    "monitor": "Effective routes and effective security rules of the NICs in it.",
+    "protect": "An NSG association; private subnets with no default outbound access.",
+    "recover": "Redeploy from a template.",
+    "cost": "Free.",
+    "remove": "Azure won't delete a subnet that still has resources in it."
+   },
+   "rel": {
+    "contains": [
+     "vnet"
+    ],
+    "dependents": [
+     "nic",
+     "private-endpoint",
+     "nsg"
+    ]
+   }
+  },
+  {
+   "id": "nsg",
+   "name": "Network security group",
+   "type": "Microsoft.Network/networkSecurityGroups",
+   "plain": "An ordered list of allow and deny rules for traffic to and from subnets or network interfaces.",
+   "lessons": [
+    "04-02"
+   ],
+   "q": {
+    "contains": "A resource group, in the same region as what it is associated with.",
+    "dependsOn": "Nothing to exist; an association with a subnet or NIC to act.",
+    "dependents": "Every flow to and from the subnets and NICs it is associated with.",
+    "manage": "Network Contributor.",
+    "network": "Rules by priority (100-4096), first match wins; default rules at 65000 and above.",
+    "monitor": "Effective security rules, IP flow verify, virtual network flow logs.",
+    "protect": "It is the protection: inbound from the internet is denied by default.",
+    "recover": "Redeploy the rules from a template.",
+    "cost": "Free.",
+    "remove": "Dissociate it from subnets and NICs, then delete it."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "subnet",
+     "nic"
+    ]
+   }
+  },
+  {
+   "id": "public-ip",
+   "name": "Public IP address",
+   "type": "Microsoft.Network/publicIPAddresses",
+   "plain": "An internet-reachable address you attach to a NIC, load balancer, Bastion or gateway.",
+   "lessons": [
+    "04-01",
+    "04-03"
+   ],
+   "q": {
+    "contains": "A resource group, in one region.",
+    "dependsOn": "Nothing to exist. Standard public IPs are static, and zone-redundant by default in regions with zones.",
+    "dependents": "NIC IP configurations, load balancer frontends, Bastion.",
+    "manage": "Network Contributor.",
+    "network": "Internet-facing. A Standard IP is closed to inbound traffic until an NSG allows it.",
+    "monitor": "Network Watcher connectivity tools; the IP's metrics.",
+    "protect": "NSGs on the NIC or subnet; prefer Bastion to public IPs on VMs.",
+    "recover": "Re-create it; a new IP usually means updating DNS.",
+    "cost": "Standard public IPs bill hourly whether or not they are attached.",
+    "remove": "Dissociate it and update DNS records that point at it. Alias records empty themselves."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "nic",
+     "lb"
+    ]
+   }
+  },
+  {
+   "id": "nic",
+   "name": "Network interface",
+   "type": "Microsoft.Network/networkInterfaces",
+   "plain": "The VM's network adapter: it takes a private IP from a subnet and can carry a public IP.",
+   "lessons": [
+    "0A-06",
+    "0A-07",
+    "04-01"
+   ],
+   "q": {
+    "contains": "A resource group, in the same region and subscription as its VM and virtual network.",
+    "dependsOn": "A subnet; optionally a public IP and an NSG.",
+    "dependents": "The VM it is attached to; load balancer backend pools reference it.",
+    "manage": "Network Contributor.",
+    "network": "Private IP from its subnet. You can change its subnet, not its virtual network.",
+    "monitor": "Effective routes and effective security rules (the VM must be running).",
+    "protect": "An NSG on the NIC as well as on the subnet.",
+    "recover": "Re-create it; the virtual network can't change on an existing NIC.",
+    "cost": "No separate charge.",
+    "remove": "A VM must keep at least one NIC. After deleting a VM, check whether its NIC was deleted with it."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependsOn": [
+     "subnet",
+     "public-ip",
+     "nsg"
+    ],
+    "dependents": [
+     "vm",
+     "lb"
+    ]
+   }
+  },
+  {
+   "id": "vm",
+   "name": "Virtual machine",
+   "type": "Microsoft.Compute/virtualMachines",
+   "plain": "A server you rent: you choose size, image, disks and network, and you manage the operating system.",
+   "lessons": [
+    "0A-06",
+    "03-02"
+   ],
+   "q": {
+    "contains": "A resource group. Zone or availability set is chosen at creation.",
+    "dependsOn": "A NIC, a managed OS disk, an image, and vCPU quota in the region.",
+    "dependents": "Load balancer backends (through its NIC), backup items, Site Recovery replicas, alert rules.",
+    "manage": "Virtual Machine Contributor manages the VM; signing in to the OS is a separate permission.",
+    "network": "Through its NICs. Reach it with Bastion rather than an open RDP or SSH port.",
+    "monitor": "Host metrics automatically; guest metrics and logs with the Azure Monitor Agent; VM insights.",
+    "protect": "Encryption at host, NSGs, no public management ports, locks.",
+    "recover": "Azure Backup restores; Site Recovery fails over to another region.",
+    "cost": "Compute while allocated (shut down from inside the OS still bills); disks and Standard public IPs bill even when deallocated.",
+    "remove": "Deleting the VM doesn't always delete its disks, NIC and public IP: each has a delete option. Check for leftovers, or delete the resource group."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependsOn": [
+     "nic",
+     "disk"
+    ],
+    "dependents": [
+     "lb",
+     "rsv"
+    ]
+   }
+  },
+  {
+   "id": "disk",
+   "name": "Managed disk",
+   "type": "Microsoft.Compute/disks",
+   "plain": "Persistent block storage for a VM. Azure manages the storage behind it; you choose type and size.",
+   "lessons": [
+    "0A-08",
+    "03-02"
+   ],
+   "q": {
+    "contains": "A resource group, in the VM's region (and zone).",
+    "dependsOn": "Nothing to exist; a VM to be used.",
+    "dependents": "The VM it is attached to; snapshots and backups.",
+    "manage": "Virtual Machine Contributor or Contributor.",
+    "network": "Not networked: attached through the VM's host.",
+    "monitor": "Disk metrics (IOPS, throughput) on the VM and the disk.",
+    "protect": "Encrypted at rest by default; encryption at host; snapshots.",
+    "recover": "Snapshots and Azure Backup.",
+    "cost": "Billed by provisioned size and type, attached or not.",
+    "remove": "Unattached disks keep billing: list disks with diskState Unattached and delete what you don't need."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "vm"
+    ]
+   }
+  },
+  {
+   "id": "storage",
+   "name": "Storage account",
+   "type": "Microsoft.Storage/storageAccounts",
+   "plain": "A named, regional container for blobs, file shares, queues and tables, with its own endpoints, firewall and redundancy.",
+   "lessons": [
+    "0A-08",
+    "02-01",
+    "02-02",
+    "02-03"
+   ],
+   "q": {
+    "contains": "A resource group, in one region. The name is globally unique.",
+    "dependsOn": "A unique name; a service endpoint for virtual network rules; a private endpoint for private access.",
+    "dependents": "Containers, shares, apps, and logs or backups written to it.",
+    "manage": "Storage Account Contributor for configuration; data roles such as Storage Blob Data Contributor for the data.",
+    "network": "Public endpoints restricted by its firewall; private endpoints.",
+    "monitor": "Capacity and transaction metrics; resource logs through diagnostic settings; Storage insights.",
+    "protect": "Firewall, Shared Key disabled, encryption, soft delete, versioning, a delete lock.",
+    "recover": "Soft delete, versioning and snapshots for data; geo-redundancy for regional outages.",
+    "cost": "Capacity by tier and redundancy, plus operations and data transfer.",
+    "remove": "Deleting the account deletes all its data: check locks, replication policies and anything writing to it."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "private-endpoint",
+     "workspace"
+    ]
+   }
+  },
+  {
+   "id": "lb",
+   "name": "Load balancer",
+   "type": "Microsoft.Network/loadBalancers",
+   "plain": "One frontend address that spreads TCP and UDP flows across healthy backend VMs.",
+   "lessons": [
+    "04-03"
+   ],
+   "q": {
+    "contains": "A resource group.",
+    "dependsOn": "A Standard public IP (public) or a subnet (internal); a health probe; NSGs allowing clients and probes.",
+    "dependents": "Clients use its frontend; DNS records may point at its public IP.",
+    "manage": "Network Contributor.",
+    "network": "Frontend IP, backend pool in one VNet, probes from 168.63.129.16, rules.",
+    "monitor": "Data Path Availability and Health Probe Status in Insights.",
+    "protect": "Standard is secure by default: an NSG must allow client traffic.",
+    "recover": "Redeploy from a template.",
+    "cost": "Standard load balancers bill while they exist.",
+    "remove": "Delete it before its public IP, and remove DNS records that point at that IP."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependsOn": [
+     "public-ip",
+     "nic",
+     "nsg"
+    ]
+   }
+  },
+  {
+   "id": "private-endpoint",
+   "name": "Private endpoint",
+   "type": "Microsoft.Network/privateEndpoints",
+   "plain": "A private IP in your subnet for one specific PaaS resource, such as a storage account's blob service.",
+   "lessons": [
+    "04-02"
+   ],
+   "q": {
+    "contains": "A resource group; its network interface sits in a subnet.",
+    "dependsOn": "A subnet, the target resource, and a private DNS zone (privatelink) linked to the VNets that use it.",
+    "dependents": "Clients that resolve the resource's name to the private IP: the VNet, peered VNets, on-premises.",
+    "manage": "Network Contributor, plus approval on the target resource.",
+    "network": "A private IP for one resource.",
+    "monitor": "Its traffic metrics; nslookup from inside to prove DNS returns the private IP.",
+    "protect": "Lets you disable the resource's public network access.",
+    "recover": "Redeploy it and its DNS zone group.",
+    "cost": "Hourly, plus data processed.",
+    "remove": "Delete the endpoint, then its DNS records or zone links; re-check the resource's public access setting."
+   },
+   "rel": {
+    "contains": [
+     "subnet"
+    ],
+    "dependsOn": [
+     "subnet",
+     "storage"
+    ]
+   }
+  },
+  {
+   "id": "app-service",
+   "name": "App Service plan and web app",
+   "type": "Microsoft.Web/serverfarms and Microsoft.Web/sites",
+   "plain": "A plan is the compute you pay for; web apps and their slots run on it.",
+   "lessons": [
+    "03-04"
+   ],
+   "q": {
+    "contains": "A resource group. An app runs on a plan in the same region.",
+    "dependsOn": "The plan's tier for features; DNS records at your DNS host for custom domains; a storage account for custom backups.",
+    "dependents": "Users and clients; deployment slots; certificates bound to the app.",
+    "manage": "Contributor or Website Contributor on the app.",
+    "network": "Public <app>.azurewebsites.net endpoint with access restrictions; private endpoint inbound; VNet integration outbound.",
+    "monitor": "App Service metrics, logs and diagnostics.",
+    "protect": "HTTPS Only, minimum TLS version, access restrictions, managed identity.",
+    "recover": "Backups and restore (custom domains and TLS bindings aren't restored); swap a slot back.",
+    "cost": "The plan bills per instance by tier whether or not the apps are busy.",
+    "remove": "Delete apps and slots, then the plan (it bills until deleted); remove DNS records pointing at the app."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependsOn": [
+     "storage"
+    ]
+   }
+  },
+  {
+   "id": "acr",
+   "name": "Container registry",
+   "type": "Microsoft.ContainerRegistry/registries",
+   "plain": "Private storage for container images, pulled by Container Instances and Container Apps.",
+   "lessons": [
+    "03-03"
+   ],
+   "q": {
+    "contains": "A resource group. The registry name is globally unique.",
+    "dependsOn": "A tier: Basic, Standard or Premium.",
+    "dependents": "Container groups and container apps that pull its images.",
+    "manage": "Contributor for the registry; AcrPush and AcrPull for images.",
+    "network": "Public login server <name>.azurecr.io; private endpoints with Premium.",
+    "monitor": "Registry metrics and resource logs.",
+    "protect": "Admin user disabled; Microsoft Entra identities with AcrPull.",
+    "recover": "Re-push or import images; geo-replication with Premium.",
+    "cost": "A daily rate by tier, plus storage.",
+    "remove": "Deleting the registry deletes every image in it: check what still pulls from it."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ]
+   }
+  },
+  {
+   "id": "workspace",
+   "name": "Log Analytics workspace",
+   "type": "Microsoft.OperationalInsights/workspaces",
+   "plain": "Where Azure Monitor keeps logs, queried with KQL.",
+   "lessons": [
+    "0A-09",
+    "05-01"
+   ],
+   "q": {
+    "contains": "A resource group.",
+    "dependsOn": "Data sources: diagnostic settings and agents with data collection rules.",
+    "dependents": "Log alert rules, VM insights, backup reports, KQL queries.",
+    "manage": "Log Analytics Contributor; Log Analytics Reader to query.",
+    "network": "Agents and diagnostic settings send data to it.",
+    "monitor": "Its own usage and ingestion data.",
+    "protect": "Access control per workspace or table; retention settings.",
+    "recover": "Retention and long-term retention per table.",
+    "cost": "Billed by data ingested and retained beyond the included period.",
+    "remove": "Subscription-scope diagnostic settings and data collection rules that point at it aren't removed with a resource group: delete them too."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "rsv"
+    ]
+   }
+  },
+  {
+   "id": "rsv",
+   "name": "Recovery Services vault",
+   "type": "Microsoft.RecoveryServices/vaults",
+   "plain": "The vault for VM and file share backups and for Site Recovery replication.",
+   "lessons": [
+    "0A-10",
+    "05-02"
+   ],
+   "q": {
+    "contains": "A resource group.",
+    "dependsOn": "Storage redundancy, chosen before the first item is protected; backup and replication policies.",
+    "dependents": "Protected items (VMs, file shares) and replicated items.",
+    "manage": "Backup Contributor, Backup Operator, Site Recovery Contributor.",
+    "network": "Failover targets a network in the secondary region; optional private endpoints.",
+    "monitor": "Backup jobs, built-in Azure Monitor alerts, backup reports through diagnostic settings.",
+    "protect": "Soft delete (14 days), RBAC, Cross Region Restore with geo-redundant storage.",
+    "recover": "It is the recovery mechanism: restore from recovery points, fail over replicas.",
+    "cost": "Per protected instance plus backup storage; Site Recovery per protected instance plus replica storage.",
+    "remove": "Stop protection and delete backup data (soft-deleted items count), then delete the vault."
+   },
+   "rel": {
+    "contains": [
+     "rg"
+    ],
+    "dependents": [
+     "vm"
+    ]
+   }
+  }
+ ]
+}

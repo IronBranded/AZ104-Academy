@@ -10,7 +10,7 @@ objective_ids: ["net.vnet.create", "net.vnet.peering", "net.vnet.public-ip", "ne
 domain: "Implement and manage virtual networking"
 domain_weight: "15-20%"
 status: GA
-prerequisites: ["03-02"]
+prerequisites: ["0A-07", "0A-13", "03-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-faq"
@@ -44,7 +44,11 @@ free_practice_available: false
 - Configure user-defined routes
 - Troubleshoot network connectivity
 
-## Why this exists
+## The administrative problem
+
+Virtual machines and other resources need private addresses, need to talk to each other, sometimes need to be
+reached from the internet, and sometimes must send their traffic through a security appliance first. Two teams' networks
+must be connected. And when traffic doesn't arrive, you need to find out why without guessing.
 
 Almost everything an administrator deploys sits in, or talks to, a virtual network: VMs, scale sets,
 private endpoints, integrated App Service apps. A virtual network is a private, isolated, Layer 3
@@ -59,6 +63,81 @@ This module covers five things you configure on one:
 - how you find out why traffic doesn't flow (**Network Watcher**).
 
 Filtering traffic with NSGs is module 04-02.
+
+## In plain English
+
+A **virtual network (VNet)** is your private network in one Azure region and one subscription. You give it an
+**address space**, such as `10.1.0.0/16`, and divide it into **subnets**, such as `10.1.1.0/24` for web servers.
+Resources get private IP addresses from their subnet.
+
+- **Peering** connects two VNets so their resources talk over Microsoft's backbone, as if on one network. It isn't
+  transitive: if A peers with B and B with C, A can't reach C through B.
+- A **public IP address** is an internet-reachable address you attach to a NIC, load balancer or Bastion.
+- **Routes** decide where traffic goes next. Azure creates **system routes** automatically; a **user-defined route
+  (UDR)** in a route table overrides them, for example to send internet-bound traffic through a firewall appliance.
+- **Network Watcher** has tools that test a specific flow and tell you what blocked it or where it went.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Virtual network (VNet)** | A private network in one region and one subscription. |
+| **Address space** | The private IP range a VNet uses, written in CIDR notation such as 10.1.0.0/16. |
+| **Subnet** | A slice of the VNet's address space where resources are placed. Azure reserves five addresses in each. |
+| **Peering** | A connection between two VNets. Not transitive. |
+| **Public IP address** | An internet-reachable address resource you attach to a NIC, load balancer or Bastion. |
+| **System route** | A route Azure creates automatically in every subnet. |
+| **User-defined route (UDR)** | A route you add in a route table to override the system routes. |
+| **Next hop** | Where a route sends traffic next, such as the internet or a virtual appliance's IP. |
+| **Network Watcher** | Azure's network diagnostic tools: IP flow verify, next hop, connection troubleshoot and more. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: A virtual network, its subnets, and how traffic leaves it
+  accDescr: A virtual network has an address space divided into subnets. Resources in subnets get private IPs. Peering connects the virtual network to another virtual network, non-transitively. A route table with user-defined routes associated with a subnet can send traffic to a virtual appliance instead of using the system routes. A public IP attached to a resource makes it reachable from the internet.
+  subgraph VNET["VNet A · 10.1.0.0/16 · one region"]
+    S1["Subnet web · 10.1.1.0/24"]
+    S2["Subnet app · 10.1.2.0/24"]
+  end
+  VNET <-- "peering (not transitive)" --> VB["VNet B"]
+  RT["Route table (UDR)"] -.-> S1
+  S1 -- "next hop: appliance" --> NVA["Firewall appliance"]
+  PIP["Public IP"] -.-> S1
+```
+
+Addresses first, then connections, then routes. Most connectivity problems are one of three things: overlapping
+address spaces, a missing or one-sided peering, or a route sending traffic somewhere unexpected. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A private office network | Virtual network |
+| Floors or departments on that network | Subnets |
+| A private corridor between two buildings | Peering |
+| A street address the public can reach | Public IP address |
+| A sign saying "all deliveries through security" | User-defined route to a firewall appliance |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Virtual network and subnet |
+| --- | --- |
+| What contains it? | A resource group; one region and one subscription. Subnets live in the VNet. |
+| What does it depend on? | A non-overlapping private address space (overlap prevents peering). |
+| What depends on it? | NICs, private endpoints, Bastion, load balancer backends and integrated apps in its subnets. |
+| Who can manage it? | Network Contributor. |
+| How is it networked? | Private addresses; peering to other VNets; public IPs on individual resources. |
+| How is it monitored? | Network Watcher tools, effective routes, connection monitor, virtual network flow logs. |
+| How is it protected? | NSGs on subnets and NICs (04-02), no public IPs by default, locks. |
+| How is it recovered? | Redeploy from a template; keep the network design as code. |
+| What does it cost? | No charge for the network itself; peering traffic and Standard public IPs are billed. |
+| How is it removed safely? | Remove what's in its subnets first (or delete the resource group), and remove peerings on both sides. |
+
+See it with its neighbours on the [resource map](#/map/vnet).
 
 ## How it works under the hood
 
@@ -249,6 +328,32 @@ az network watcher test-ip-flow --vm "<vm>" --resource-group "<rg>" --direction 
 | Route tables per subnet | 0 or 1 | Subnet | Up to 400 routes per table |
 | Network Watcher | **Enabled automatically** per region | Network Watcher | Troubleshooting tools |
 
+## Worked example
+
+**Requirement.** VMs in the `web` subnet must send all internet-bound traffic through a firewall appliance at
+`10.1.9.4` in the same VNet.
+
+1. **Decide.** Overriding where traffic goes is a **user-defined route**: address prefix `0.0.0.0/0`, next hop type
+   **Virtual appliance**, next hop address `10.1.9.4`.
+2. **Configure.** Create a route table with that route and **associate it with the `web` subnet**. A route table that
+   isn't associated with a subnet does nothing.
+3. **Observe.** The appliance must be set up to forward traffic (IP forwarding on its NIC); otherwise traffic stops
+   there.
+4. **Validate.** Ask Network Watcher where a packet goes next, as below.
+
+## Validate the result
+
+```powershell
+az network vnet subnet list -g <rg> --vnet-name <vnet> --query "[].{name:name, prefix:addressPrefix, rt:routeTable.id}" -o table
+az network vnet peering list -g <rg> --vnet-name <vnet> --query "[].{name:name, state:peeringState}" -o table   # Connected
+az network watcher show-next-hop -g <rg> --vm <vm> --source-ip <vm-private-ip> --dest-ip 8.8.8.8
+az network nic show-effective-route-table -g <rg> -n <nic> -o table
+```
+
+- **Next hop** should return **VirtualAppliance** and `10.1.9.4` for internet-bound traffic.
+- A peering is only usable when **both** sides show **Connected**.
+- Effective routes need the VM running: they show what Azure actually applies, not what you meant to configure.
+
 ## Common failure modes
 
 1. **"We can't peer the two networks."** Their address spaces overlap. Re-address one of them.
@@ -299,6 +404,14 @@ and after a user-defined route.
 4. Peering between A and B shows **Disconnected** on A. What happened, and how do you fix it?
 5. A VM can't reach a database VM in a peered network. Name the Network Watcher tools you'd use, in order,
    and what each rules in or out.
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain address spaces and subnets using a building and its floors.
+- Explain why peering A-B and B-C doesn't connect A and C.
+- Explain what a user-defined route changes, and what has to be true for it to apply.
 
 ## Key takeaways
 

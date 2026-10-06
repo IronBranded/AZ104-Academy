@@ -3,7 +3,60 @@
 Notable changes to AZ104 Academy, newest first. Content corrections that change a
 factual claim are listed with the lesson id. Routine `last_verified` bumps are not.
 
-## [Unreleased] - Phase 16: module 05-02 (all 82 outline bullets covered)
+## [Unreleased] - Beginner-first, certification-first pass (2026-10-06)
+
+The Academy now teaches the infrastructure before it expects you to administer it. Full record:
+[docs/CURRICULUM-AUDIT-2026-10-06.md](docs/CURRICULUM-AUDIT-2026-10-06.md).
+
+### Objective validation
+
+- Re-retrieved the study guide through the Microsoft Learn MCP server. *Skills measured as of April
+  17, 2026* is still current, and a mechanical diff of all 82 bullets, five weights and fifteen
+  functional groups found no drift. Every existing lesson, lab and question is classified CURRENT.
+
+### Added
+
+- **Module 0A, Understanding Azure:** 13 short, skippable primers, from cloud computing and regions
+  to Resource Manager, the admin tools, and how resources fit together. Each one ends with where it
+  shows up in AZ-104. The dashboard recommends it first and lets experienced learners skip it.
+- **Lesson anatomy** on all 15 exam lessons: *The administrative problem*, *In plain English*,
+  *Words you need to know*, *Mental model* (with a diagram and an everyday-to-Azure translation),
+  *Where it fits* (the ten relationship questions), *Worked example*, *Validate the result* and
+  *Teach it back*. Lessons now run Orient, Understand, Learn, Validate, Distinguish, Practice, Check,
+  Review.
+- **Resource map** (`#/map`): 21 resources, each answering what contains it, what it depends on,
+  what depends on it, who manages it, and how it's networked, monitored, protected, recovered,
+  billed and removed. Data: `data/resources.json`.
+- **Comparisons** (`#/compare`, and inside lessons): 12 structured comparisons with purpose, scope,
+  layer, when to use, key difference, limitation, dependency, how to validate, and the AZ-104
+  takeaway. Data: `data/comparisons.json`.
+- **Glossary** (`#/glossary`): 207 terms, built from the lessons' own *Words you need to know*
+  tables, so a term is defined once.
+- **Scenario clues** on all 212 questions: the phrase that decides the answer.
+- **Progress:** *Validated* (the lab's validation checklist is ticked) and *Retained* (questions
+  answered correctly again at least 7 days after first being right), shown in lesson headers and
+  domain cards.
+- **Labs:** *Why this matters*, *The desired state*, a validation checklist of observed results,
+  *What just happened?*, and a teardown checklist on every lab.
+- **Official training:** course AZ-104T00-A and all six Microsoft Learn learning paths with their
+  modules, retrieved through the Microsoft Learn MCP server and shown on the lessons they serve.
+- Module 0B (00-00): choosing the subscription and the region.
+- `tools/smoke-test.js`: a headless check that every route renders without errors.
+
+### Fixed
+
+- Labs could be marked *practised* with a single click; 15 of 16 had no checklist.
+- The lab card told learners to activate roles through PIM, contradicting lesson 00-00.
+- The sidebar rendered only the last non-exam domain.
+- Lab checklist items inside wrapped sections were never recorded as validation checks.
+- The validator crashed on non-numeric module ids.
+
+### Validator
+
+- Requires the new lesson, primer and lab sections, a validation and a teardown checklist in every
+  lab, a scenario clue on every question, and resolvable ids in the comparison and resource data.
+
+## Phase 16: module 05-02 (all 82 outline bullets covered)
 
 ### Final verification (2026-10-02)
 

@@ -20,7 +20,8 @@
     "IP rules accept only public IP addresses; private ranges are rejected.",
     "Locks protect the resource from change; they don't filter network traffic.",
     "A stored access policy constrains SAS tokens, not networks."
-   ]
+   ],
+   "clue": "\"only VMs in subnet Apps\": a virtual network rule, which needs the service endpoint on that subnet."
   },
   {
    "id": "02-01-q2",
@@ -39,7 +40,8 @@
     "SAS is authorization, not network filtering; it doesn't change which network rules apply.",
     null,
     "Network rules apply to all protocols, REST and SMB."
-   ]
+   ],
+   "clue": "\"same Azure region\" as the storage account: IP rules don't apply to same-region traffic."
   },
   {
    "id": "02-01-q3",
@@ -58,7 +60,8 @@
     "Management operations still work; only data access is filtered.",
     "Key regeneration is unrelated to network rules.",
     null
-   ]
+   ],
+   "clue": "\"change its settings\" still works but \"list blobs\" doesn't: the firewall guards the data plane only."
   },
   {
    "id": "02-01-q4",
@@ -77,7 +80,8 @@
     null,
     "That contains an account key and grants full access to all data.",
     "It's key-signed and far longer than needed."
-   ]
+   ],
+   "clue": "\"must not share account keys\" and \"most secure SAS\": a user delegation SAS, signed with Entra credentials."
   },
   {
    "id": "02-01-q5",
@@ -96,7 +100,8 @@
     "It's signed with a user delegation key obtained with Entra credentials, not an account key.",
     "It's supported for Blob, Queue, Table and Azure Files.",
     null
-   ]
+   ],
+   "clue": "User delegation SAS facts: a 7-day maximum, and it isn't tied to the account keys."
   },
   {
    "id": "02-01-q6",
@@ -115,7 +120,8 @@
     "A service SAS covers one resource in one service and can't delegate service-level operations.",
     "A user delegation SAS can't delegate the service-level operations an account SAS can.",
     "It's still a service SAS: one service, no service-level operations."
-   ]
+   ],
+   "clue": "\"Get Service Properties\" and \"across Blob and Queue\": only an account SAS reaches service-level operations."
   },
   {
    "id": "02-01-q7",
@@ -134,7 +140,8 @@
     "SAS tokens aren't stored or tracked; there's nothing to delete.",
     null,
     "These are service SAS tokens signed with an account key; user delegation keys are unrelated."
-   ]
+   ],
+   "clue": "\"all referencing stored access policy\" and \"without disrupting\" others: change the policy, not the keys."
   },
   {
    "id": "02-01-q8",
@@ -153,7 +160,8 @@
     null,
     "SAS types never convert.",
     "Nothing about the policy re-creation adds an IP restriction."
-   ]
+   ],
+   "clue": "\"re-creates a policy named readers\": tokens bind to the policy name, so the old tokens come back to life."
   },
   {
    "id": "02-01-q9",
@@ -172,7 +180,8 @@
     "There's a limit of five, and only a service SAS can reference one.",
     "An account SAS must be ad hoc.",
     "User delegation SAS tokens don't support stored access policies."
-   ]
+   ],
+   "clue": "Stored access policy limits: five per container, service SAS only."
   },
   {
    "id": "02-01-q10",
@@ -191,7 +200,8 @@
     "This SAS was signed with key1, not a user delegation key.",
     "An expiration policy warns about long validity at creation; it doesn't revoke existing tokens.",
     null
-   ]
+   ],
+   "clue": "\"ad hoc account SAS signed with key1\": no policy to revoke, so regenerate the signing key."
   },
   {
    "id": "02-01-q11",
@@ -210,7 +220,8 @@
     "Applications fail between the regeneration and the update.",
     "The applications fail as soon as key1 changes.",
     "That blocks all key-based access, so the applications fail too."
-   ]
+   ],
+   "clue": "\"without interrupting applications that use key1\": move them to key2 before regenerating key1."
   },
   {
    "id": "02-01-q12",
@@ -229,7 +240,8 @@
     "A ReadOnly lock blocks listing keys, but anyone who already has a key can still use it on the data plane.",
     null,
     "That blocks every client, including Entra-authorized ones."
-   ]
+   ],
+   "clue": "\"no one can access with account keys, including SAS\" and \"Conditional Access\": disallow Shared Key."
   },
   {
    "id": "02-01-q13",
@@ -248,7 +260,8 @@
     null,
     "Clients must be joined to the managed domain and reach its domain controllers.",
     "A key isn't an identity source and gives every user full access."
-   ]
+   ],
+   "clue": "\"Entra-joined\", \"hybrid identities\" and \"no line of sight to domain controllers\": Microsoft Entra Kerberos."
   },
   {
    "id": "02-01-q14",
@@ -267,7 +280,8 @@
     "That's for SAS tokens, not SMB identity access.",
     "The default share-level permission is None until you set it.",
     null
-   ]
+   ],
+   "clue": "\"identities NOT synced\" and \"all authenticated users\": the default share-level permission."
   },
   {
    "id": "02-01-q15",
@@ -286,7 +300,8 @@
     "It supports SMB shares; NFS isn't supported.",
     null,
     "A storage account can use only one identity source."
-   ]
+   ],
+   "clue": "\"has the share role\" but denied at the root folder: Windows ACLs are the second layer."
   }
  ]
 }

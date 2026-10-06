@@ -11,7 +11,7 @@ objective_ids: ["mon.monitor.metrics", "mon.monitor.log-settings", "mon.monitor.
 domain: "Monitor and maintain Azure resources"
 domain_weight: "10-15%"
 status: GA
-prerequisites: ["03-02", "04-02"]
+prerequisites: ["0A-09", "03-02", "04-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/azure-monitor/metrics/data-platform-metrics"
@@ -47,7 +47,11 @@ free_practice_available: false
 - Configure and interpret monitoring of virtual machines, storage accounts, and networks by using Azure Monitor Insights
 - Use Azure Network Watcher and Connection monitor
 
-## Why this exists
+## The administrative problem
+
+Something is slow, something failed overnight, and someone changed a setting they shouldn't have. An administrator
+needs to see what resources are doing, find out what happened and who did it, and be told about problems before users
+report them. None of that is possible after the fact unless the right data was being collected beforehand.
 
 Azure Monitor is where an administrator finds out what's happening, ideally before users do. It keeps
 two kinds of data:
@@ -60,6 +64,86 @@ two kinds of data:
 On top of that data sit **alerts**, **Insights** (ready-made monitoring for VMs, storage and networks) and,
 for networks specifically, **Network Watcher**. The exam asks what's collected **automatically**, what you
 must **configure**, and which tool answers which question.
+
+## In plain English
+
+**Azure Monitor** collects two kinds of data:
+
+- **Metrics**: numbers sampled over time, such as CPU percentage. Platform metrics are collected automatically.
+- **Logs**: detailed records, stored in a **Log Analytics workspace** and searched with **KQL**. The **activity log**
+  (who changed what) is automatic; a resource's own detailed logs need a **diagnostic setting**; data from inside a
+  VM's operating system needs the **Azure Monitor Agent**.
+
+On top of the data:
+
+- **Alert rules** watch metrics or logs and fire when a condition is met.
+- **Action groups** decide who is notified (email, SMS) and what runs (a webhook, a runbook).
+- **Alert processing rules** change what happens to fired alerts, for example suppressing notifications during
+  planned maintenance.
+- **Insights** are ready-made monitoring views for VMs, storage and networks.
+- **Network Watcher** diagnoses network paths, and **Connection monitor** tests them continuously.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Azure Monitor** | The platform that collects, stores and analyzes monitoring data in Azure. |
+| **Platform metric** | A metric Azure collects automatically from a resource, such as CPU percentage. |
+| **Activity log** | The automatic record of control-plane operations: who did what, to which resource, when. |
+| **Resource log** | A resource's own detailed log, collected only through a diagnostic setting. |
+| **Diagnostic setting** | Sends a resource's logs and metrics to a workspace, storage account or event hub. |
+| **Log Analytics workspace** | Where Azure Monitor stores logs for querying. |
+| **KQL** | Kusto Query Language: how you search and summarize logs. |
+| **Alert rule** | A condition on metrics, logs or the activity log that fires an alert. |
+| **Action group** | Who to notify and what to run when an alert fires. |
+| **Alert processing rule** | Changes what happens to fired alerts, such as suppressing notifications for a time. |
+| **Connection monitor** | Continuously tests connectivity between endpoints and reports failures and latency. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: From data to action in Azure Monitor
+  accDescr: Resources produce platform metrics automatically and the activity log automatically. Resource logs reach a Log Analytics workspace only through a diagnostic setting, and guest OS data only through the Azure Monitor Agent. Alert rules watch metrics and logs and fire alerts. Alert processing rules can modify or suppress what happens next. Action groups notify people and run automation.
+  R["Resource"] -- "automatic" --> MET["Metrics"]:::d05
+  R -- "diagnostic setting" --> LAW["Log Analytics workspace<br/>KQL"]:::d05
+  ACT["Activity log (automatic)"] -.-> LAW
+  MET --> AR["Alert rule"]:::d05
+  LAW --> AR
+  AR --> APR["Alert processing rule"] --> AG["Action group<br/>email · SMS · webhook"]
+```
+
+Ask two questions: is the data collected (automatic, or does it need a setting or agent first), and what
+should happen when a condition is met (rule, then processing, then action). This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A car's dashboard gauges | Metrics |
+| The car's service history | Logs |
+| A warning light | Alert rule |
+| Who gets the phone call when the light comes on | Action group |
+| "Ignore the light during the scheduled service" | Alert processing rule |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Log Analytics workspace |
+| --- | --- |
+| What contains it? | A resource group. |
+| What does it depend on? | Data sources: diagnostic settings, and agents with data collection rules. |
+| What depends on it? | Log alert rules, VM insights, backup reports, saved KQL queries. |
+| Who can manage it? | Log Analytics Contributor; Log Analytics Reader to query. |
+| How is it networked? | Agents and diagnostic settings send data to it. |
+| How is it monitored? | Its own usage and ingestion data. |
+| How is it protected? | Access control per workspace or table; retention settings. |
+| How is it recovered? | Retention and long-term retention per table. |
+| What does it cost? | Data ingested, and retention beyond the included period. |
+| How is it removed safely? | Subscription-scope diagnostic settings and data collection rules that point at it aren't removed with a resource group: delete them too. |
+
+See it with its neighbours on the [resource map](#/map/workspace).
 
 ## How it works under the hood
 
@@ -274,6 +358,37 @@ az monitor alert-processing-rule create --resource-group "<rg>" --name maintenan
 | Alert processing rule schedule | **Always** | Alert processing rule | One-time or recurring windows |
 | Network Watcher | **Enabled automatically** per region | Network Watcher | NetworkWatcherRG |
 
+## Worked example
+
+**Requirement.** The on-call engineer must get an SMS when a VM's CPU stays above 80% for 15 minutes, except during
+the Sunday maintenance window, and auditors must be able to query who deleted resources over the last year.
+
+1. **Decide.** CPU is a platform **metric**: a **metric alert rule**. The SMS is an **action group**. Silence during
+   maintenance is an **alert processing rule** with a schedule. Deletions are in the **activity log**; keeping a year of
+   it queryable means a **subscription diagnostic setting** to a workspace.
+2. **Configure.** Each of those four pieces.
+3. **Observe.** The alert fires and resolves; during the window, it still fires but no SMS is sent.
+4. **Validate.** Check each piece, and query the workspace, as below.
+
+## Validate the result
+
+```powershell
+az monitor metrics alert show -g <rg> -n <alert> --query "{enabled:enabled, autoMitigate:autoMitigate}" -o table
+az monitor alert-processing-rule list -g <rg> -o table
+az monitor diagnostic-settings subscription show --name <setting> --query "workspaceId" -o tsv
+```
+
+```kusto
+AzureActivity
+| where OperationNameValue endswith "DELETE" and ActivityStatusValue == "Success"
+| project TimeGenerated, Caller, ResourceGroup, OperationNameValue
+| take 20
+```
+
+- Make the condition true on purpose (a CPU load on a test VM): the alert appears in **Alerts**, and the action group
+  sends the notification.
+- A diagnostic setting is validated when its table returns rows, not when it saves without error.
+
 ## Common failure modes
 
 1. **"Free space per drive is missing for our VMs."** That's a guest OS counter. Install the Azure Monitor Agent with
@@ -332,6 +447,14 @@ workspace, a metric alert, an alert processing rule and a connection monitor.
    other resource groups must keep notifying. What do you create, and with which settings?
 5. Users report intermittent slowness between a VM and an on-premises server. Which tool gives you a continuous
    latency and loss history, and what does the on-premises side need?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain metrics versus logs using a car's dashboard and its service history.
+- Explain the path from a condition to a phone notification, naming each piece.
+- Explain why some data has to be configured before an incident to be useful after it.
 
 ## Key takeaways
 

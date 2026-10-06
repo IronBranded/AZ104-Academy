@@ -8,7 +8,7 @@ objective_ids: ["net.dnslb.dns", "net.dnslb.load-balancer", "net.dnslb.troublesh
 domain: "Implement and manage virtual networking"
 domain_weight: "15-20%"
 status: GA
-prerequisites: ["04-01", "04-02"]
+prerequisites: ["0A-02", "0A-07", "04-01", "04-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/dns/dns-zones-records"
@@ -40,7 +40,12 @@ free_practice_available: false
 - Configure an internal or public load balancer
 - Troubleshoot load balancing
 
-## Why this exists
+## The administrative problem
+
+Users reach the company's app by typing a name, not an IP address, and the domain was bought from a registrar
+outside Azure. Inside the network, servers need to find each other by name too. And the app runs on two VMs, because one
+would be a single point of failure: something has to give users one address and send each connection to a VM that is
+actually healthy.
 
 Two jobs that every application needs:
 
@@ -50,6 +55,79 @@ Two jobs that every application needs:
 - **Spreading load.** One VM is a single point of failure. **Azure Load Balancer** puts one address in
   front of several VMs, sends each new flow to a healthy one, and stops sending traffic to any that fail
   their health probe.
+
+## In plain English
+
+**DNS** turns names into IP addresses. **Azure DNS** hosts DNS zones for you:
+
+- a **public zone**, such as `contoso.com`, answers for the internet once your registrar **delegates** the domain to
+  Azure's name servers;
+- a **private zone** answers only for the virtual networks **linked** to it, and can register VM names automatically.
+
+**Azure Load Balancer** gives clients one **frontend** IP and spreads their connections across a **backend pool** of
+VMs. A **health probe** checks each VM, and only healthy ones get new connections. A **public** load balancer has a
+public IP for internet traffic; an **internal** one has a private IP for traffic inside your network. It works with
+TCP and UDP, not with web addresses or URLs.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **DNS zone** | The records for one domain, such as contoso.com, hosted by a DNS service. |
+| **Record set** | All the records with the same name and type in a zone, such as the A records for www. |
+| **Delegation** | Pointing a domain's name servers at Azure DNS, at the registrar, so Azure answers for it. |
+| **Alias record** | A record that points at an Azure resource, follows its IP, and can sit at the zone apex. |
+| **Private DNS zone** | A zone that only linked virtual networks can resolve. |
+| **Auto-registration** | A private zone link option that creates records for VMs in the linked network automatically. |
+| **Frontend IP** | The address clients connect to on a load balancer: public or private. |
+| **Backend pool** | The VMs or scale set instances that receive the traffic. |
+| **Health probe** | A regular check of each backend. A backend that fails it gets no new connections. |
+| **Load-balancing rule** | Maps a frontend port to a backend port on a pool, using a probe. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: From a name to a healthy backend
+  accDescr: A user looks up www.contoso.com. Azure DNS, after delegation from the registrar, answers with the load balancer's public IP, ideally through an alias record. The client connects to the load balancer frontend. A load-balancing rule sends the connection to a backend VM in the pool that passes its health probe; a VM failing the probe receives no new connections.
+  U["User types www.contoso.com"] --> DNS["Azure DNS public zone<br/>alias record"]:::d04
+  DNS -- "returns frontend IP" --> U
+  U --> FE["Load balancer frontend"]:::d04
+  FE -- "rule + health probe" --> VM1["VM 1 (healthy)"]
+  FE -- "rule + health probe" --> VM2["VM 2 (healthy)"]
+  FE -. "no new flows" .-> VM3["VM 3 (probe failing)"]
+```
+
+Two jobs in a chain: DNS gets the client to one address; the load balancer gets the connection to one healthy
+server. When users can't connect, test each link separately. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A phone book entry | DNS record |
+| Telling the phone company who answers for your number | Delegation at the registrar |
+| A company switchboard with one public number | Load balancer frontend |
+| Checking which staff are at their desks before routing calls | Health probe |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Load balancer |
+| --- | --- |
+| What contains it? | A resource group, in one region. |
+| What does it depend on? | A Standard public IP (public) or a subnet (internal), a health probe, and NSG rules that allow clients and probes. |
+| What depends on it? | Clients using its frontend; DNS records pointing at its public IP. |
+| Who can manage it? | Network Contributor. |
+| How is it networked? | Frontend IP; backend pool in one VNet; probes from 168.63.129.16. |
+| How is it monitored? | Data Path Availability and Health Probe Status metrics, in Insights. |
+| How is it protected? | Standard is secure by default: an NSG must allow the client traffic. |
+| How is it recovered? | Redeploy from a template; backends recover by passing their probe again. |
+| What does it cost? | Standard load balancers bill while they exist. |
+| How is it removed safely? | Delete it before its public IP, and remove DNS records that point at that IP. |
+
+See it with its neighbours on the [resource map](#/map/lb).
 
 ## How it works under the hood
 
@@ -207,6 +285,32 @@ az network lb rule create --resource-group "<rg>" --lb-name lb-web --name rule-h
 | Distribution mode | **5-tuple hash** | Rule > Session persistence | Client IP for stickiness |
 | Probe | TCP, HTTP or HTTPS | Health probes | HTTP needs 200 OK |
 
+## Worked example
+
+**Requirement.** `contoso.com` (bought from another registrar) and `www.contoso.com` must reach a web app running on
+two VMs behind a load balancer, and DNS must keep working if the load balancer's public IP is ever replaced.
+
+1. **Decide.** Azure must answer for the domain: create the zone and **delegate** it at the registrar. The apex can't be
+   a CNAME, and the IP may change: an **alias A record** pointing at the public IP. Internet traffic on port 443: a
+   **public Standard load balancer** with a probe and a rule.
+2. **Configure.** Zone and delegation; alias A at `@`; load balancer frontend, backend pool, HTTP or HTTPS probe, rule
+   for 443; an NSG rule allowing 443 to the backends.
+3. **Observe.** Name resolution returns the frontend IP; both VMs show healthy.
+4. **Validate.** Check resolution, the alias target and the probe status, as below.
+
+## Validate the result
+
+```powershell
+nslookup www.contoso.com                                                  # the load balancer's frontend IP
+az network dns record-set a show -g <rg> --zone-name contoso.com -n "@" --query "targetResource.id" -o tsv   # the public IP: an alias
+az network lb show -g <rg> -n <lb> --query "{sku:sku.name, rules:length(loadBalancingRules), probes:length(probes)}" -o table
+```
+
+- In **Load balancer > Insights** or **Metrics**, **Health Probe Status** shows each backend; **Data Path Availability**
+  shows whether the frontend works end to end.
+- Stop the web service on one VM: its probe fails and traffic keeps flowing to the other. Start it again and it returns.
+- If probes are healthy but clients time out, the NSG doesn't allow the client traffic: Standard is closed by default.
+
 ## Common failure modes
 
 1. **"We created the zone in Azure but the internet still sees the old records."** The registrar still points at
@@ -263,6 +367,14 @@ for about an hour, with a public and a private DNS zone. It needs no Bastion: co
    ways to fix it.
 5. A Standard public load balancer's probes are all healthy, but users time out. What's the most likely missing
    configuration?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain delegation using a phone company and who answers for a number.
+- Explain why an alias record is safer than an A record for a load-balanced app.
+- Explain what a health probe does when a VM fails, and what it doesn't do to existing connections.
 
 ## Key takeaways
 

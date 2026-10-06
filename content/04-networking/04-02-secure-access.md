@@ -10,7 +10,7 @@ objective_ids: ["net.secure.nsg-asg", "net.secure.effective-rules", "net.secure.
 domain: "Implement and manage virtual networking"
 domain_weight: "15-20%"
 status: GA
-prerequisites: ["02-01", "04-01"]
+prerequisites: ["0A-07", "0A-08", "02-01", "04-01"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview"
@@ -45,7 +45,11 @@ free_practice_available: false
 - Configure service endpoints for Azure platform as a service (PaaS)
 - Configure private endpoints for Azure PaaS
 
-## Why this exists
+## The administrative problem
+
+Your VMs are on a network, and now you have to decide what is allowed through. Web servers should accept HTTPS
+from the internet and nothing else. Administrators need to reach the VMs without exposing remote desktop or SSH to the
+whole internet. And the VMs need to reach a storage account privately, without that account being open to everyone.
 
 04-01 connected networks; this module controls **what is allowed through them**. Three separate
 questions, three tools:
@@ -54,6 +58,77 @@ questions, three tools:
   application security groups.
 - **How do admins reach VMs without exposing RDP or SSH to the internet?** Azure Bastion.
 - **How do VMs reach PaaS services such as Storage privately?** Service endpoints or private endpoints.
+
+## In plain English
+
+Three separate controls, for three separate questions:
+
+- A **network security group (NSG)** is a list of allow and deny rules, checked in priority order, for traffic to and
+  from a subnet or a network interface. **Application security groups (ASGs)** let a rule say "the web servers" instead
+  of listing IP addresses.
+- **Azure Bastion** lets administrators open RDP or SSH sessions to VMs through the Azure portal over HTTPS, so the VMs
+  need no public IP and no open management port.
+- **Service endpoints** and **private endpoints** let VMs reach PaaS services such as Storage privately. A service
+  endpoint lets a subnet through the service's firewall; a private endpoint gives the service a private IP address in
+  your network.
+
+To know what actually applies, read the **effective security rules**: the combined result of every NSG on the path.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Network security group (NSG)** | Ordered allow and deny rules for traffic to and from subnets and network interfaces. |
+| **Priority** | A rule's order, 100 to 4096. The lowest number that matches wins and processing stops. |
+| **Default rules** | Rules every NSG has at priority 65000 and above, such as denying inbound from the internet. |
+| **Service tag** | A named group of Azure IP ranges, such as Internet or AzureLoadBalancer, for use in rules. |
+| **Application security group (ASG)** | A label you give to NICs, so rules can target "web servers" instead of IP addresses. |
+| **Effective security rules** | The combined rules actually applied to a network interface from its subnet's and its own NSG. |
+| **Azure Bastion** | A managed service for RDP and SSH to VMs through the portal, without public IPs on the VMs. |
+| **Service endpoint** | Sends a subnet's traffic to a PaaS service with the subnet's identity, so the service firewall can allow it. |
+| **Private endpoint** | A network interface with a private IP that connects to one specific PaaS resource. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Three controls for three questions
+  accDescr: Network security groups decide which traffic may reach or leave subnets and network interfaces, checked in priority order. Azure Bastion lets administrators reach VMs over HTTPS through the portal without public IPs or open management ports. Service endpoints and private endpoints let VMs reach PaaS services such as Storage privately.
+  Q1["Which traffic may pass?"] --> NSG["NSG rules (+ ASGs)<br/>subnet and NIC"]:::d04
+  Q2["How do admins reach VMs safely?"] --> BAS["Azure Bastion<br/>RDP/SSH over HTTPS"]:::d04
+  Q3["How do VMs reach PaaS privately?"] --> EP["Service endpoint or private endpoint"]:::d04
+```
+
+Match the question to the control. And when traffic is blocked, check the effective rules rather than the NSG you
+think applies: a subnet NSG and a NIC NSG can both be on the path. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A doorman with a list of who may enter, read top to bottom | Network security group |
+| Name badges by job, such as "web team" | Application security groups |
+| A supervised visitor entrance instead of an unlocked side door | Azure Bastion |
+| A private corridor to a shop, versus opening a shop counter inside your office | Service endpoint versus private endpoint |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Network security group |
+| --- | --- |
+| What contains it? | A resource group, in the same region as the subnets and NICs it's associated with. |
+| What does it depend on? | Nothing to exist; an association with a subnet or NIC to take effect. |
+| What depends on it? | Every flow to and from the subnets and NICs it's associated with. |
+| Who can manage it? | Network Contributor. |
+| How is it networked? | Rules by priority, first match wins; default rules at 65000 and above. |
+| How is it monitored? | Effective security rules, IP flow verify, virtual network flow logs. |
+| How is it protected? | It is the protection: inbound from the internet is denied by default. |
+| How is it recovered? | Redeploy the rules from a template. |
+| What does it cost? | Free. |
+| How is it removed safely? | Dissociate it from subnets and NICs, then delete it; check what traffic its rules were allowing. |
+
+See it with its neighbours on the [resource map](#/map/nsg).
 
 ## How it works under the hood
 
@@ -231,6 +306,32 @@ az network private-endpoint dns-zone-group create --endpoint-name pe-blob --reso
 | Bastion SKU change | Upgrade only | Bastion > Configuration | Downgrade means re-create |
 | Private endpoint DNS | Private DNS zone integration | Private endpoint > DNS configuration | Name must resolve to the private IP |
 
+## Worked example
+
+**Requirement.** Web VMs accept HTTPS from the internet only. Database VMs accept SQL (TCP 1433) only from the web
+VMs. Nobody may open RDP from the internet.
+
+1. **Decide.** Traffic filtering is an **NSG**; "only from the web VMs" without IP lists is an **ASG**; admin access
+   without open RDP is **Bastion**.
+2. **Configure.** ASGs `asg-web` and `asg-db` on the NICs. Rules: allow 443 from **Internet** to `asg-web`; allow 1433
+   from `asg-web` to `asg-db`. Rely on the default inbound deny for everything else. Deploy Bastion for admins.
+3. **Observe.** HTTPS reaches the web VMs; SQL from anywhere else is dropped.
+4. **Validate.** Ask Network Watcher about specific flows, as below.
+
+## Validate the result
+
+```powershell
+az network nic list-effective-nsg -g <rg> -n <nic>
+az network watcher test-ip-flow -g <rg> --vm <db-vm> --direction Inbound --protocol TCP `
+  --local <db-ip>:1433 --remote <web-ip>:60000                     # Allow, naming the rule
+az network watcher test-ip-flow -g <rg> --vm <db-vm> --direction Inbound --protocol TCP `
+  --local <db-ip>:1433 --remote 203.0.113.10:60000                 # Deny, naming the rule
+```
+
+- **IP flow verify** returns Allow or Deny *and the rule that decided it*: that's the validation, not the rule list.
+- For a private endpoint, `nslookup <account>.blob.core.windows.net` from a VM in the VNet must return a **private** IP.
+- For Bastion, connect to a VM with no public IP from the portal.
+
 ## Common failure modes
 
 1. **"We allowed port 80 on the NIC's NSG but it's still blocked."** The subnet NSG denies it, and inbound is
@@ -283,6 +384,14 @@ Bastion Developer, and keeps a private endpoint for about 15 minutes. Dedicated 
 4. Bastion Developer works for VM1 in VNet-A but not for VM2 in a peered VNet-B. Why, and what's the cheapest fix?
 5. A storage account must be reachable from a subnet **and** from on-premises, privately, with its public endpoint
    disabled. Service endpoint or private endpoint, and what else must you configure for names to resolve?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain how an NSG decides, using a list read from the top until the first match.
+- Explain why you'd check effective security rules instead of one NSG.
+- Explain the difference between a service endpoint and a private endpoint in one sentence each.
 
 ## Key takeaways
 

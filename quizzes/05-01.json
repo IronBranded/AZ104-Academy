@@ -20,7 +20,8 @@
     "Platform metrics are kept for 93 days, and a chart shows up to 30.",
     null,
     "Metrics are stored in the metrics database, not the activity log."
-   ]
+   ],
+   "clue": "Platform metric retention and the explorer's chart window are fixed: 93 days kept, 30 days per chart."
   },
   {
    "id": "05-01-q2",
@@ -39,7 +40,8 @@
     "Aggregation changes the calculation, not the breakdown.",
     "Splitting is a metrics explorer feature; no export is needed.",
     "Alerts don't chart breakdowns."
-   ]
+   ],
+   "clue": "\"separate line for each\" value of a dimension: splitting."
   },
   {
    "id": "05-01-q3",
@@ -58,7 +60,8 @@
     "Retention isn't the issue; the data isn't collected.",
     "It was retired in August 2024.",
     null
-   ]
+   ],
+   "clue": "\"free space on each logical disk\" is a guest counter: it needs the Azure Monitor Agent and a DCR."
   },
   {
    "id": "05-01-q4",
@@ -77,7 +80,8 @@
     null,
     "An alert doesn't store logs.",
     "Insights visualize metrics; they don't ingest resource logs."
-   ]
+   ],
+   "clue": "\"read and write operations\" must be \"queryable in a workspace\": a diagnostic setting on the blob service."
   },
   {
    "id": "05-01-q5",
@@ -96,7 +100,8 @@
     "The activity log is a source, not a destination.",
     null,
     "Alerts aren't log destinations."
-   ]
+   ],
+   "clue": "\"streamed in near real time to a third-party SIEM\": an event hub."
   },
   {
    "id": "05-01-q6",
@@ -115,7 +120,8 @@
     "Analytics retention goes up to 2 years.",
     "The default is 30 days.",
     "Backup doesn't hold Log Analytics data."
-   ]
+   ],
+   "clue": "\"7 years\", \"low cost\", \"queried only occasionally\": long-term retention on those tables."
   },
   {
    "id": "05-01-q7",
@@ -134,7 +140,8 @@
     "ago() compares with time, not a resource group, and count gives one total.",
     "Heartbeat holds agent check-ins, not the activity log.",
     null
-   ]
+   ],
+   "clue": "\"counts operations per resource group\" over \"7 days\": filter by time, then summarize count() by group."
   },
   {
    "id": "05-01-q8",
@@ -153,7 +160,8 @@
     null,
     "summarize aggregates rows into groups.",
     "where filters rows."
-   ]
+   ],
+   "clue": "\"adds a calculated column\" and keeps the others: extend."
   },
   {
    "id": "05-01-q9",
@@ -172,7 +180,8 @@
     "take returns 15 rows, not missing machines.",
     null,
     "Storage logs don't describe VM agents."
-   ]
+   ],
+   "clue": "\"stopped reporting\": the Heartbeat table, latest TimeGenerated per computer."
   },
   {
    "id": "05-01-q10",
@@ -191,7 +200,8 @@
     "CPU doesn't record deletions.",
     "InsightsMetrics holds performance data, not deletions.",
     "Processing rules modify fired alerts; they don't detect events."
-   ]
+   ],
+   "clue": "\"whenever anyone deletes\" a resource: an activity log alert."
   },
   {
    "id": "05-01-q11",
@@ -210,7 +220,8 @@
     "Diagnostic settings route data.",
     "DCRs configure agent data collection.",
     null
-   ]
+   ],
+   "clue": "\"SMS\" and \"a runbook must run\" when an alert fires: both are actions in an action group."
   },
   {
    "id": "05-01-q12",
@@ -229,7 +240,8 @@
     null,
     "Fragile, and it affects every rule using them.",
     "Severity doesn't stop notifications."
-   ]
+   ],
+   "clue": "\"still be recorded but notify no one\" in a time window: an alert processing rule that suppresses actions."
   },
   {
    "id": "05-01-q13",
@@ -248,7 +260,8 @@
     "That's a diagnostic-setting destination, not VM insights.",
     null,
     "That table holds activity log data."
-   ]
+   ],
+   "clue": "\"VM insights\" with the Azure Monitor Agent: guest performance goes to InsightsMetrics."
   },
   {
    "id": "05-01-q14",
@@ -267,7 +280,8 @@
     "VM insights focuses on VMs and needs the agent.",
     "Storage insights covers storage accounts.",
     "Connection monitor tests connectivity; it's one of the tools Network insights links to."
-   ]
+   ],
+   "clue": "\"all network resources without any configuration\": Network insights."
   },
   {
    "id": "05-01-q15",
@@ -286,7 +300,8 @@
     "The Log Analytics agent was retired in August 2024.",
     "Map collection is an option you choose when enabling VM insights.",
     null
-   ]
+   ],
+   "clue": "The Map feature depends on the Dependency agent, which has a retirement date."
   },
   {
    "id": "05-01-q16",
@@ -305,7 +320,8 @@
     null,
     "IP flow verify checks NSG rules for a single flow; the Log Analytics agent isn't supported.",
     "Packet capture records traffic; it doesn't monitor latency over time."
-   ]
+   ],
+   "clue": "\"continuous monitoring of latency and packet loss\" including \"on-premises\": Connection monitor; the server needs Azure Arc and the agent."
   },
   {
    "id": "05-01-q17",
@@ -324,7 +340,8 @@
     "Network Watcher is enabled automatically when you create a virtual network.",
     "Connection monitor doesn't require a public IP on the source.",
     "Sources don't need to be in that resource group."
-   ]
+   ],
+   "clue": "\"no data from an Azure VM\" source: the Network Watcher agent extension isn't on it."
   },
   {
    "id": "05-01-q18",
@@ -343,7 +360,8 @@
     "Deletion isn't delayed like that.",
     null,
     "Monitors aren't attached to disks."
-   ]
+   ],
+   "clue": "\"after deleting a lab's resource group\" it's still billing: it lives in NetworkWatcherRG, not your group."
   }
  ]
 }

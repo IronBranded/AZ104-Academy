@@ -20,7 +20,8 @@
     null,
     "Azure DNS isn't a registrar; you delegate, you don't transfer.",
     "TTL changes don't move authority to Azure."
-   ]
+   ],
+   "clue": "\"bought from a third-party registrar\" and lookups return old records: delegate the NS records at the registrar."
   },
   {
    "id": "04-03-q2",
@@ -39,7 +40,8 @@
     "It won't follow an IP change and can become a dangling record.",
     "TXT records don't route clients.",
     null
-   ]
+   ],
+   "clue": "\"root domain\" and \"stay correct if that IP changes\": an alias A record at the apex."
   },
   {
    "id": "04-03-q3",
@@ -58,7 +60,8 @@
     "Linked VNets resolve the zone without peering.",
     "That registers VNet-B's VMs too; the requirement only asks VNet-B to resolve.",
     "Public zones can't resolve private addresses for your VNets."
-   ]
+   ],
+   "clue": "\"register automatically\" for VNet-A, \"resolve\" from VNet-B: a registration link and a resolution link."
   },
   {
    "id": "04-03-q4",
@@ -77,7 +80,8 @@
     "Registration doesn't change which server answers queries.",
     null,
     "That would expose names and still not resolve private IPs."
-   ]
+   ],
+   "clue": "\"custom DNS server\" and private zone names stop resolving: forward to 168.63.129.16."
   },
   {
    "id": "04-03-q5",
@@ -96,7 +100,8 @@
     "NAT rules forward to one specific instance; they don't balance.",
     null,
     "DNS round robin doesn't health-check or remove failed VMs."
-   ]
+   ],
+   "clue": "\"internet users\", \"port 443\", \"failed VMs removed automatically\": a public load balancer with a health probe."
   },
   {
    "id": "04-03-q6",
@@ -115,7 +120,8 @@
     "A load-balancing rule distributes to all instances, not a specific VM.",
     "Outbound rules provide SNAT for outbound traffic.",
     "HA ports load-balance all ports on internal load balancers."
-   ]
+   ],
+   "clue": "\"one specific VM\" on a dedicated port: an inbound NAT rule."
   },
   {
    "id": "04-03-q7",
@@ -134,7 +140,8 @@
     "Persistence controls stickiness, not port coverage.",
     "Basic is retired and never supported HA ports.",
     null
-   ]
+   ],
+   "clue": "\"all TCP and UDP traffic on every port\" from an internal load balancer: HA ports."
   },
   {
    "id": "04-03-q8",
@@ -153,7 +160,8 @@
     null,
     "More backends make stickiness worse, not better.",
     "Five-tuple hashing is the default that spreads a user's flows."
-   ]
+   ],
+   "clue": "\"keep reaching the same backend VM\": session persistence by client IP."
   },
   {
    "id": "04-03-q9",
@@ -172,7 +180,8 @@
     "NSGs are required for Standard load balancers.",
     "Interval affects detection speed, not success.",
     "Backends don't need public IPs."
-   ]
+   ],
+   "clue": "\"all backends down\", app listening, NSG \"denying all inbound\" on the probe port: the probe is blocked."
   },
   {
    "id": "04-03-q10",
@@ -191,7 +200,8 @@
     "A Standard load balancer requires a Standard public IP; it wouldn't deploy with Basic.",
     null,
     "None is the default and doesn't block traffic."
-   ]
+   ],
+   "clue": "\"healthy\" probes but \"clients time out\" on a Standard load balancer: client traffic isn't allowed by an NSG."
   },
   {
    "id": "04-03-q11",
@@ -210,7 +220,8 @@
     "It measures outbound SNAT connections.",
     "It measures volume, not availability.",
     null
-   ]
+   ],
+   "clue": "\"get through the frontend\" rather than \"each backend's own health\": Data Path Availability."
   },
   {
    "id": "04-03-q12",
@@ -229,7 +240,8 @@
     null,
     "Other clients reach the frontend fine, so the backends are healthy.",
     "Internal load balancers use private IPs."
-   ]
+   ],
+   "clue": "\"backend VM\" to \"its own internal load balancer\": that outbound flow isn't supported."
   }
  ]
 }

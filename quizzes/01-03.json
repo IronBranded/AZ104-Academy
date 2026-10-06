@@ -20,7 +20,8 @@
     "Policy doesn't move resources; moving doesn't change a resource's region anyway.",
     null,
     "No policy effect stops or deallocates resources."
-   ]
+   ],
+   "clue": "\"already contains VMs\": deny policies block new requests; existing resources are only reported non-compliant."
   },
   {
    "id": "01-03-q2",
@@ -39,7 +40,8 @@
     "Locks prevent change or deletion; they don't add tags.",
     "Tags aren't inherited.",
     "deny blocks new non-compliant resources but never adds the tag, and does nothing to existing ones."
-   ]
+   ],
+   "clue": "\"every existing and future resource\" gets the tag: a modify policy for new ones, plus remediation for existing ones."
   },
   {
    "id": "01-03-q3",
@@ -58,7 +60,8 @@
     "That would stop enforcement for the whole subscription, not one resource group.",
     "A lock doesn't change policy evaluation.",
     null
-   ]
+   ],
+   "clue": "\"left out\" but \"auditors must still see\": an exemption (Waiver) with an expiry, not an exclusion."
   },
   {
    "id": "01-03-q4",
@@ -77,7 +80,8 @@
     null,
     "Locks apply to every user and role, Owner included.",
     "Azure never moves resources to work around a lock."
-   ]
+   ],
+   "clue": "\"CanNotDelete lock\" on a resource inside the group: the whole resource group delete fails."
   },
   {
    "id": "01-03-q5",
@@ -96,7 +100,8 @@
     "Locks apply to the control plane only; the issue is POST operations on the control plane.",
     "Locks don't change role assignments.",
     "Locks don't change the state of resources."
-   ]
+   ],
+   "clue": "\"can no longer restart a VM\" and \"retrieve keys\": ReadOnly also blocks POST actions."
   },
   {
    "id": "01-03-q6",
@@ -115,7 +120,8 @@
     "The root is a management group; locks can't be applied there either.",
     "Locks are Azure Resource Manager objects on subscriptions, resource groups and resources.",
     null
-   ]
+   ],
+   "clue": "\"share a management group\" tempts you, but locks go on subscriptions, resource groups or resources."
   },
   {
    "id": "01-03-q7",
@@ -134,7 +140,8 @@
     null,
     "Virtual machines support tags.",
     "Tag names are case-insensitive, and nothing was copied to compare anyway."
-   ]
+   ],
+   "clue": "\"has the tag\" on the resource group, \"no tags\" on the VM: tags don't inherit."
   },
   {
    "id": "01-03-q8",
@@ -153,7 +160,8 @@
     "Reader can't write tags.",
     null,
     "That role manages policies, not tags on resources."
-   ]
+   ],
+   "clue": "\"add and change tags\" but \"not change the resources\": Tag Contributor."
   },
   {
    "id": "01-03-q9",
@@ -172,7 +180,8 @@
     "Cross-subscription moves require both subscriptions to be in the same tenant.",
     "You can't move a resource group to another subscription at all.",
     "Templates aren't moved; a template can only re-create resources."
-   ]
+   ],
+   "clue": "\"different Microsoft Entra tenant\": a resource move can't cross tenants."
   },
   {
    "id": "01-03-q10",
@@ -191,7 +200,8 @@
     "A move changes only the resource group or subscription, never the region.",
     null,
     "Both source and target resource groups are locked."
-   ]
+   ],
+   "clue": "\"during the move\": both resource groups are locked for changes; the resources keep running."
   },
   {
    "id": "01-03-q11",
@@ -210,7 +220,8 @@
     null,
     "Resource provider registration isn't what removed their access.",
     "Changing directory doesn't move resources."
-   ]
+   ],
+   "clue": "\"Change directory\": role assignments in the subscription are deleted and must be re-created."
   },
   {
    "id": "01-03-q12",
@@ -229,7 +240,8 @@
     "A subscription has one parent and inherits only from its current chain.",
     "Moves aren't blocked by the new parent's policies in this way.",
     null
-   ]
+   ],
+   "clue": "\"move a subscription\" between management groups: it inherits from its new parent only."
   },
   {
    "id": "01-03-q13",
@@ -248,7 +260,8 @@
     "Budgets never stop resources, whatever their reset period.",
     "A forecasted alert only warns earlier; it doesn't act.",
     "Budgets have no spending cap; they notify."
-   ]
+   ],
+   "clue": "\"VMs keep running\": a budget only notifies; an action group running automation is what acts."
   },
   {
    "id": "01-03-q14",
@@ -267,7 +280,8 @@
     null,
     "Budgets don't influence Advisor recommendations.",
     "Advisor lets you configure the right-sizing lookback period and CPU filter."
-   ]
+   ],
+   "clue": "\"busy only during month-end\": a 7-day lookback misses it; lengthen Advisor's lookback."
   },
   {
    "id": "01-03-q15",
@@ -286,7 +300,8 @@
     "Management groups can't be locked.",
     null,
     "New subscriptions land under the root management group by default."
-   ]
+   ],
+   "clue": "\"new subscriptions automatically\" under a management group: set the default management group."
   },
   {
    "id": "01-03-q16",
@@ -305,7 +320,8 @@
     "10,000 is the count limit; depth is limited separately to six levels.",
     "The number of subscriptions per level has nothing to do with the depth limit.",
     null
-   ]
+   ],
+   "clue": "\"Root > ... > Project\" with seven levels below the root: the limit is six levels of depth."
   }
  ]
 }

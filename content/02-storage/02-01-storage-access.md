@@ -10,7 +10,7 @@ objective_ids: ["sto.access.firewalls", "sto.access.sas", "sto.access.stored-pol
 domain: "Implement and manage storage"
 domain_weight: "15-20%"
 status: GA
-prerequisites: ["00-01", "01-02"]
+prerequisites: ["0A-05", "0A-08", "00-01", "01-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security"
@@ -45,7 +45,12 @@ free_practice_available: false
 - Manage access keys
 - Configure identity-based access for Azure Files
 
-## Why this exists
+## The administrative problem
+
+A storage account holds data that a web app, a partner and a batch job all need, each in a different way. The
+partner should be able to upload for one week and no longer. The batch job runs in your own virtual network. Nothing
+from the internet at large should get in. And when a key leaks, you need to take access back without breaking
+everything else.
 
 Every request to data in a storage account has to pass **two independent gates**:
 
@@ -60,6 +65,76 @@ Passing one gate says nothing about the other. A request from an allowed IP addr
 needs valid authorization, and a perfectly valid SAS is still refused from a blocked
 network. Most questions in this module come down to picking the right mechanism for each
 gate, and knowing how to take access *back* when something leaks.
+
+## In plain English
+
+Every request to the data in a storage account passes two separate checks:
+
+1. **Can it reach the account?** The storage **firewall** allows or refuses requests by network: selected public IP
+   ranges, selected virtual network subnets, or nothing public at all.
+2. **Is it allowed to do this?** The caller proves permission in one of four ways:
+   - a **Microsoft Entra identity** with a data role, such as Storage Blob Data Reader (the preferred way);
+   - an **account key**, which is like the account's master password;
+   - a **shared access signature (SAS)**, a signed link with limited permissions and an expiry time;
+   - for **Azure Files** over SMB, **identity-based access** with Kerberos, like a Windows file server.
+
+Passing one check says nothing about the other. A valid SAS used from a blocked network is still refused.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Storage firewall** | Network rules on the account: which IP ranges and subnets may reach it, or none. |
+| **Account key** | One of two master keys for the whole account. Anyone holding it has full access. |
+| **Shared Key authorization** | Authorizing requests with an account key. It can be disallowed on the account. |
+| **Shared access signature (SAS)** | A signed token granting limited permissions, for a limited time, to part of the account. |
+| **User delegation SAS** | A SAS signed with Microsoft Entra credentials instead of an account key. Preferred for blobs. |
+| **Stored access policy** | Settings on a container or share that a service SAS can refer to, so you can change or revoke many SAS at once. |
+| **Data role** | An Azure role with data actions, such as Storage Blob Data Contributor, for reading or writing the data itself. |
+| **Identity-based access** | Azure Files over SMB authorizing users with Kerberos from an identity source such as AD DS. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Two gates in front of storage data
+  accDescr: A request first passes the network gate, the storage firewall, which allows selected public IP ranges or virtual network subnets. It then passes the authorization gate, using a Microsoft Entra identity with a data role, an account key, a shared access signature, or identity-based access for Azure Files. Only a request that passes both gates reaches the data.
+  C["Client request"] --> G1["Gate 1: network<br/>storage firewall"]:::d02
+  G1 --> G2["Gate 2: authorization<br/>Entra data role · account key · SAS · Kerberos for Files"]:::d02
+  G2 --> DATA["Blobs, files, queues, tables"]
+```
+
+Solve each gate separately. A scenario that says "from the internet" or "only from this subnet" is about
+gate 1; one that says "for one week" or "without sharing the key" is about gate 2. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A building's gate guard who checks where you came from | Storage firewall |
+| The building's master key | Account key |
+| A visitor pass valid until Friday for one room | Shared access signature |
+| A rulebook the passes refer to, which you can tear up | Stored access policy |
+| An employee badge with the right clearance | Microsoft Entra identity with a data role |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Storage account (access) |
+| --- | --- |
+| What contains it? | A resource group, in one region. Its name is globally unique. |
+| What does it depend on? | For subnet rules, a service endpoint on the subnet; for private access, a private endpoint. |
+| What depends on it? | Every app, user and SAS holder that reads or writes its data. |
+| Who can manage it? | Storage Account Contributor configures it; data roles such as Storage Blob Data Contributor grant data access. |
+| How is it networked? | Public endpoints filtered by its firewall, or private endpoints. |
+| How is it monitored? | Transaction metrics, and resource logs through a diagnostic setting. |
+| How is it protected? | Firewall default deny, Shared Key disallowed, user delegation SAS, key rotation reminders. |
+| How is it recovered? | For access: revoke a SAS through its stored access policy, or rotate the key that signed it. |
+| What does it cost? | Capacity and transactions; network rules themselves are free. |
+| How is it removed safely? | Rotate or revoke what you handed out before deleting anything, and find what still uses the keys. |
+
+See it with its neighbours on the [resource map](#/map/storage).
 
 ## How it works under the hood
 
@@ -279,6 +354,36 @@ az storage account revoke-delegation-keys --name "<account>" --resource-group "<
 | User delegation SAS maximum | **7 days** | — | Longer expiration policies don't extend it |
 | Stored access policies per container | Up to **5** | Container > Access policy | Service SAS only |
 
+## Worked example
+
+**Requirement.** A partner must upload files to the `inbox` container for seven days. You must be able to cancel
+that access early without affecting anyone else. The account must refuse traffic except from the `apps` subnet and the
+partner's public IP range.
+
+1. **Decide.** Time-limited access for someone without an identity in your tenant: a **SAS**. Early, isolated
+   revocation: a **service SAS tied to a stored access policy** on `inbox`. Network restriction: the **firewall** with
+   a virtual network rule for `apps` and an IP rule for the partner.
+2. **Configure.** Create the stored access policy (write, add, create; seven-day expiry), issue the SAS from it, set
+   the firewall's default action to **Deny** and add the two rules.
+3. **Observe.** The partner uploads; the same SAS from any other network is refused.
+4. **Validate.** Check the settings, then test the access from both sides, as below.
+
+## Validate the result
+
+Prove each gate with a real request, not just a setting:
+
+```powershell
+$a = Get-AzStorageAccount -ResourceGroupName <rg> -Name <account>
+$a.NetworkRuleSet.DefaultAction                      # Deny
+$a.NetworkRuleSet.VirtualNetworkRules.VirtualNetworkResourceId   # ends in /subnets/apps
+$a.AllowSharedKeyAccess                              # False, if keys are disallowed
+```
+
+- Use the SAS from an allowed network: the upload succeeds. Use it from anywhere else: it's refused by the firewall.
+- Delete or change the stored access policy: the same SAS stops working immediately, and other access is unaffected.
+- After a key rotation, anything still signing with the old key fails. That failure list is your inventory of
+  dependents.
+
 ## Common failure modes
 
 1. **"The firewall allows our office IP, but the app on a VM in the same region is blocked,"** or
@@ -341,6 +446,14 @@ because it needs a directory service most learners don't have in a lab tenant.
 4. A user holds Storage File Data SMB Share Reader, and the default share-level permission is
    Elevated Contributor. What share-level access do they get, and what still controls file access?
 5. What does disallowing Shared Key break, what keeps working, and what does it enable?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain the two gates using a building's front gate and its room keys.
+- Explain three ways to take back a SAS, and which one breaks the least.
+- Explain why an Owner of the subscription may still be unable to read a blob.
 
 ## Key takeaways
 

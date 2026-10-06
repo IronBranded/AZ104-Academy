@@ -60,8 +60,10 @@
 
   var STAGES = [
     { id: 'orient',      label: 'Orient' },
-    { id: 'learn',       label: 'Learn' },
+    { id: 'understand',  label: 'Understand' },
     { id: 'visualize',   label: 'Visualize' },
+    { id: 'learn',       label: 'Learn' },
+    { id: 'validate',    label: 'Validate' },
     { id: 'distinguish', label: 'Distinguish' },
     { id: 'practice',    label: 'Practice' },
     { id: 'check',       label: 'Check' },
@@ -71,6 +73,17 @@
   /* heading text -> where it goes. Anything else goes to LEARN. */
   var PLACE = {
     'sub-objectives covered': 'orient',
+    /* Beginner-first anatomy: problem -> plain English -> words -> mental
+       model -> where it fits. All of it lands in UNDERSTAND, in order. */
+    'the administrative problem': 'understand',
+    'the problem':            'understand',
+    'in plain english':       'understand',
+    'words you need to know': 'understand',
+    'mental model':           'understand',
+    'where it fits':          'understand',
+    'where this shows up in az-104': 'understand',
+    'validate the result':    'validate',
+    'teach it back':          'teachback',
     'common failure modes':   'pitfalls',
     'the traps, specifically':'pitfalls',
     'how this is tested':     'lens',
@@ -140,9 +153,11 @@
        explanation they illustrate. The stage rail links to the first one. */
     var firstDiagram = root.querySelector('pre > code.language-mermaid');
     if (firstDiagram) firstDiagram.parentNode.id = 'stage-visualize';
+    var understand = [];
     parts.list.forEach(function (c) {
       var p = PLACE[c.key];
-      if (p && !byPlace[p]) byPlace[p] = c;
+      if (p === 'understand') understand.push(c);
+      else if (p && !byPlace[p]) byPlace[p] = c;
       else learn.push(c);
     });
 
@@ -188,8 +203,10 @@
       byPlace.orient.nodes.forEach(function (n) { if (n !== ul) orient.appendChild(n); });
     } else {
       orient.appendChild(node('p', 'lede',
-        route.moduleId && route.moduleId.indexOf('00-') === 0
-          ? 'Module 0 is a project prerequisite rather than exam content: it makes every later lab safe and affordable. Complete it before creating any billable resource.'
+        route.moduleId && route.moduleId.indexOf('0A-') === 0
+          ? 'Foundation primer: not an exam objective by itself. It explains what the ' + window.AcademyExam.code + ' lessons assume you already know. Already comfortable with it? Skip it; nothing later is locked behind it.'
+          : route.moduleId && route.moduleId.indexOf('00-') === 0
+          ? 'Module 0B is a project prerequisite rather than exam content: it makes every later lab safe and affordable. Complete it before creating any billable resource.'
           : 'This lesson has no sub-objective list.'));
     }
     introKeep.forEach(function (n) { orient.appendChild(n); });
@@ -201,6 +218,16 @@
     orient.appendChild(trainingHost);
     article.appendChild(orient);
     present.push('orient');
+
+    /* UNDERSTAND: why it exists, what it is in plain words, the vocabulary,
+       the mental model and where it sits among other resources - before any
+       portal step or command. */
+    if (understand.length) {
+      var und = stage('understand');
+      understand.forEach(function (c) { append(und, c); });
+      article.appendChild(und);
+      present.push('understand');
+    }
 
     /* LEARN */
     if (learn.length) {
@@ -218,6 +245,14 @@
       if (firstDiagram) present.push('visualize');
     }
 
+    /* VALIDATE: how to prove the configuration did what was intended. */
+    if (byPlace.validate) {
+      var val = stage('validate');
+      append(val, byPlace.validate);
+      article.appendChild(val);
+      present.push('validate');
+    }
+
     /* DISTINGUISH */
     var dist = stage('distinguish');
     var distHost = node('div', 'distinctions');
@@ -225,7 +260,7 @@
     var distHead = node('h2', null, 'Important distinctions');
     distHost.appendChild(distHead);
     distHost.appendChild(node('p', 'lede',
-      'The controls this lesson is most easily confused with. Each comparison comes from appendix A6; the trap is the nearly-right answer the exam relies on.'));
+      'What this lesson is most easily confused with. Side-by-side comparisons come first; the appendix A6 entries after them name the trap, the nearly-right answer a scenario relies on.'));
     var distList = node('div', 'distinctions__list');
     distHost.appendChild(distList);
     dist.appendChild(distHost);
@@ -276,6 +311,15 @@
         'Open questions with no scoring. Answer them out loud or in writing before moving on; if one is hard, that is the section to re-read.'));
       byPlace.selfcheck.nodes.forEach(function (n) { sc.appendChild(n); });
       check.appendChild(sc);
+    }
+    if (byPlace.teachback) {
+      var tb = node('div', 'teachback');
+      var th = node('h3', null, 'Teach it back');
+      th.id = byPlace.teachback.head.id || 'teach-it-back';
+      tb.appendChild(th);
+      tb.appendChild(node('p', 'lede', 'Explain it to someone who has never used Azure, without notes. Where you hesitate is what to review.'));
+      byPlace.teachback.nodes.forEach(function (n) { tb.appendChild(n); });
+      check.appendChild(tb);
     }
     article.appendChild(check);
     present.push('check');
@@ -440,7 +484,7 @@
       function crumb(el) { var li = node('li'); li.appendChild(el); ol.appendChild(li); }
       crumb(link(window.AcademyExam.code, '#/'));
       if (L.exam) crumb(link(D().info(L.domainId).short, '#/domain/' + L.domainId));
-      else crumb(link('Lab safety', '#/'));
+      else crumb(link(D().info(L.domainId).nav || D().info(L.domainId).short, '#/module/' + (model.order.filter(function (x) { return model.lessons[x].domainId === L.domainId; })[0] || L.id)));
       var obj = L.objectiveId ? model.objectiveById[L.objectiveId] : null;
       if (obj) crumb(node('span', null, obj.text));
       var here = node('span', null, L.title);
@@ -506,6 +550,16 @@
     else pill('Practised', practised, practised ? 'Lab complete' : 'Not yet', practised ? 'done' : 'todo');
     pill('Checked', chk === 'checked' ? true : chk === 'review' ? 'warn' : chk === 'noq' ? null : false,
       stateLabel(chk), chk === 'checked' ? 'done' : chk === 'review' ? 'review' : chk === 'noq' ? 'na' : 'todo');
+    if (L.hasLab) {
+      var val = P().isValidated(L.id);
+      pill('Validated', val, val ? 'Lab checks ticked' : 'Not yet', val ? 'done' : 'todo');
+    }
+    if (L.questionIds.length) {
+      var ret = P().retention(L.questionIds);
+      var rt = { retained: 'Re-checked later', due: 'Re-test now', wait: 'Re-test from ' + ret.dueAt }[ret.state] || 'Not yet';
+      pill('Retained', ret.state === 'retained' ? true : ret.state === 'due' ? 'warn' : false, rt,
+        ret.state === 'retained' ? 'done' : ret.state === 'due' ? 'review' : 'todo');
+    }
   }
 
   function paintOutcomes(model, L) {
@@ -558,7 +612,7 @@
     var host = current.refs.trainingHost;
     host.textContent = '';
     var o = L.objectiveId ? model.objectiveById[L.objectiveId] : null;
-    if (!model.training || !o || (!o.path && !L.officialModules && !L.officialLabs)) { host.hidden = true; return; }
+    if (!model.training || (!o && !L.officialModules) || (o && !o.path && !L.officialModules && !L.officialLabs)) { host.hidden = true; return; }
     host.hidden = false;
     host.appendChild(node('h3', null, 'Official Microsoft training for this lesson'));
     var ul = node('ul', 'official__list');
@@ -570,7 +624,7 @@
       li.appendChild(extLink(mod.title, mod.url));
       ul.appendChild(li);
     });
-    if (o.path) {
+    if (o && o.path) {
       var li = node('li');
       li.appendChild(node('span', 'official__kind', 'Learning path'));
       li.appendChild(extLink(o.path.title, o.path.url));
@@ -595,7 +649,8 @@
     var list = refs.distList;
     list.textContent = '';
     var items = model.distinctions.filter(function (x) { return L.distinctionNs.indexOf(x.n) !== -1; });
-    if (!items.length) {
+    var cmps = (model.comparisons || []).filter(function (c) { return (c.modules || []).indexOf(L.id) !== -1; });
+    if (!items.length && !cmps.length) {
       refs.distHost.hidden = true;
       return;
     }
@@ -610,6 +665,7 @@
       }
     }
     var parse = global.marked ? (global.marked.parse || global.marked) : null;
+    if (global.AcademyCompare) cmps.forEach(function (c) { list.appendChild(global.AcademyCompare.render(c, model, { here: L.id })); });
     items.forEach(function (x) { list.appendChild(comparison(x, model, L, parse)); });
   }
 
@@ -713,11 +769,12 @@
     meta.appendChild(timeLi);
     meta.appendChild(node('li', null, practised ? 'Complete, teardown included' :
       (stats.total ? stats.done + ' of ' + stats.total + ' checklist items ticked' : 'Not started')));
+    if (P().isValidated(L.id)) meta.appendChild(node('li', null, 'Validation checks ticked'));
     card.appendChild(meta);
 
     if (L.fm.lab_cost_estimate) card.appendChild(node('p', 'field__note', String(L.fm.lab_cost_estimate)));
     card.appendChild(node('p', 'lab-card__safety',
-      'Creates real resources in your test tenant. Module 0 first; activate roles through PIM; every lab ends in a mandatory teardown.'));
+      'Creates real resources in your lab subscription. Do Module 0B first, hold only the roles this lab needs, and finish with the mandatory teardown.'));
     card.appendChild(link(practised ? 'Review the lab' : 'Open the lab', '#/lab/' + L.id, 'btn btn--primary'));
 
     fetch(L.lab, { cache: 'force-cache' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (md) {
@@ -924,7 +981,7 @@
     done.id = 'lab-completion';
     done.appendChild(node('h2', null, 'Completion'));
     done.appendChild(node('p', null,
-      'This lab counts as practised when every checklist item on this page is ticked. The checklist includes the teardown, on purpose: a lab that is still billing is not finished.'));
+      'Finishing the steps is not the goal. Tick an item only after you have seen the result it describes. The lab counts as validated when every item under Validation is ticked, and as practised when the teardown items are ticked too: a lab that is still billing is not finished.'));
     var back = node('div', 'field__links');
     back.appendChild(link('Back to lesson ' + route.moduleId, '#/module/' + route.moduleId, 'btn'));
     back.appendChild(link('Go to the knowledge check', '#/module/' + route.moduleId + '/check', 'btn'));

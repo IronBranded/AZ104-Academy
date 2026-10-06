@@ -12,7 +12,7 @@ objective_ids: ["cmp.vm.create", "cmp.vm.encryption-at-host", "cmp.vm.move", "cm
 domain: "Deploy and manage Azure compute resources"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["00-01", "03-01"]
+prerequisites: ["0A-02", "0A-06", "00-01", "03-01"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption-overview"
@@ -48,7 +48,11 @@ free_practice_available: false
 - Deploy virtual machines to availability zones and availability sets
 - Deploy and configure an Azure Virtual Machine Scale Sets
 
-## Why this exists
+## The administrative problem
+
+An application needs a Windows or Linux server that you fully control. It must be the right size for its load,
+keep its data safely, survive hardware failures, be moved when the organization reorganizes, and grow when demand
+grows. Some of those choices are permanent the moment the server is created.
 
 A virtual machine is the most flexible compute in Azure and the one administrators manage most
 directly: you choose its size, its disks, where it runs, how it survives failures, and what it costs
@@ -63,6 +67,86 @@ Many VM decisions are **made at creation and can't simply be changed later**:
 
 Other decisions can change, but only with a **restart or deallocation**: its size, its disk types,
 encryption at host. Exam questions in this module turn on knowing which is which.
+
+## In plain English
+
+An Azure **virtual machine** is a server running on Microsoft's hosts. You choose:
+
+- its **size**: how many virtual CPUs and how much memory;
+- its **image**: which operating system;
+- its **disks**: a managed **OS disk**, usually **data disks**, of a chosen type (Standard HDD, Standard SSD, Premium
+  SSD and others);
+- its **network**: a network interface in a subnet.
+
+For availability, VMs can be spread across **availability zones** (separate datacenters in a region) or placed in an
+**availability set** (separate racks and maintenance batches in one datacenter). A **Virtual Machine Scale Set**
+manages many similar VMs together and can add or remove them automatically.
+
+Some choices are fixed at creation, such as the zone or the availability set. Others, such as size or disk type, can
+change but need a restart or a deallocation. **Encryption at host** encrypts data on the host, including temporary
+disks and caches. And a VM can be **moved** to another resource group, subscription or region.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **VM size** | The vCPU, memory and feature combination, such as a B-series or D-series size. |
+| **Image** | The operating system template the VM is created from. |
+| **OS disk / data disk** | Managed disks: the boot drive, and extra drives for applications and data. |
+| **Temporary disk** | Fast host-local scratch storage that can lose its data. Not a managed disk. |
+| **Deallocated** | Stopped from Azure so compute stops billing. Disks still bill. |
+| **Availability zone** | A separate datacenter group in a region. A VM's zone is chosen at creation. |
+| **Availability set** | Spreads VMs across fault domains (racks) and update domains (maintenance batches) in one datacenter. |
+| **Virtual Machine Scale Set** | A group of VMs managed together, with optional autoscale. |
+| **Encryption at host** | Encrypts VM data on the host, including temporary disks and disk caches. |
+| **Resize** | Changing a VM's size. It needs a restart, and sometimes a deallocation. |
+
+## Mental model
+
+```mermaid
+flowchart TD
+  accTitle: A virtual machine is a small group of resources
+  accDescr: A virtual machine has a size and an image, a managed OS disk and optional data disks, and a network interface in a subnet. For availability it can be placed in an availability zone or an availability set, chosen at creation, or run as one of many instances in a scale set.
+  VM["Virtual machine<br/>size · image"]:::d03
+  VM --> OS["Managed OS disk"]
+  VM --> DD["Data disks"]
+  VM --> NIC["Network interface → subnet"]
+  VM -. "chosen at creation" .-> AV["Availability zone or availability set"]
+  SS["Scale set: many identical VMs"] -. "or" .-> VM
+```
+
+Before creating a VM, decide what can't change later: its zone or availability set, and its virtual network.
+Everything else can be adjusted, at the cost of a restart. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| Renting a server instead of buying one | Virtual machine |
+| Choosing the server model | VM size |
+| A server's hard drives | Managed disks |
+| Servers in different buildings | Availability zones |
+| Servers on different racks in one building | Availability set |
+| A fleet of identical servers that grows with demand | Virtual Machine Scale Set |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Virtual machine |
+| --- | --- |
+| What contains it? | A resource group. Its region, and its zone or availability set, are chosen at creation. |
+| What does it depend on? | A network interface in a subnet, a managed OS disk, an image, and vCPU quota in the region. |
+| What depends on it? | Load balancer backends, backup items, Site Recovery replicas, alert rules. |
+| Who can manage it? | Virtual Machine Contributor or Contributor; signing in to the OS is a separate permission. |
+| How is it networked? | Through its network interfaces; reach it with Bastion rather than an open RDP or SSH port. |
+| How is it monitored? | Host metrics automatically; guest metrics and logs need the Azure Monitor Agent; VM insights. |
+| How is it protected? | Encryption at host, NSGs, no public management ports, locks. |
+| How is it recovered? | Azure Backup restores; Site Recovery fails over to another region. |
+| What does it cost? | Compute while allocated (shut down inside the OS still bills); disks bill even when deallocated. |
+| How is it removed safely? | Deleting the VM may leave its disks, NIC and public IP. Check for leftovers, or delete the resource group. |
+
+See it with its neighbours on the [resource map](#/map/vm).
 
 ## How it works under the hood
 
@@ -265,6 +349,31 @@ Update-AzVM -VM (Get-AzVM -ResourceGroupName '<rg>' -Name '<vm>') -ResourceGroup
 | Disk type change | — | Disk > Size + performance | VM must be stopped |
 | Autoscale limits | Min, max, default | Scale set > Scaling | Scale in only when all scale-in rules agree |
 
+## Worked example
+
+**Requirement.** Two web VMs must keep serving if one datacenter in the region fails. The region supports
+availability zones.
+
+1. **Decide.** Surviving a datacenter means **availability zones**, not an availability set (which protects within one
+   datacenter).
+2. **Configure.** Create the VMs in **zone 1** and **zone 2** at creation time. An existing VM can't simply be moved
+   into a zone by changing a setting.
+3. **Observe.** Each VM reports its zone; zone-aware dependencies such as a Standard load balancer and public IP fit
+   the design.
+4. **Validate.** Check each VM's zone, size and disks, as below.
+
+## Validate the result
+
+```powershell
+az vm show -g <rg> -n <vm> --query "{zone:zones[0], size:hardwareProfile.vmSize, eah:securityProfile.encryptionAtHost}" -o table
+az vm show -d -g <rg> -n <vm> --query powerState -o tsv                 # VM running, or VM deallocated
+az disk list -g <rg> --query "[].{name:name, sku:sku.name, size:diskSizeGB, state:diskState}" -o table
+```
+
+- A VM you stopped to save money shows **VM deallocated**, not just **VM stopped**.
+- After a resize or disk change, confirm the new value *and* that the VM started again.
+- After deleting a VM, list disks with `diskState` **Unattached**: those are still billing.
+
 ## Common failure modes
 
 1. **"The size we want isn't in the list."** It isn't available on the current hardware cluster.
@@ -320,6 +429,14 @@ brake. Region moves are a walkthrough.
    of 20 instances?
 5. You need three web VMs that survive a zone outage, with autoscale. Name the resource, the orchestration
    mode, and one thing you must configure that a Uniform scale set wouldn't need.
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain the difference between an availability set and availability zones using racks and buildings.
+- Explain why a stopped VM can still bill, and what deallocation changes.
+- Explain which VM decisions you can't change after creation.
 
 ## Key takeaways
 

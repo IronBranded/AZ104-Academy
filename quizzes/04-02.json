@@ -20,7 +20,8 @@
     null,
     "Allow and deny have no precedence; priority order decides.",
     "Rule 100 matches before the default rule is reached."
-   ]
+   ],
+   "clue": "\"priority 100 deny\" before \"priority 200 allow\": the lowest number matches first and processing stops."
   },
   {
    "id": "04-02-q2",
@@ -39,7 +40,8 @@
     "That needs rule changes every time a VM is added.",
     "Per-NIC NSGs don't solve role-based targeting.",
     null
-   ]
+   ],
+   "clue": "\"added and removed weekly\" and \"without editing the rule\": an application security group."
   },
   {
    "id": "04-02-q3",
@@ -58,7 +60,8 @@
     "When both levels have an NSG, both must allow the traffic.",
     "Its default rules deny inbound internet traffic.",
     "Inbound is evaluated subnet first, then NIC; the NIC's deny still applies."
-   ]
+   ],
+   "clue": "\"subnet NSG allows\" but \"the NIC has an NSG with no custom rules\": inbound must pass both."
   },
   {
    "id": "04-02-q4",
@@ -77,7 +80,8 @@
     "It records management operations, not packet decisions.",
     null,
     "Next hop reports routing, not security rule decisions."
-   ]
+   ],
+   "clue": "\"exactly which NSG rule is denying\" one flow: IP flow verify."
   },
   {
    "id": "04-02-q5",
@@ -96,7 +100,8 @@
     "It doesn't show rule evaluation.",
     "Policy evaluates resource configuration, not traffic rules.",
     null
-   ]
+   ],
+   "clue": "\"every security rule that applies\", \"combining subnet and NIC\": effective security rules."
   },
   {
    "id": "04-02-q6",
@@ -115,7 +120,8 @@
     null,
     "They're unrelated to effective rules.",
     "They show subnet and NIC NSGs together."
-   ]
+   ],
+   "clue": "\"effective security rules show nothing\": they're computed only for a running VM."
   },
   {
    "id": "04-02-q7",
@@ -134,7 +140,8 @@
     "Basic bills hourly and needs an AzureBastionSubnet and a public IP.",
     "That exposes SSH to the internet.",
     "Premium is the most expensive tier."
-   ]
+   ],
+   "clue": "\"occasional\", \"single test VM\", \"at no cost\": Bastion Developer."
   },
   {
    "id": "04-02-q8",
@@ -153,7 +160,8 @@
     "Basic supports peering but not the native client.",
     null,
     "Premium works, but Standard is the minimum for the native client."
-   ]
+   ],
+   "clue": "\"peered spoke VNets\" and \"native SSH client\": Standard is the minimum."
   },
   {
    "id": "04-02-q9",
@@ -172,7 +180,8 @@
     "The name must be exactly AzureBastionSubnet.",
     "That's only the Developer SKU.",
     null
-   ]
+   ],
+   "clue": "\"dedicated Bastion host\": a subnet named AzureBastionSubnet, /26 or larger."
   },
   {
    "id": "04-02-q10",
@@ -191,7 +200,8 @@
     null,
     "An NSG controls the VNet side, not who the storage account accepts.",
     "ASGs contain NICs, not PaaS services."
-   ]
+   ],
+   "clue": "\"only from subnet App\" and \"at no extra cost\": a service endpoint plus a virtual network rule."
   },
   {
    "id": "04-02-q11",
@@ -210,7 +220,8 @@
     "That's what a private endpoint with private DNS does.",
     "Service endpoints don't change DNS.",
     "DNS for the service doesn't change to the VM's address."
-   ]
+   ],
+   "clue": "\"service endpoint\" and DNS resolution: the name still resolves to the public IP."
   },
   {
    "id": "04-02-q12",
@@ -229,7 +240,8 @@
     "Storage service endpoints work across regions; on-premises is the issue.",
     "Stored access policies govern SAS tokens, not network access.",
     null
-   ]
+   ],
+   "clue": "\"on-premises servers\" and a \"service endpoint\": service endpoints don't extend beyond the VNet."
   },
   {
    "id": "04-02-q13",
@@ -248,7 +260,8 @@
     "Bastion provides RDP and SSH to VMs, not PaaS access.",
     null,
     "Routing doesn't give the account a private address."
-   ]
+   ],
+   "clue": "\"privately from on-premises\" and \"public endpoint disabled\": a private endpoint with private DNS."
   },
   {
    "id": "04-02-q14",
@@ -267,7 +280,8 @@
     "Private endpoints don't use public IPs.",
     "They're unnecessary for a private endpoint.",
     "The symptom is resolution to the public IP, a DNS configuration issue."
-   ]
+   ],
+   "clue": "\"private endpoint exists\" but apps \"still connect to its public IP\": DNS isn't resolving to the private IP."
   },
   {
    "id": "04-02-q15",
@@ -286,7 +300,8 @@
     null,
     "The service tag covers all storage, not your accounts only.",
     "Recording covers admin sessions, not data paths."
-   ]
+   ],
+   "clue": "\"can't copy data to accounts outside the organization\": private endpoints scope access to one instance."
   }
  ]
 }

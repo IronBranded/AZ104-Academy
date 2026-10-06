@@ -50,7 +50,9 @@
        colour: Identity blue and Compute purple measure deltaE 4.4 apart under
        simulated protanopia, which is effectively the same colour. */
     domains: {
-      '00': { short: 'Lab Safety',            abbr: 'LAB', exam: false,
+      '0A': { short: 'Understanding Azure',   abbr: 'FND', exam: false, nav: 'Module 0A \u00b7 Understanding Azure',
+              icon: 'M8 1.5a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13zM10.6 5.4 9 9 5.4 10.6 7 7z' },
+      '00': { short: 'Safe lab foundations',  abbr: 'LAB', exam: false, nav: 'Module 0B \u00b7 Safe lab foundations',
               icon: 'M8 1.5 14 5v6l-6 3.5L2 11V5z' },
       '01': { short: 'Identity & Governance', abbr: 'IDG', exam: true,
               icon: 'M8 2.2a2.8 2.8 0 1 1 0 5.6a2.8 2.8 0 0 1 0-5.6zM2.6 14c.5-2.9 2.7-4.4 5.4-4.4s4.9 1.5 5.4 4.4' },

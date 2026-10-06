@@ -20,7 +20,8 @@
     null,
     "Public IPs are billed separately; the question is the compute.",
     "The temporary disk isn't billed separately; compute is."
-   ]
+   ],
+   "clue": "\"shut down from inside Windows\": the VM is stopped but still allocated, so compute still bills."
   },
   {
    "id": "03-02-q2",
@@ -39,7 +40,8 @@
     "Encryption doesn't erase data.",
     "Quota isn't involved; the temporary disk is ephemeral by design.",
     null
-   ]
+   ],
+   "clue": "\"temporary disk\" and \"after a deallocation\": temporary storage isn't persistent."
   },
   {
    "id": "03-02-q3",
@@ -58,7 +60,8 @@
     "SSE is always on but doesn't encrypt the temporary disk or caches.",
     "It uses the VM's CPU, and it retires on September 15, 2028.",
     "That applies to storage accounts, not VM disks."
-   ]
+   ],
+   "clue": "\"temporary disk and caches encrypted\" and \"without the VM's CPU\": encryption at host."
   },
   {
    "id": "03-02-q4",
@@ -77,7 +80,8 @@
     "Microsoft's direction is to move off ADE onto encryption at host, not to layer them.",
     null,
     "A disk encryption set is only for customer-managed keys, and the VM must be deallocated."
-   ]
+   ],
+   "clue": "\"existing running VM\" and enabling fails: the feature must be registered and the VM deallocated."
   },
   {
    "id": "03-02-q5",
@@ -96,7 +100,8 @@
     "A resource's region can't be changed in place.",
     "Assessment plans migrations from on-premises; Resource Mover moves Azure resources between regions.",
     null
-   ]
+   ],
+   "clue": "\"from East US to West Europe\" with disks and network: a region move, which is Azure Resource Mover."
   },
   {
    "id": "03-02-q6",
@@ -115,7 +120,8 @@
     "A NIC can't be moved to another virtual network.",
     "Resource Mover moves across regions; it doesn't change a VM's virtual network.",
     "Changing resource group doesn't change the VNet attachment."
-   ]
+   ],
+   "clue": "\"attached to VNet-A\" and must use \"VNet-B\": a VM can't change virtual network, so re-create it."
   },
   {
    "id": "03-02-q7",
@@ -134,7 +140,8 @@
     null,
     "Disks don't decide which sizes are available.",
     "Sizes not offered on the current cluster need deallocation."
-   ]
+   ],
+   "clue": "\"doesn't appear in its list of available sizes\": deallocate first to see sizes on other hardware."
   },
   {
    "id": "03-02-q8",
@@ -153,7 +160,8 @@
     "Resizing doesn't change the region.",
     null,
     "The NIC persists; dynamic addresses are released on deallocation."
-   ]
+   ],
+   "clue": "\"public IP changed\" after a resize: deallocation released a dynamic public IP."
   },
   {
    "id": "03-02-q9",
@@ -172,7 +180,8 @@
     "Not needed: the 4 TiB rule only applies when growing beyond 4 TiB.",
     "Expanding in place is supported.",
     null
-   ]
+   ],
+   "clue": "\"can't go offline\" and a data disk grows: expand it while running, then extend the partition."
   },
   {
    "id": "03-02-q10",
@@ -191,7 +200,8 @@
     "Ultra Disks can only be data disks.",
     "Standard SSD isn't designed for very high IOPS.",
     "Premium SSD v2 can't be an OS disk either."
-   ]
+   ],
+   "clue": "\"very high IOPS\" and \"adjustable without restarting\": Ultra Disk, data disks only."
   },
   {
    "id": "03-02-q11",
@@ -210,7 +220,8 @@
     null,
     "Direct conversion is supported between these types.",
     "You can't detach an OS disk; stop the VM instead."
-   ]
+   ],
+   "clue": "\"Standard SSD OS disk to Premium SSD\": stop the VM and check the size supports Premium storage."
   },
   {
    "id": "03-02-q12",
@@ -229,7 +240,8 @@
     "Deallocation doesn't allow joining a set.",
     null,
     "Resource group membership doesn't affect availability sets."
-   ]
+   ],
+   "clue": "\"VM3 is running\" and \"must join availability set\": sets are chosen at creation only."
   },
   {
    "id": "03-02-q13",
@@ -248,7 +260,8 @@
     "Availability sets protect against rack-level failures within a datacenter, not datacenter loss.",
     "A single VM in one zone doesn't survive that zone failing.",
     "Availability sets don't support availability zones."
-   ]
+   ],
+   "clue": "\"failure of an entire datacenter\" with the \"highest VM SLA\": availability zones."
   },
   {
    "id": "03-02-q14",
@@ -267,7 +280,8 @@
     "High network-in doesn't trigger a scale-in rule, and there's no scale-out rule in the question.",
     "Instance limits bound scaling; they don't force it.",
     null
-   ]
+   ],
+   "clue": "\"two scale-in rules\" and only one is met: scale-in needs all its rules to trigger."
   },
   {
    "id": "03-02-q15",
@@ -286,7 +300,8 @@
     "Flexible scale sets don't have default outbound access.",
     null,
     "The orchestration mode can't be changed after creation."
-   ]
+   ],
+   "clue": "\"mix VM sizes and Spot\" in the recommended mode: Flexible, which needs explicit outbound connectivity."
   },
   {
    "id": "03-02-q16",
@@ -305,7 +320,8 @@
     null,
     "Rules aren't added together.",
     "Triggered scale-out rules don't cancel each other; autoscale uses the one that asks for the most capacity."
-   ]
+   ],
+   "clue": "\"two scale-out rules\" trigger at once: autoscale takes the larger increase."
   }
  ]
 }

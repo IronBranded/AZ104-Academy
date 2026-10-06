@@ -20,7 +20,8 @@
     "Standard adds capacity, not geo-replication or private endpoints.",
     null,
     "Geo-replication requires the Premium tier."
-   ]
+   ],
+   "clue": "\"three regions under one name\" and \"private endpoints\": both are Premium-only registry features."
   },
   {
    "id": "03-03-q2",
@@ -39,7 +40,8 @@
     "AcrPush also allows pushing images.",
     "Owner is a privileged control-plane role, far beyond pulling.",
     "Contributor manages the registry; it isn't the data-plane pull role."
-   ]
+   ],
+   "clue": "\"only needs to download images\": AcrPull."
   },
   {
    "id": "03-03-q3",
@@ -58,7 +60,8 @@
     "acr build builds from source and a Dockerfile; it doesn't copy an existing image.",
     "Storage Explorer manages storage accounts, not registries.",
     null
-   ]
+   ],
+   "clue": "\"without Docker installed\": az acr import copies the image server-side."
   },
   {
    "id": "03-03-q4",
@@ -77,7 +80,8 @@
     null,
     "Never doesn't retry a failed run, which the requirement asks for.",
     "There's no Manual restart policy; the options are Always, OnFailure and Never."
-   ]
+   ],
+   "clue": "\"retried if it fails\" but \"must not run again\" after success: OnFailure."
   },
   {
    "id": "03-03-q5",
@@ -96,7 +100,8 @@
     "Multi-container groups are supported only for Linux.",
     null,
     "Revisions are versions of one app, not co-located containers."
-   ]
+   ],
+   "clue": "\"share localhost\", \"a lifecycle\" and \"a mounted volume\": one container group."
   },
   {
    "id": "03-03-q6",
@@ -115,7 +120,8 @@
     "For ACR image pulls, ACI supports only a user-assigned identity.",
     "That works but isn't a managed identity, and Microsoft advises against it.",
     "Registry pulls need AcrPull, not a storage role."
-   ]
+   ],
+   "clue": "\"container group\" pulling with a \"managed identity\" fails: ACI supports only a user-assigned identity for this."
   },
   {
    "id": "03-03-q7",
@@ -134,7 +140,8 @@
     "CPU and memory scale rules can't scale to zero.",
     "A registry stores images; it doesn't run them.",
     null
-   ]
+   ],
+   "clue": "\"scale on concurrent HTTP requests\" and \"nothing when idle\": Container Apps with minimum replicas 0."
   },
   {
    "id": "03-03-q8",
@@ -153,7 +160,8 @@
     null,
     "That isn't a traffic split on one app's URL.",
     "Environments don't split an app's traffic."
-   ]
+   ],
+   "clue": "\"10% of users\" on a new version: multiple revision mode with traffic weights."
   },
   {
    "id": "03-03-q9",
@@ -172,7 +180,8 @@
     "That restriction applies to ACI, not Container Apps.",
     null,
     "Revision mode doesn't affect registry authentication."
-   ]
+   ],
+   "clue": "\"system-assigned identity\" and a \"private image\": set the registry to use that identity, which needs AcrPull."
   },
   {
    "id": "03-03-q10",
@@ -191,7 +200,8 @@
     "CPU, memory and GPU changes require deleting and redeploying the group.",
     "Container Instances has no autoscale rules.",
     "A restart doesn't change requested resources."
-   ]
+   ],
+   "clue": "\"now needs 2 CPUs\" on a container group: ACI resources are fixed at creation."
   },
   {
    "id": "03-03-q11",
@@ -210,7 +220,8 @@
     "Replicas follow demand up to the maximum, not straight to it.",
     "Each replica handles up to the configured concurrency.",
     null
-   ]
+   ],
+   "clue": "\"10 concurrent requests per replica\" with \"45 concurrent requests\": about 5 replicas, under the maximum."
   },
   {
    "id": "03-03-q12",
@@ -229,7 +240,8 @@
     null,
     "Scale rules don't expire.",
     "Revision mode doesn't limit the number of rules."
-   ]
+   ],
+   "clue": "\"adds a second scale rule\" with the CLI and \"the first disappears\": the CLI replaces the rule set."
   }
  ]
 }

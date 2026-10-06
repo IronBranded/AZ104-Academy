@@ -47,7 +47,7 @@
   }
 
   function domainMeasures(model, dom) {
-    var m = { bullets: dom.bulletIds.length, studied: 0, checked: 0, review: 0, withQ: 0, noQ: 0, labs: 0, labsDone: 0 };
+    var m = { bullets: dom.bulletIds.length, studied: 0, checked: 0, review: 0, withQ: 0, noQ: 0, labs: 0, labsDone: 0, labsValidated: 0, retained: 0, due: 0 };
     dom.bulletIds.forEach(function (bid) {
       var b = model.bulletById[bid];
       var st = bulletState(model, b);
@@ -55,10 +55,12 @@
       if (st.check === 'noq') m.noQ++; else m.withQ++;
       if (st.check === 'checked') m.checked++;
       if (st.check === 'review') m.review++;
+      var rt = P().retention(b.questionIds).state;
+      if (rt === 'retained') m.retained++; else if (rt === 'due') m.due++;
     });
     dom.lessonIds.forEach(function (id) {
       var l = model.lessons[id];
-      if (l && l.hasLab) { m.labs++; if (P().isComplete('lab', id)) m.labsDone++; }
+      if (l && l.hasLab) { m.labs++; if (P().isComplete('lab', id)) m.labsDone++; if (P().isValidated(id)) m.labsValidated++; }
     });
     return m;
   }
@@ -75,6 +77,7 @@
   /* The single recommendation. Last-visited first, so a learner returning to
      the site lands where they stopped; then study order. */
   function recommend(model) {
+    var skipFound = P().getPref && P().getPref('skipFoundations');
     var last = P().lastVisit();
     if (last && model.lessons[last.id]) {
       var l = model.lessons[last.id];
@@ -83,6 +86,7 @@
     }
     for (var i = 0; i < model.order.length; i++) {
       var x = model.lessons[model.order[i]];
+      if (skipFound && x.id.indexOf('0A-') === 0) continue;
       if (!P().isComplete('module', x.id)) return { lesson: x, kind: 'next', left: lessonLeft(model, x) };
     }
     for (var j = 0; j < model.order.length; j++) {
@@ -210,7 +214,9 @@
     card.appendChild(top);
     card.appendChild(node('p', 'continue__title', l.title));
     if (l.objectiveText && l.exam) card.appendChild(node('p', 'continue__obj', l.objectiveText));
-    else if (!l.exam) card.appendChild(node('p', 'continue__obj', 'Module 0 \u00b7 project prerequisite, not exam content. Do it before any billable lab.'));
+    else if (!l.exam) card.appendChild(node('p', 'continue__obj', l.id.indexOf('0A-') === 0
+      ? 'Module 0A \u00b7 foundation primer. Plain-English background the exam lessons assume; skip it from the card below if you already know it.'
+      : 'Module 0B \u00b7 project prerequisite, not exam content. Do it before any billable lab.'));
 
     if (r.left.length) {
       var ul = node('ul', 'continue__left');
@@ -263,10 +269,12 @@
 
     card.appendChild(meter('Studied', m.studied, m.bullets));
     card.appendChild(meter('Practised', m.labsDone, m.labs, m.labs ? null : 'No labs in this domain.'));
+    card.appendChild(meter('Validated', m.labsValidated, m.labs, m.labs ? 'Labs whose validation checklist is fully ticked' : null));
     var notes = [];
     if (m.review) notes.push(m.review + ' need review');
     if (m.noQ) notes.push(m.noQ + ' have no questions yet');
     card.appendChild(meter('Knowledge checked', m.checked, m.withQ, notes.join(' \u00b7 ') || null));
+    card.appendChild(meter('Retained', m.retained, m.withQ, m.due ? m.due + ' due for a re-test in Exam prep' : 'Answered correctly again ' + P().retainDays + '+ days after first passing'));
 
     var actions = node('div', 'dcard__actions');
     actions.appendChild(link('Domain review', '#/domain/' + dom.id, 'btn'));
@@ -303,16 +311,51 @@
     box.dataset.done = done ? 'true' : 'false';
     var h = node('h2', 'm0__title');
     h.appendChild(D().icon('00', 16));
-    h.appendChild(node('span', null, 'Module 0 \u00b7 Lab safety'));
+    h.appendChild(node('span', null, 'Module 0B \u00b7 Safe lab foundations'));
     box.appendChild(h);
     box.appendChild(node('p', null, done
-      ? 'Budget guardrails, just-in-time access and the teardown template are in place.'
-      : 'Not exam content, and not optional: budget alerts, PIM-based access and the teardown template come before any billable lab.'));
+      ? 'Budget guardrails, least-privilege access and the teardown template are in place.'
+      : 'Not exam content, and not optional: budget alerts, least-privilege lab access and the teardown template come before any billable lab.'));
     box.appendChild(node('p', 'm0__counts', studied + ' / ' + ids.length + ' lessons studied \u00b7 ' + labsDone + ' / ' + labs.length + ' labs complete'));
     if (!done) {
       var first = ids.filter(function (id) { return !P().isComplete('module', id); })[0] || ids[0];
-      box.appendChild(link('Open Module 0', '#/module/' + first, 'btn'));
+      box.appendChild(link('Open Module 0B', '#/module/' + first, 'btn'));
     }
+    return box;
+  }
+
+  /* Module 0A: the beginner on-ramp. Recommended first, skippable in one
+     click, and never a gate: nothing in the exam domains waits for it. */
+  function foundations(model) {
+    var ids = model.order.filter(function (id) { return id.indexOf('0A-') === 0; });
+    if (!ids.length) return null;
+    var studied = ids.filter(function (id) { return P().isComplete('module', id); }).length;
+    var skipped = !!P().getPref('skipFoundations');
+    var box = node('section', 'm0 m0--foundations');
+    D().paint(box, '0A');
+    box.dataset.done = (studied === ids.length || skipped) ? 'true' : 'false';
+    var h = node('h2', 'm0__title');
+    h.appendChild(D().icon('0A', 16));
+    h.appendChild(node('span', null, 'Module 0A \u00b7 Understanding Azure'));
+    box.appendChild(h);
+    box.appendChild(node('p', null, skipped
+      ? 'Skipped. The primers stay in the sidebar, and each lesson lists the ones it builds on.'
+      : 'New to Azure? Start here. ' + ids.length + ' short primers explain tenants, subscriptions, networks, storage, monitoring and Resource Manager before the exam lessons expect you to administer them.'));
+    box.appendChild(node('p', 'm0__counts', studied + ' / ' + ids.length + ' primers studied'));
+    var row = node('div', 'dcard__actions');
+    if (studied < ids.length && !skipped) {
+      var first = ids.filter(function (id) { return !P().isComplete('module', id); })[0];
+      row.appendChild(link(studied ? 'Continue the primers' : 'Start the primers', '#/module/' + first, 'btn btn--primary'));
+    }
+    var skip = node('button', 'btn', skipped ? 'Recommend the primers again' : 'I know the basics: skip the primers');
+    skip.type = 'button';
+    skip.addEventListener('click', function () {
+      P().setPref('skipFoundations', !skipped);
+      if (global.AcademyApp) global.AcademyApp.reroute();
+    });
+    row.appendChild(skip);
+    row.appendChild(link('Open the resource map', '#/map', 'btn'));
+    box.appendChild(row);
     return box;
   }
 
@@ -323,7 +366,10 @@
      ['Mock exam', '#/exam', 'Timed, weighted, mixed across every quiz'],
      ['Flashcards', '#/cards', 'Distinctions, spaced repetition'],
      ['Coverage', '#/coverage', 'Every official sub-objective and what teaches it'],
-     ['Cost planner', '#/cost', 'Every lab by what it will cost']
+     ['Cost planner', '#/cost', 'Every lab by what it will cost'],
+     ['Resource map', '#/map', 'What contains, depends on and protects each resource'],
+     ['Compare options', '#/compare', 'Easily confused services, side by side'],
+     ['Glossary', '#/glossary', 'Every term the lessons define']
     ].forEach(function (t) {
       var a = link('', t[1], 'tool');
       a.appendChild(node('span', 'tool__name', t[0]));
@@ -371,6 +417,7 @@
       }
       root.appendChild(continueCard(model));
       var m0 = moduleZero(model);
+      var f0 = foundations(model);
 
       var ds = node('section', 'domains');
       ds.setAttribute('aria-labelledby', 'domains-title');
@@ -378,7 +425,7 @@
       h2.id = 'domains-title';
       ds.appendChild(h2);
       ds.appendChild(node('p', 'lede',
-        'Counts are observable: a sub-objective is studied when its lesson is marked studied, practised when its lab (teardown included) is complete, and checked when every question on it was answered correctly on the latest attempt.'));
+        'Counts are observable: a sub-objective is studied when its lesson is marked studied and checked when every question on it was answered correctly on the latest attempt; a lab is validated when its validation checklist is ticked and practised when its teardown is ticked too; retained means answered correctly again at least ' + P().retainDays + ' days later. There is no pass prediction.'));
       var grid = node('div', 'dgrid');
       model.domains.forEach(function (d) { grid.appendChild(domainCard(model, d)); });
       ds.appendChild(grid);
@@ -387,6 +434,7 @@
          Continue card is already pointing into it, which says the same. */
       var r = recommend(model);
       var zeroFirst = m0 && m0.dataset.done !== 'true' && !(r && !r.lesson.exam);
+      if (f0) root.appendChild(f0);
       if (zeroFirst) root.appendChild(m0);
       root.appendChild(ds);
       if (m0 && !zeroFirst) root.appendChild(m0);

@@ -8,11 +8,12 @@ updated_at: 2026-03-19T18:11:00.0000000Z
 git_commit_id: c5713289393650e759a90d705723329faa446a2e
 gitcommit: https://github.com/MicrosoftDocs/learn-certs-pr/blob/c5713289393650e759a90d705723329faa446a2e/learn-certs-pr/certifications/resources/study-guides/az-104.md
 captured: 2026-09-29
+reverified: 2026-10-06
 ---
 
 # Skills measured snapshot: Exam AZ-104
 
-This file holds only the "Skills measured" section of Microsoft's AZ-104 study guide, captured on 2026-09-29 from the page above. It is the authority the validator, the site and the outline-drift workflow compare against. Do not edit bullets by hand: when the drift workflow reports a change, re-capture and review the diff.
+This file holds only the "Skills measured" section of Microsoft's AZ-104 study guide, captured on 2026-09-29 from the page above, and re-verified on 2026-10-06 through the Microsoft Learn MCP server: all 82 bullets, five domain weights and fifteen functional groups match verbatim and in order. It is the authority the validator, the site and the outline-drift workflow compare against. Do not edit bullets by hand: when the drift workflow reports a change, re-capture and review the diff.
 
 ## Skills measured as of April 17, 2026
 

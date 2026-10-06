@@ -20,7 +20,8 @@
     null,
     "Type changes aren't supported, whatever the tool.",
     "Microsoft documents that you must create a new account and copy the data."
-   ]
+   ],
+   "clue": "\"converted\" from Premium to Standard GPv2: an account's type never changes, so create a new account and copy."
   },
   {
    "id": "02-02-q2",
@@ -39,7 +40,8 @@
     "Names must be at least 3 characters.",
     null,
     "Underscores aren't allowed."
-   ]
+   ],
+   "clue": "Storage account naming: 3 to 24 characters, lowercase letters and numbers only, globally unique."
   },
   {
    "id": "02-02-q3",
@@ -58,7 +60,8 @@
     "Resource moves change the resource group or subscription, never the region.",
     "The region of an existing account can't be changed.",
     "Failover goes to the paired region, which you can't choose; it isn't a move to an arbitrary region."
-   ]
+   ],
+   "clue": "\"from West Europe to North Europe\": storage accounts don't move regions; copy to a new account."
   },
   {
    "id": "02-02-q4",
@@ -77,7 +80,8 @@
     "ZRS stays within one region; a regional outage affects all three zones.",
     "It meets the requirement but costs more than RA-GRS; zone redundancy wasn't requested.",
     null
-   ]
+   ],
+   "clue": "\"keep reading during a regional outage\" and \"without failover\" at \"lowest cost\": RA-GRS."
   },
   {
    "id": "02-02-q5",
@@ -96,7 +100,8 @@
     null,
     "It's possible through an intermediate option.",
     "There's no such operation; conversion is the supported path."
-   ]
+   ],
+   "clue": "\"ZRS to GRS\": no direct path; it takes two conversions."
   },
   {
    "id": "02-02-q6",
@@ -115,7 +120,8 @@
     "Premium accounts don't support any geo-redundant option.",
     null,
     "There's no such option; premium accounts support LRS or ZRS."
-   ]
+   ],
+   "clue": "\"Premium file shares\" plus \"geo-redundancy\": Premium accounts support LRS and ZRS only."
   },
   {
    "id": "02-02-q7",
@@ -134,7 +140,8 @@
     "Object replication isn't supported on accounts with a hierarchical namespace.",
     "Object replication doesn't depend on the redundancy option.",
     "Stored access policies are for SAS tokens, not replication."
-   ]
+   ],
+   "clue": "\"object replication\" configuration fails: versioning on both accounts, change feed on the source."
   },
   {
    "id": "02-02-q8",
@@ -153,7 +160,8 @@
     "The failure is 409 Conflict from the rule, not authorization.",
     "Replication is asynchronous and continuous; the defaults explain the missing blobs.",
     null
-   ]
+   ],
+   "clue": "\"uploads to the destination fail with 409\" and old blobs missing: the destination is read-only, and only new writes replicate by default."
   },
   {
    "id": "02-02-q9",
@@ -172,7 +180,8 @@
     null,
     "GRS covers the whole account, all data types; object replication supports block blobs only.",
     "The destination container becomes read-only, not the source."
-   ]
+   ],
+   "clue": "GRS copies the whole account to a Microsoft-chosen region; object replication copies chosen containers to an account you choose."
   },
   {
    "id": "02-02-q10",
@@ -191,7 +200,8 @@
     "It adds a second layer, but with Microsoft-managed keys.",
     "That's for per-request Blob operations; it isn't account-wide key management and doesn't cover Azure Files.",
     "Access keys authorize requests; they aren't the encryption key."
-   ]
+   ],
+   "clue": "\"control and rotate the key\": customer-managed keys in Key Vault."
   },
   {
    "id": "02-02-q11",
@@ -210,7 +220,8 @@
     "CMK changes who manages the key; it doesn't add a second encryption layer.",
     null,
     "That protects data in transit, not at rest."
-   ]
+   ],
+   "clue": "\"existing account\" plus \"double encryption\": infrastructure encryption is a creation-time setting."
   },
   {
    "id": "02-02-q12",
@@ -229,7 +240,8 @@
     "That copies data; it doesn't separate encryption keys within an account.",
     "It uses a single Microsoft-managed key for the second layer.",
     null
-   ]
+   ],
+   "clue": "\"one storage account\" and \"different key per customer\": encryption scopes."
   },
   {
    "id": "02-02-q13",
@@ -248,7 +260,8 @@
     null,
     "That copies from local storage, so the data must be on the laptop first.",
     "GRS replicates to the paired region's hidden secondary, not to another account."
-   ]
+   ],
+   "clue": "\"500 GB\" and \"slow laptop connection\": a service-to-service copy between URLs."
   },
   {
    "id": "02-02-q14",
@@ -267,7 +280,8 @@
     "Entra-authorized AzCopy doesn't use the keys.",
     null,
     "Account performance tier doesn't affect authorization."
-   ]
+   ],
+   "clue": "\"own a storage account\" but 403 on upload: owning the account isn't a data role."
   },
   {
    "id": "02-02-q15",
@@ -286,7 +300,8 @@
     "copy transfers what you point it at on each run, rather than comparing source and destination.",
     "make only creates a container or share.",
     "Object replication copies between storage accounts, not from a file server."
-   ]
+   ],
+   "clue": "\"mirror\", \"one direction\" and \"only changes\": azcopy sync."
   }
  ]
 }

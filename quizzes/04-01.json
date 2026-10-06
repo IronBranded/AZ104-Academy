@@ -20,7 +20,8 @@
     "Azure reserves five addresses, not two.",
     null,
     "A /28 has 16 addresses; 16 − 5 = 11."
-   ]
+   ],
+   "clue": "\"/28\" is 16 addresses, and Azure reserves 5 in every subnet."
   },
   {
    "id": "04-01-q2",
@@ -39,7 +40,8 @@
     "Virtual networks are region-scoped; connect regions with global peering.",
     "Virtual networks are isolated until you connect them.",
     "The smallest IPv4 subnet is /29."
-   ]
+   ],
+   "clue": "A virtual network lives in one region and spans all of that region's availability zones."
   },
   {
    "id": "04-01-q3",
@@ -58,7 +60,8 @@
     "Peering connects virtual networks; it doesn't provide internet egress.",
     "A system route already exists; private subnets lack default outbound access.",
     null
-   ]
+   ],
+   "clue": "\"created recently\", \"no public IPs\", \"can't reach the internet\": new subnets are private by default."
   },
   {
    "id": "04-01-q4",
@@ -77,7 +80,8 @@
     null,
     "Gateway settings don't complete a peering.",
     "The VNet1 link is fine; the reverse link is missing."
-   ]
+   ],
+   "clue": "\"Initiated\": peering needs a link from each side."
   },
   {
    "id": "04-01-q5",
@@ -96,7 +100,8 @@
     "Gateway transit concerns VPN or ExpressRoute gateways, not spoke-to-spoke traffic.",
     null,
     "Peering works across subscriptions."
-   ]
+   ],
+   "clue": "\"VNet-A peers with Hub, Hub peers with VNet-B\": peering isn't transitive."
   },
   {
    "id": "04-01-q6",
@@ -115,7 +120,8 @@
     "Sync applies the change without recreating the peering.",
     "That setting is for traffic forwarded by appliances, not new address ranges.",
     "A peered network can't be moved, and moving doesn't update the address space."
-   ]
+   ],
+   "clue": "\"add a new address range to a peered virtual network\": sync the peering."
   },
   {
    "id": "04-01-q7",
@@ -134,7 +140,8 @@
     "Standard public IPs use static allocation.",
     "A prefix reserves a block; you'd still create a public IP from it.",
     null
-   ]
+   ],
+   "clue": "\"never changes\", \"zone-redundant\", \"closed until an NSG allows\": Standard SKU, static."
   },
   {
    "id": "04-01-q8",
@@ -153,7 +160,8 @@
     null,
     "Public IPs aren't part of a VNet, and VNets aren't billed.",
     "Default outbound access uses Microsoft-owned addresses, not yours."
-   ]
+   ],
+   "clue": "\"Standard public IP that isn't attached\" is on the bill: it bills while it exists."
   },
   {
    "id": "04-01-q9",
@@ -172,7 +180,8 @@
     "The /24 route is a longer prefix match for 10.2.1.7.",
     "User-defined routes override the system route for these prefixes.",
     "No route sends 10.2.1.7 to the internet here."
-   ]
+   ],
+   "clue": "\"10.2.0.0/16\" and \"10.2.1.0/24\" both match: the longest prefix wins."
   },
   {
    "id": "04-01-q10",
@@ -191,7 +200,8 @@
     "The firewall is in the same network path; peering isn't the issue.",
     null,
     "The design sends egress through the firewall, not per-VM IPs."
-   ]
+   ],
+   "clue": "\"reaches the firewall's subnet but is dropped\": the appliance's NIC needs IP forwarding."
   },
   {
    "id": "04-01-q11",
@@ -210,7 +220,8 @@
     "Azure picks one route.",
     "Conflicts are resolved by priority, not dropped.",
     null
-   ]
+   ],
+   "clue": "\"system\" and \"user-defined\" routes with the same prefix: the user-defined route wins."
   },
   {
    "id": "04-01-q12",
@@ -229,7 +240,8 @@
     null,
     "Packet capture shows traffic but doesn't name the rule that decided.",
     "Connection monitor tests continuously; it doesn't name the blocking rule."
-   ]
+   ],
+   "clue": "\"whether an NSG rule is blocking it, and which one\": IP flow verify."
   },
   {
    "id": "04-01-q13",
@@ -248,7 +260,8 @@
     "IP flow verify evaluates security rules, not routes.",
     "That lists NSG rules, not routes.",
     "That diagnoses VPN gateways and connections."
-   ]
+   ],
+   "clue": "\"sent to a firewall, a gateway, or dropped\": next hop."
   },
   {
    "id": "04-01-q14",
@@ -267,7 +280,8 @@
     "IP flow verify tests a single packet; it doesn't log traffic.",
     null,
     "The activity log records control-plane operations, not traffic flows."
-   ]
+   ],
+   "clue": "\"NSG flow logs for new subscriptions\" now fail: use virtual network flow logs."
   }
  ]
 }

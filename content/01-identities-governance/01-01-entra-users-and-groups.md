@@ -10,7 +10,7 @@ objective_ids: ["id.users.create", "id.users.properties", "id.users.licenses", "
 domain: "Manage Azure identities and governance"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["00-00", "00-01"]
+prerequisites: ["0A-03", "0A-05", "00-00", "00-01"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/entra/fundamentals/concept-learn-about-groups"
@@ -45,7 +45,12 @@ free_practice_available: true
 - Manage external users
 - Configure self-service password reset (SSPR)
 
-## Why this exists
+## The administrative problem
+
+A new employee starts on Monday. They need an account to sign in with, a Microsoft 365 licence, and the
+same access as the rest of their team. A consultant from a partner company needs to reach one application, and you
+don't want to manage their password. Meanwhile, the help desk spends hours every week resetting forgotten passwords.
+Every one of these is an identity task, and none of them can wait until someone needs a VM.
 
 Every access decision in Azure starts with an identity. Before you can grant a
 role, assign a licence or let a partner into a resource, the person has to exist
@@ -67,6 +72,84 @@ password.
 > Active Directory or Azure AD; the exam uses the new name. The AzureAD and
 > MSOnline PowerShell modules are deprecated; use Microsoft Graph PowerShell
 > (`Microsoft.Graph`) for everything in this module.
+
+## In plain English
+
+Microsoft Entra ID is the directory your Azure subscription trusts. Everything that signs in has an object there.
+
+- A **user** is one person's account. **Members** belong to your organization; **guests** are people from outside
+  who sign in with their own organization's or personal account, so you never hold their password.
+- A **group** is a list of users (and sometimes devices or other identities). You grant access, licences and roles
+  to the group once, then manage who is in it. That one habit is what keeps access manageable.
+- A group's membership is either **assigned** (you add people) or **dynamic** (a rule such as "department equals
+  Sales" adds and removes people automatically).
+- A **licence** turns on a paid product, such as Microsoft 365, for a user. It can be assigned to a user or to a group.
+- **Self-service password reset (SSPR)** lets users prove who they are with methods they registered earlier, then
+  reset their own password without calling anyone.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **User** | An account for one person in the directory. Members belong to your organization. |
+| **Guest user** | Someone from outside your organization who signs in with their own account. You manage their access, not their password. |
+| **Security group** | A group used to grant access to resources and apps. It can contain users, devices, service principals and other groups. |
+| **Microsoft 365 group** | A collaboration group with a shared mailbox, calendar and files. Its members can only be users. |
+| **Assigned membership** | An administrator adds and removes members by hand. |
+| **Dynamic membership** | A rule on user or device attributes decides who is in the group. Needs Microsoft Entra ID P1. |
+| **Usage location** | The country set on a user. A licence can't be assigned until it's set. |
+| **Licence** | A paid product, such as Microsoft 365 E3 or Microsoft Entra ID P1, assigned to users or groups. |
+| **SSPR** | Self-service password reset: users reset their own password after proving who they are. |
+| **Authentication method** | Something a user registers to prove identity, such as the Authenticator app, a phone or email. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Identities flow through groups to what they receive
+  accDescr: The Microsoft Entra tenant holds member users and guest users. Users are placed in groups, either by hand (assigned) or by a rule (dynamic). Licences, Azure role assignments and application access are granted to the group, so every member receives them, and removing someone from the group removes them. Self-service password reset applies to the users in scope.
+  T["Microsoft Entra tenant"]:::d01 --> M["Member users"]
+  T --> G["Guest users<br/>own account, your access rules"]
+  M --> GR["Group<br/>assigned or dynamic"]:::d01
+  G --> GR
+  GR --> LIC["Licences"]
+  GR --> RA["Role assignments"]
+  GR --> APP["App access"]
+```
+
+Grant to the group, manage the membership: joining and leaving become one change each, and every grant is
+auditable in one place. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| The company staff directory | Microsoft Entra tenant |
+| An employee badge | Member user |
+| A visitor badge for a partner | Guest user (B2B collaboration) |
+| A team mailing list you add people to | Group with assigned membership |
+| "Everyone in Sales, automatically" | Group with dynamic membership |
+| A software seat from the IT budget | Licence |
+| A forgotten-password kiosk | Self-service password reset |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Users and groups |
+| --- | --- |
+| What contains it? | The Microsoft Entra tenant. Users and groups aren't Azure resources and don't live in a subscription or resource group. |
+| What does it depend on? | The tenant. A licence needs the user's usage location; dynamic membership needs Microsoft Entra ID P1. |
+| What depends on it? | Role assignments, licences, application access and SSPR scope that target the user or group. |
+| Who can manage it? | Microsoft Entra roles such as User Administrator and Groups Administrator; Guest Inviter can invite guests. |
+| How is it networked? | Not networked. Sign-in happens against Microsoft Entra ID. |
+| How is it monitored? | Microsoft Entra sign-in logs and audit logs. |
+| How is it protected? | MFA, SSPR registration, least-privilege admin roles, external collaboration settings. |
+| How is it recovered? | Deleted users and Microsoft 365 groups can be restored for 30 days. |
+| What does it cost? | Users, groups and invitations are free; licences, and features such as dynamic groups, are paid. |
+| How is it removed safely? | Before deleting a group, check what it grants: roles, licences and apps disappear for every member. |
+
+See it with its neighbours on the [resource map](#/map/user-group).
 
 ## How it works under the hood
 
@@ -275,6 +358,35 @@ documentation this lesson was checked against doesn't give one.
 | Require registration at sign-in | not stated (Microsoft recommends Yes) | Password reset > Registration | Reconfirm window 0-730 days |
 | Password writeback | not stated | Password reset > On-premises integration | Hybrid users; P1 or Business Premium |
 
+## Worked example
+
+**Requirement.** Every user whose department is Sales must get a Microsoft 365 licence and read access to the sales
+resource group, automatically, including people hired next year.
+
+1. **Decide.** "Automatically" by attribute means **dynamic membership** (Microsoft Entra ID P1). Access to resources
+   is the goal, so a **security group** fits; Microsoft 365 groups are for collaboration.
+2. **Configure.** Create the group with the rule `user.department -eq "Sales"`. Make sure each user's **usage location**
+   is set. Assign the licence to the group, and assign **Reader** on the resource group to the group (01-02).
+3. **Observe.** New Sales users appear in the group after the rule processes; licences follow.
+4. **Validate.** Check the group's members and one user's licences, as below.
+
+## Validate the result
+
+Prove the directory says what you intended, rather than assuming the portal saved it:
+
+```powershell
+# Members of the dynamic group: everyone in Sales, nobody else
+Get-MgGroupMember -GroupId <group-id> | ForEach-Object { $_.AdditionalProperties.displayName }
+
+# The properties licensing and rules depend on
+Get-MgUser -UserId <upn> -Property DisplayName,Department,UsageLocation,UserType |
+    Select-Object DisplayName, Department, UsageLocation, UserType
+```
+
+- A guest shows **UserType = Guest**; a licence won't assign while **UsageLocation** is empty.
+- In the portal, the dynamic group's **Members** can't be edited by hand: that's how you know the rule is in charge.
+- For SSPR, sign in as a test user in scope and complete the reset at the password reset portal.
+
 ## Common failure modes
 
 1. **"The licence won't assign."** Usage location is empty. Set it on the user, or
@@ -354,6 +466,14 @@ licence are marked optional.
 5. You delete a user who held an E3 licence, reassign the freed licence, then restore
    the user 10 days later. What is the licence count afterwards, and is anything
    blocked?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain to a new colleague why access is granted to groups instead of to people.
+- Explain the difference between a member and a guest, and what you do and don't manage for a guest.
+- Explain why a licence can fail to assign even though the user exists.
 
 ## Key takeaways
 

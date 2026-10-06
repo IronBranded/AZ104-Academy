@@ -66,6 +66,9 @@
     out.push({ kind: 'View', label: 'Cost planner', sub: 'What can I afford to run', href: '#/cost' });
     out.push({ kind: 'View', label: 'Readiness', sub: 'What to study next', href: '#/readiness' });
     out.push({ kind: 'View', label: 'Verification watchlist', sub: 'Preview features and stale verification dates', href: '#/preview' });
+    out.push({ kind: 'View', label: 'Resource map', sub: 'What contains, depends on and protects each resource', href: '#/map' });
+    out.push({ kind: 'View', label: 'Compare options', sub: 'Side-by-side comparisons of easily confused services', href: '#/compare' });
+    out.push({ kind: 'View', label: 'Glossary', sub: 'Every term the lessons define, in plain English', href: '#/glossary' });
     manifest.domains.forEach(function (d) {
       if (!d.weight || d.weight === 'n/a') return;
       out.push({ kind: 'View', label: 'Domain review: ' + d.name, sub: d.weight + ' of the exam', href: '#/domain/' + d.id });

@@ -1,7 +1,7 @@
 ---
 objective: "(Project prerequisite - not an AZ-104 exam objective)"
 sub_objectives: []
-domain: "Lab Safety and Environment Setup"
+domain: "Safe Lab Foundations"
 domain_weight: "n/a"
 status: GA
 prerequisites: ["00-00"]

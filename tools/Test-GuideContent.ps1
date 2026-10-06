@@ -159,13 +159,29 @@ $RequiredKeys = @(
 $ValidWeights = @('10-15%', '15-20%', '20-25%', '25-30%', 'n/a')
 $ValidStatus  = @('GA', 'Preview')
 
+# The exam-lesson anatomy (docs/STYLE-GUIDE.md): problem and plain English
+# before terminology, relationships before configuration, validation before
+# troubleshooting, and teach-back before review.
 $ContentSections = @(
-    '## Sub-objectives covered', '## Why this exists',
-    '## How it works under the hood', '## Configuration surface',
+    '## Sub-objectives covered', '## The administrative problem',
+    '## In plain English', '## Words you need to know', '## Mental model',
+    '## Where it fits', '## How it works under the hood',
+    '## Configuration surface', '## Worked example', '## Validate the result',
     '## Common failure modes', '## How this is tested', '## Hands-on',
-    '## Check yourself', '## Sources'
+    '## Check yourself', '## Teach it back', '## Key takeaways', '## Sources'
 )
-$LabSections = @('## Prerequisites', '## Validation', '## Teardown')
+# Module 0A foundation primers: concise, skippable, beginner-first.
+$FoundationSections = @(
+    '## The problem', '## In plain English', '## Words you need to know',
+    '## Mental model', '## Where this shows up in AZ-104', '## Check yourself',
+    '## Teach it back', '## Key takeaways', '## Sources'
+)
+$LabSections = @(
+    '## Why this matters', '## The desired state', '## Prerequisites',
+    '## Validation', '## What just happened?', '## Teardown'
+)
+# Module ids: two characters (digits, or 0A for the foundations), dash, two digits.
+$ModIdPattern = '^([0-9A-Z]{2}-\d{2})'
 
 # Mirrors AcademyFrontMatter.costLevel in assets/js/frontmatter.js: read the
 # LEADING token, because estimates routinely say "back to Free in teardown"
@@ -324,13 +340,28 @@ foreach ($f in $contentFiles) {
                 Add-Issue Error $rel "Missing required section: $sec"
             }
         }
+        # The words table feeds the glossary view: two columns, at least 3 terms.
+        $words = [regex]::Match($fm.Body, '(?s)## Words you need to know\s*(.*?)(\r?\n## |\z)')
+        $rows = @($words.Groups[1].Value -split "`r?`n" | Where-Object { $_ -match '^\|' -and $_ -notmatch '^\|\s*-' })
+        if ($rows.Count -lt 4) { Add-Issue Error $rel 'Words you need to know: expected a table with at least 3 terms.' }
+        # Where it fits answers the ten relationship questions in a table.
+        $fits = [regex]::Match($fm.Body, '(?s)## Where it fits\s*(.*?)(\r?\n## |\z)')
+        $fitRows = @($fits.Groups[1].Value -split "`r?`n" | Where-Object { $_ -match '^\|' -and $_ -notmatch '^\|\s*-' })
+        if ($fitRows.Count -lt 11) { Add-Issue Error $rel "Where it fits: expected the ten-question table (found $([Math]::Max(0, $fitRows.Count - 1)) rows)." }
+    }
+    elseif ($rel -like 'content/0A-*') {
+        foreach ($sec in $FoundationSections) {
+            if ($fm.Body -notmatch ('(?m)^' + [regex]::Escape($sec) + '\s*$')) {
+                Add-Issue Error $rel "Missing required primer section: $sec"
+            }
+        }
     }
     if ($isExamModule -and $subs.Count -eq 0) {
         Add-Issue Error $rel 'sub_objectives is empty on an exam module.'
     }
 
-    $modId = if ($f.BaseName -match '^(\d{2}-\d{2})') { $Matches[1] } else { $null }
-    $moduleCost[$modId] = Get-CostLevel $d.lab_cost_estimate
+    $modId = if ($f.BaseName -match $ModIdPattern) { $Matches[1] } else { $null }
+    if ($modId) { $moduleCost[$modId] = Get-CostLevel $d.lab_cost_estimate }
 
     foreach ($s in $subs) {
         $n = ConvertTo-Norm $s
@@ -373,8 +404,17 @@ foreach ($f in $labFiles) {
         Add-Issue Warning $rel 'No "## Part 1" - labs are expected to be structured in numbered parts.'
     }
 
+    # Completion means observed results, not clicked steps: the Validation and
+    # Teardown sections must each carry a checklist the learner ticks.
+    foreach ($sec in @('Validation', 'Teardown')) {
+        $m = [regex]::Match($body, '(?s)(?m)^## ' + $sec + '\s*$(.*?)(?=^## |\z)')
+        if ($m.Success -and $m.Groups[1].Value -notmatch '(?m)^\s*- \[ \] ') {
+            Add-Issue Error $rel "## $sec has no checklist (- [ ] items): the lab can't record validation or teardown."
+        }
+    }
+
     # Cost parity: the module's chip and the lab header must agree.
-    $modId = if ($f.BaseName -match '^(\d{2}-\d{2})') { $Matches[1] } else { $null }
+    $modId = if ($f.BaseName -match $ModIdPattern) { $Matches[1] } else { $null }
     if ($modId -and $moduleCost.ContainsKey($modId)) {
         $hdr = [regex]::Match($body, '\*\*Estimated cost:\*\*(.*)')
         if (-not $hdr.Success) {
@@ -464,6 +504,63 @@ foreach ($jf in @(Get-ChildItem -LiteralPath (Join-RepoPath 'assets/js') -Filter
     $m = [regex]::Matches((Get-Content -LiteralPath $jf.FullName -Raw), "['""][a-z0-9]+:[a-z]+:v\d+['""]")
     foreach ($x in $m) { Add-Issue Error (ConvertTo-RelPath $jf.FullName) "Literal storage key $($x.Value); build it from AcademyExam.slug." }
 }
+
+# ------------------------------------- 3d. comparisons and resource map ----
+# data/comparisons.json and data/resources.json are rendered in lessons and at
+# #/compare and #/map. A module id, objective or resource id that resolves to
+# nothing is a silent hole in the page, so it is an error here.
+
+$moduleIds = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($m in $modules) { [void]$moduleIds.Add($m.Id) }
+$bulletNorms = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($s in $allSubObjectives) { [void]$bulletNorms.Add($s) }
+
+$cmpPath = Join-RepoPath 'data/comparisons.json'
+if (Test-Path -LiteralPath $cmpPath) {
+    try {
+        $cmp = Get-Content -LiteralPath $cmpPath -Raw | ConvertFrom-Json
+        $fields = @('name', 'purpose', 'scope', 'layer', 'when', 'difference', 'limitation', 'dependency', 'validate')
+        $seen = [System.Collections.Generic.HashSet[string]]::new()
+        foreach ($c in $cmp.comparisons) {
+            if (-not $seen.Add($c.id)) { Add-Issue Error 'data/comparisons.json' "$($c.id): duplicate id." }
+            if (-not $c.takeaway) { Add-Issue Error 'data/comparisons.json' "$($c.id): no AZ-104 takeaway." }
+            foreach ($mid in @($c.modules)) {
+                if (-not $moduleIds.Contains($mid)) { Add-Issue Error 'data/comparisons.json' "$($c.id): unknown module '$mid'." }
+            }
+            foreach ($o in @($c.objectives)) {
+                if (-not $bulletNorms.Contains((ConvertTo-Norm $o))) { Add-Issue Error 'data/comparisons.json' "$($c.id): objective is not a verbatim bullet: $o" }
+            }
+            if (@($c.options).Count -lt 2) { Add-Issue Error 'data/comparisons.json' "$($c.id): fewer than two options." }
+            foreach ($opt in @($c.options)) {
+                foreach ($fld in $fields) {
+                    if (-not $opt.$fld) { Add-Issue Error 'data/comparisons.json' "$($c.id) / $($opt.name): missing '$fld'." }
+                }
+            }
+        }
+    }
+    catch { Add-Issue Error 'data/comparisons.json' "Invalid JSON: $($_.Exception.Message)" }
+}
+else { Add-Issue Error 'data/comparisons.json' 'Missing.' }
+
+$resPath = Join-RepoPath 'data/resources.json'
+if (Test-Path -LiteralPath $resPath) {
+    try {
+        $res = Get-Content -LiteralPath $resPath -Raw | ConvertFrom-Json
+        $rids = [System.Collections.Generic.HashSet[string]]::new()
+        foreach ($r in $res.resources) { if (-not $rids.Add($r.id)) { Add-Issue Error 'data/resources.json' "$($r.id): duplicate id." } }
+        $questions = @('contains', 'dependsOn', 'dependents', 'manage', 'network', 'monitor', 'protect', 'recover', 'cost', 'remove')
+        foreach ($r in $res.resources) {
+            foreach ($q in $questions) { if (-not $r.q.$q) { Add-Issue Error 'data/resources.json' "$($r.id): missing answer '$q'." } }
+            foreach ($lid in @($r.lessons)) { if (-not $moduleIds.Contains($lid)) { Add-Issue Error 'data/resources.json' "$($r.id): unknown lesson '$lid'." } }
+            foreach ($k in @('contains', 'dependsOn', 'dependents')) {
+                foreach ($x in @($r.rel.$k)) { if ($x -and -not $rids.Contains($x)) { Add-Issue Error 'data/resources.json' "$($r.id).rel.$k -> unknown resource '$x'." } }
+            }
+        }
+        foreach ($g in $res.groups) { foreach ($x in @($g.ids)) { if (-not $rids.Contains($x)) { Add-Issue Error 'data/resources.json' "group '$($g.name)' -> unknown resource '$x'." } } }
+    }
+    catch { Add-Issue Error 'data/resources.json' "Invalid JSON: $($_.Exception.Message)" }
+}
+else { Add-Issue Error 'data/resources.json' 'Missing.' }
 
 # ---------------------------------------------- 4. skills-measured diff ----
 
@@ -562,6 +659,7 @@ if (Test-Path -LiteralPath $quizDir) {
             if (-not $seenIds.Add($qid)) { Add-Issue Error $rel "$qid : duplicate question id." }
             if (-not $item.prompt)       { Add-Issue Error $rel "$qid : no prompt." }
             if (-not $item.explanation)  { Add-Issue Warning $rel "$qid : no explanation." }
+            if (-not $item.clue)         { Add-Issue Error $rel "$qid : no scenario clue." }
 
             $opts = @($item.options)
             if ($opts.Count -lt 3) { Add-Issue Error $rel "$qid : only $($opts.Count) options." }

@@ -1,0 +1,516 @@
+{
+ "_note": "Structured comparisons rendered by assets/js/explore.js, inside lessons and at #/compare. Each one is limited to services the current AZ-104 skills outline supports; objectives are verbatim bullets. Facts come from the Academy lessons (verified against Microsoft Learn) and from Microsoft Learn retrieved 2026-10-06.",
+ "verified": "2026-10-06",
+ "excluded": [
+  {
+   "title": "NSG or Azure Firewall",
+   "reason": "Azure Firewall is not in the AZ-104 skills measured or the study guide's documentation list."
+  }
+ ],
+ "comparisons": [
+  {
+   "id": "entra-vs-azure-roles",
+   "title": "Microsoft Entra roles or Azure roles",
+   "question": "Does the task change the directory, or Azure resources?",
+   "modules": [
+    "01-02",
+    "01-01",
+    "0A-05"
+   ],
+   "objectives": [
+    "Manage built-in Azure roles",
+    "Interpret access assignments"
+   ],
+   "options": [
+    {
+     "name": "Microsoft Entra roles",
+     "purpose": "Administer the directory: users, groups, licences, app registrations and tenant settings.",
+     "scope": "The tenant, or narrower directory scopes such as an administrative unit.",
+     "layer": "Identity plane: Microsoft Entra ID.",
+     "when": "Someone must create users, reset passwords, assign licences or change tenant settings.",
+     "difference": "Grants nothing on Azure resources: a Global Administrator sees no VM until given an Azure role or elevating access.",
+     "limitation": "Never assigned on a subscription or resource group.",
+     "dependency": "A user or role-assignable group in the same tenant.",
+     "validate": "Entra admin center: Roles & admins, the role, Assignments."
+    },
+    {
+     "name": "Azure roles (Azure RBAC)",
+     "purpose": "Grant access to Azure resources: manage them (actions) or use their data (data actions).",
+     "scope": "Management group, subscription, resource group or resource, inherited downward.",
+     "layer": "Resource plane, enforced by Azure Resource Manager; data roles by the service.",
+     "when": "Someone must create, change, view or use Azure resources or their data.",
+     "difference": "Grants nothing in the directory: a subscription Owner can't create users.",
+     "limitation": "Additive: NotActions removes permissions from one role, it doesn't deny what another assignment grants.",
+     "dependency": "A principal from the tenant the subscription trusts, and a role definition.",
+     "validate": "az role assignment list --assignee <upn> --all --include-inherited --include-groups, or IAM > Check access."
+    }
+   ],
+   "takeaway": "Directory task: Entra role. Resource task: Azure role. A scenario that needs both needs two assignments."
+  },
+  {
+   "id": "rbac-policy-locks",
+   "title": "Azure RBAC, Azure Policy or a resource lock",
+   "question": "Is the requirement about who may act, what may exist, or what must not change?",
+   "modules": [
+    "01-03",
+    "01-02"
+   ],
+   "objectives": [
+    "Implement and manage Azure Policy",
+    "Configure resource locks",
+    "Assign roles at different scopes"
+   ],
+   "options": [
+    {
+     "name": "Azure RBAC",
+     "purpose": "Decide who may perform which operations.",
+     "scope": "Management group, subscription, resource group or resource.",
+     "layer": "The caller's identity.",
+     "when": "The requirement names people, groups or apps and what they may do.",
+     "difference": "About the caller; says nothing about how a resource must be configured.",
+     "limitation": "Can't stop an authorized Owner from a mistaken delete.",
+     "dependency": "Principals in the trusted tenant.",
+     "validate": "Check access for the user; try the action as that user."
+    },
+    {
+     "name": "Azure Policy",
+     "purpose": "Decide what may exist and how it must be configured, whoever deploys it.",
+     "scope": "Usually a management group, subscription or resource group, with exclusions and exemptions below.",
+     "layer": "Resource properties, evaluated by Resource Manager on create and update.",
+     "when": "The requirement is about locations, SKUs, tags or settings.",
+     "difference": "Deny blocks new or changed non-compliant resources; existing ones are only reported until remediated.",
+     "limitation": "Remediation works only for modify and deployIfNotExists, through a remediation task with a managed identity.",
+     "dependency": "A policy definition or initiative; a managed identity for remediation.",
+     "validate": "Policy > Compliance, or az policy state summarize."
+    },
+    {
+     "name": "Resource lock",
+     "purpose": "Stop deletion (CanNotDelete) or any change (ReadOnly), even by an Owner.",
+     "scope": "Subscription, resource group or resource; not a management group.",
+     "layer": "Control-plane operations.",
+     "when": "Critical resources must not be deleted or changed by accident.",
+     "difference": "Applies to everyone, including Owners, until someone removes the lock.",
+     "limitation": "ReadOnly also blocks POST actions such as restarting a VM or listing storage keys; locks don't stop data-plane operations.",
+     "dependency": "Permission on Microsoft.Authorization/locks (Owner or User Access Administrator) to create or remove it.",
+     "validate": "az lock list --resource-group <rg>, then try the blocked action."
+    }
+   ],
+   "takeaway": "Who: RBAC. What may exist and how: Policy. Protect from deletion or change, even by admins: a lock."
+  },
+  {
+   "id": "availability-sets-vs-zones",
+   "title": "Availability set or availability zones",
+   "question": "Which failure must the VMs survive: a rack and maintenance, or a whole datacenter?",
+   "modules": [
+    "03-02",
+    "0A-02"
+   ],
+   "objectives": [
+    "Deploy virtual machines to availability zones and availability sets"
+   ],
+   "options": [
+    {
+     "name": "Availability set",
+     "purpose": "Spread VMs across fault domains (racks) and update domains (maintenance batches).",
+     "scope": "One region, one datacenter.",
+     "layer": "VM placement on hosts and racks.",
+     "when": "The region has no zones, or you need rack-level separation within one datacenter.",
+     "difference": "Protects against rack, host and planned-maintenance failures, not a datacenter outage.",
+     "limitation": "A VM joins only at creation; up to 3 fault and 20 update domains; 99.95% SLA.",
+     "dependency": "The set exists before or with the VMs.",
+     "validate": "az vm get-instance-view shows each VM's platform fault and update domain."
+    },
+    {
+     "name": "Availability zones",
+     "purpose": "Place VMs in separate datacenters within a region.",
+     "scope": "One region with at least three zones.",
+     "layer": "Datacenters with independent power, cooling and networking.",
+     "when": "The workload must survive the loss of a zone.",
+     "difference": "Survives a whole-zone outage.",
+     "limitation": "Not every region or VM size supports zones; the zone is chosen at creation; 99.99% SLA with two or more VMs across zones.",
+     "dependency": "Zone-aware dependencies, such as a zone-redundant Standard public IP or load balancer.",
+     "validate": "az vm show --query zones."
+    }
+   ],
+   "takeaway": "Datacenter failure in scope: zones. Rack or maintenance only, or no zones in the region: availability set. Neither can be added to a VM that already exists."
+  },
+  {
+   "id": "storage-redundancy",
+   "title": "LRS, ZRS, GRS or GZRS",
+   "question": "How many copies, in how many places, and can the second region be read without a failover?",
+   "modules": [
+    "02-02",
+    "0A-08"
+   ],
+   "objectives": [
+    "Configure Azure Storage redundancy"
+   ],
+   "options": [
+    {
+     "name": "LRS",
+     "purpose": "Three copies in one datacenter.",
+     "scope": "Primary region, one datacenter.",
+     "layer": "Storage replication.",
+     "when": "Lowest cost, or data that can be re-created.",
+     "difference": "No protection from a datacenter or zone outage.",
+     "limitation": "A datacenter-level disaster can lose the data.",
+     "dependency": "Nothing extra.",
+     "validate": "az storage account show --query sku.name returns Standard_LRS."
+    },
+    {
+     "name": "ZRS",
+     "purpose": "Three copies across three availability zones.",
+     "scope": "Primary region only.",
+     "layer": "Storage replication.",
+     "when": "High availability inside one region, data kept in that region.",
+     "difference": "Survives a zone outage; no copy outside the region.",
+     "limitation": "The region must support zones; not every account type does.",
+     "dependency": "A region with availability zones.",
+     "validate": "sku.name returns Standard_ZRS."
+    },
+    {
+     "name": "GRS / RA-GRS",
+     "purpose": "LRS in the primary region plus an asynchronous LRS copy in a secondary region.",
+     "scope": "Primary and secondary (paired) region.",
+     "layer": "Storage replication.",
+     "when": "Survive a regional disaster; RA-GRS when apps must read the secondary without a failover.",
+     "difference": "Secondary readable only with RA-, otherwise after a failover.",
+     "limitation": "Asynchronous, so the newest writes can be lost; Premium accounts don't support it.",
+     "dependency": "Azure chooses the secondary region.",
+     "validate": "sku.name returns Standard_GRS or Standard_RAGRS."
+    },
+    {
+     "name": "GZRS / RA-GZRS",
+     "purpose": "ZRS in the primary region plus an asynchronous copy in a secondary region.",
+     "scope": "Primary and secondary region.",
+     "layer": "Storage replication.",
+     "when": "Zone resilience locally and protection from a regional disaster.",
+     "difference": "The most resilient option.",
+     "limitation": "Highest cost; availability varies by region and account type.",
+     "dependency": "A primary region with zones.",
+     "validate": "sku.name returns Standard_GZRS or Standard_RAGZRS."
+    }
+   ],
+   "takeaway": "Read the failure in scope: datacenter, ZRS; region, GRS or GZRS; must read during an outage without failing over, the RA- version."
+  },
+  {
+   "id": "disks-vs-storage-data",
+   "title": "Managed disk, storage account data or temporary disk",
+   "question": "Is this a VM's drive, data shared over the network, or scratch space?",
+   "modules": [
+    "03-02",
+    "02-02",
+    "0A-08"
+   ],
+   "objectives": [
+    "Manage virtual machine disks",
+    "Create and configure storage accounts"
+   ],
+   "options": [
+    {
+     "name": "Managed disk",
+     "purpose": "Persistent block storage attached to a VM: the OS disk and data disks.",
+     "scope": "A resource in the VM's region (and zone).",
+     "layer": "Compute: Microsoft.Compute/disks.",
+     "when": "A VM needs a drive that survives restarts and deallocation.",
+     "difference": "Azure manages the storage behind it: you pick type and size, no storage account.",
+     "limitation": "One VM at a time unless shared disks are used; type changes need the VM deallocated.",
+     "dependency": "The VM it is attached to.",
+     "validate": "az disk list --query \"[].{name:name, sku:sku.name, state:diskState}\" -o table."
+    },
+    {
+     "name": "Storage account data",
+     "purpose": "Blobs, file shares, queues and tables reached over service endpoints.",
+     "scope": "Containers and shares inside a storage account.",
+     "layer": "Storage: Microsoft.Storage/storageAccounts and its data plane.",
+     "when": "Data shared by many clients, apps or regions over HTTPS, SMB or NFS.",
+     "difference": "Addressed by URL or share path, with its own firewall and authorization.",
+     "limitation": "Name is globally unique, 3-24 lowercase letters and numbers; the account type can't change.",
+     "dependency": "Network access and an authorization method.",
+     "validate": "az storage account show; read or write a test object."
+    },
+    {
+     "name": "Temporary disk",
+     "purpose": "Local scratch storage on the VM's host.",
+     "scope": "The host running the VM.",
+     "layer": "Host-local, not a managed disk.",
+     "when": "Page or swap files and data you can afford to lose.",
+     "difference": "Not persistent: data can be lost on maintenance, redeploy or deallocation.",
+     "limitation": "Never keep data you need on it; some VM sizes have none.",
+     "dependency": "The VM size.",
+     "validate": "After a deallocate and start, the data is gone."
+    }
+   ],
+   "takeaway": "A VM drive that must persist: managed disk. Data shared over the network: storage account. Scratch only: temporary disk."
+  },
+  {
+   "id": "blob-vs-files",
+   "title": "Blob storage or Azure Files",
+   "question": "Do clients need objects by URL, or a mounted share with folders?",
+   "modules": [
+    "02-03",
+    "0A-08"
+   ],
+   "objectives": [
+    "Create and configure a container in Azure Blob Storage",
+    "Create and configure a file share in Azure Files"
+   ],
+   "options": [
+    {
+     "name": "Blob storage",
+     "purpose": "Store objects of any type in containers, accessed over HTTPS.",
+     "scope": "A container in a storage account.",
+     "layer": "Object storage, REST API.",
+     "when": "Backups, logs, media, data lakes, static content.",
+     "difference": "Objects addressed by URL; access tiers hot, cool, cold and archive.",
+     "limitation": "Not a normal mounted drive; archived blobs need rehydration before they can be read.",
+     "dependency": "A general-purpose v2 or premium block blob account.",
+     "validate": "az storage blob list --container-name <c> --account-name <sa> --auth-mode login."
+    },
+    {
+     "name": "Azure Files",
+     "purpose": "Managed file shares mounted over SMB or NFS.",
+     "scope": "A share in a storage account.",
+     "layer": "File storage.",
+     "when": "Apps or users that expect a file share; lift-and-shift of file servers.",
+     "difference": "Directories and files, share-level plus Windows ACL permissions, share snapshots.",
+     "limitation": "SMB uses TCP port 445, which networks and ISPs often block.",
+     "dependency": "A general-purpose v2 or premium file share account; an identity source for identity-based access.",
+     "validate": "Mount the share from a VM and read and write a file."
+    }
+   ],
+   "takeaway": "URL access to objects: Blob. A mounted share with folders and ACLs: Azure Files."
+  },
+  {
+   "id": "service-vs-private-endpoint",
+   "title": "Service endpoint or private endpoint",
+   "question": "Must the PaaS resource get a private IP, or is it enough to allow certain subnets?",
+   "modules": [
+    "04-02",
+    "02-01"
+   ],
+   "objectives": [
+    "Configure service endpoints for Azure platform as a service (PaaS)",
+    "Configure private endpoints for Azure PaaS",
+    "Configure Azure Storage firewalls and virtual networks"
+   ],
+   "options": [
+    {
+     "name": "Service endpoint",
+     "purpose": "Send a subnet's traffic to a PaaS service over the Azure backbone with the subnet's identity, so the service firewall can allow it.",
+     "scope": "Per subnet, per service (for example Microsoft.Storage).",
+     "layer": "Routing and source identity; the service keeps its public endpoint.",
+     "when": "Restrict a storage account to chosen subnets at no extra cost.",
+     "difference": "The destination is still the service's public IP; DNS doesn't change.",
+     "limitation": "Doesn't extend to on-premises; scoped to the service, not to one instance.",
+     "dependency": "The endpoint on the subnet plus a virtual network rule on the resource.",
+     "validate": "From the allowed subnet access works; from any other network it's refused."
+    },
+    {
+     "name": "Private endpoint",
+     "purpose": "Give one PaaS resource a private IP inside your virtual network.",
+     "scope": "A network interface in a subnet, mapped to one resource and sub-resource such as blob.",
+     "layer": "A private IP plus DNS (a privatelink zone).",
+     "when": "Private access from VNets, peered VNets or on-premises, with public access disabled.",
+     "difference": "Traffic goes to a private IP in your address space.",
+     "limitation": "Depends on DNS resolving the name to the private IP; billed hourly and per GB.",
+     "dependency": "A subnet and a private DNS zone linked to the VNets that use it.",
+     "validate": "nslookup <account>.blob.core.windows.net from inside the VNet returns a private IP."
+    }
+   ],
+   "takeaway": "Free, subnet-scoped, public IP unchanged: service endpoint. Private IP, reachable from on-premises, public access can be turned off: private endpoint."
+  },
+  {
+   "id": "lb-vs-appgw",
+   "title": "Azure Load Balancer or Application Gateway",
+   "question": "Does the routing decision need to read HTTP?",
+   "modules": [
+    "04-03"
+   ],
+   "objectives": [
+    "Configure an internal or public load balancer"
+   ],
+   "note": "Application Gateway isn't a skills-measured bullet. It appears in the study guide's documentation list and in Microsoft's AZ-104 networking learning path, so it's included only as the option to tell apart from Azure Load Balancer.",
+   "options": [
+    {
+     "name": "Azure Load Balancer",
+     "purpose": "Distribute TCP and UDP flows across healthy backends.",
+     "scope": "Regional; public or internal frontend.",
+     "layer": "Layer 4 (TCP/UDP).",
+     "when": "Any TCP or UDP application, non-HTTP traffic, HA ports for appliances.",
+     "difference": "Doesn't read HTTP: no URL routing, no TLS termination, no WAF.",
+     "limitation": "Standard is closed to inbound traffic until an NSG allows it.",
+     "dependency": "A backend pool in one VNet, a health probe, NSG rules allowing clients and 168.63.129.16.",
+     "validate": "Data Path Availability and Health Probe Status metrics; connect to the frontend."
+    },
+    {
+     "name": "Application Gateway",
+     "purpose": "Distribute HTTP and HTTPS requests with application-aware routing.",
+     "scope": "Regional; public, private or both.",
+     "layer": "Layer 7 (HTTP/HTTPS).",
+     "when": "Route by URL path or host name, terminate TLS, or add a web application firewall.",
+     "difference": "Terminates and reads HTTP, so /images and /api can go to different pools.",
+     "limitation": "Needs a dedicated subnet; regional only.",
+     "dependency": "A dedicated subnet, listeners, rules and backend pools.",
+     "validate": "Its Backend health page; request each path and check which pool answers."
+    }
+   ],
+   "takeaway": "Ports and protocols: Load Balancer. URL paths, host names, TLS offload or WAF: Application Gateway."
+  },
+  {
+   "id": "managed-identity-types",
+   "title": "System-assigned or user-assigned managed identity",
+   "question": "Should the identity live and die with one resource, or be shared and managed on its own?",
+   "modules": [
+    "03-03",
+    "02-02",
+    "0A-05"
+   ],
+   "objectives": [
+    "Create and manage an Azure Container Registry",
+    "Configure storage account encryption"
+   ],
+   "note": "AZ-104 tests managed identities through the services that use them: pulling images from Container Registry (an ACI container group needs a user-assigned identity for this) and customer-managed keys for storage encryption.",
+   "options": [
+    {
+     "name": "System-assigned",
+     "purpose": "An identity created on one resource and tied to it.",
+     "scope": "Exactly one resource.",
+     "layer": "A workload identity (service principal) in Microsoft Entra ID.",
+     "when": "One resource needs its own access, removed when the resource is deleted.",
+     "difference": "Deleted automatically with the resource.",
+     "limitation": "Can't be shared, and can't be granted roles before the resource exists.",
+     "dependency": "A resource type that supports managed identities.",
+     "validate": "Resource > Identity shows Status On and an object ID; list its role assignments."
+    },
+    {
+     "name": "User-assigned",
+     "purpose": "A standalone identity resource assigned to zero or more resources.",
+     "scope": "Any resources you assign it to.",
+     "layer": "A workload identity (service principal) in Microsoft Entra ID.",
+     "when": "Several resources need the same access, access must exist before deployment, or resources are recreated often.",
+     "difference": "Independent lifecycle: must be deleted explicitly.",
+     "limitation": "Neither type removes its role assignments when deleted; clean them up.",
+     "dependency": "The identity resource in a resource group.",
+     "validate": "az identity show; az role assignment list --assignee <principalId> --all."
+    }
+   ],
+   "takeaway": "One resource, gone with it: system-assigned. Shared, created in advance, or surviving redeployments: user-assigned. Either way it needs a role assignment to do anything."
+  },
+  {
+   "id": "metrics-vs-logs",
+   "title": "Azure Monitor metrics or logs",
+   "question": "Do you need a number over time, or records you can search?",
+   "modules": [
+    "05-01",
+    "0A-09"
+   ],
+   "objectives": [
+    "Interpret metrics in Azure Monitor",
+    "Configure log settings in Azure Monitor",
+    "Query and analyze logs in Azure Monitor"
+   ],
+   "options": [
+    {
+     "name": "Metrics",
+     "purpose": "Numeric values sampled over time.",
+     "scope": "Per resource, split by dimensions.",
+     "layer": "Azure Monitor Metrics.",
+     "when": "Charts and near-real-time threshold alerts: CPU, transactions, availability.",
+     "difference": "Platform metrics are collected automatically, with no setup.",
+     "limitation": "Kept 93 days; numbers only, not who or why.",
+     "dependency": "Nothing for platform metrics; the Azure Monitor Agent and a data collection rule for guest OS counters.",
+     "validate": "Metrics explorer chart for the resource."
+    },
+    {
+     "name": "Logs",
+     "purpose": "Records with many fields, queried with KQL.",
+     "scope": "Tables in a Log Analytics workspace.",
+     "layer": "Azure Monitor Logs.",
+     "when": "Investigations and audits: who changed what, which request failed.",
+     "difference": "Resource logs exist only after you create a diagnostic setting.",
+     "limitation": "Ingestion and retention are billed.",
+     "dependency": "Diagnostic settings or agents with data collection rules, and a workspace.",
+     "validate": "A KQL query returns recent rows, for example AzureActivity | take 10."
+    }
+   ],
+   "takeaway": "A threshold on a number: metric. Who, what and when: logs, and create the diagnostic setting first."
+  },
+  {
+   "id": "backup-vs-site-recovery",
+   "title": "Azure Backup or Azure Site Recovery",
+   "question": "Do you need the data as it was, or the workload running somewhere else?",
+   "modules": [
+    "05-02",
+    "0A-10"
+   ],
+   "objectives": [
+    "Perform backup and restore operations by using Azure Backup",
+    "Configure Azure Site Recovery for Azure resources"
+   ],
+   "options": [
+    {
+     "name": "Azure Backup",
+     "purpose": "Keep point-in-time recovery points to restore data, files or whole VMs.",
+     "scope": "Protected items in a Recovery Services vault or a Backup vault.",
+     "layer": "Data protection.",
+     "when": "Recover from deletion, corruption or ransomware; restore an earlier version or one file.",
+     "difference": "Goes back in time on a schedule set by the backup policy.",
+     "limitation": "Changes after the latest recovery point aren't in it; restores take time.",
+     "dependency": "A vault, a backup policy, the VM agent and extension.",
+     "validate": "Backup items show a recent successful backup; do a test restore."
+    },
+    {
+     "name": "Azure Site Recovery",
+     "purpose": "Replicate VMs continuously to another region and fail over.",
+     "scope": "Replicated items in a Recovery Services vault.",
+     "layer": "Disaster recovery.",
+     "when": "Keep the workload running when its region is unavailable.",
+     "difference": "Keeps a near-current replica and moves where the workload runs.",
+     "limitation": "Recovery points are kept briefly (one day by default), so it isn't a backup; after failover you must reprotect.",
+     "dependency": "A target region network, a cache storage account, the Mobility service extension.",
+     "validate": "Replicated items are Healthy; a test failover into an isolated network succeeds."
+    }
+   ],
+   "takeaway": "Need the data as it was: Backup. Need the workload running in another region: Site Recovery. Many designs use both."
+  },
+  {
+   "id": "arm-vs-bicep",
+   "title": "ARM template or Bicep file",
+   "question": "Which language describes the deployment, and how do you move between them?",
+   "modules": [
+    "03-01",
+    "0A-12"
+   ],
+   "objectives": [
+    "Interpret an Azure Resource Manager template or a Bicep file",
+    "Export a deployment as an Azure Resource Manager template or convert an Azure Resource Manager template to a Bicep file"
+   ],
+   "options": [
+    {
+     "name": "ARM template",
+     "purpose": "Declare resources as JSON that Resource Manager deploys.",
+     "scope": "Resource group, subscription, management group or tenant deployments.",
+     "layer": "The format Resource Manager accepts.",
+     "when": "Existing JSON templates, portal exports, tools that emit JSON.",
+     "difference": "Verbose: bracket expressions, explicit dependsOn often needed.",
+     "limitation": "Harder to read and change by hand.",
+     "dependency": "A parameters file for per-environment values.",
+     "validate": "what-if before deploying; the deployment's provisioningState is Succeeded."
+    },
+    {
+     "name": "Bicep",
+     "purpose": "Declare the same resources in a simpler language.",
+     "scope": "The same deployment scopes.",
+     "layer": "Compiled to an ARM template before deployment.",
+     "when": "New infrastructure as code; reuse with modules.",
+     "difference": "Symbolic references create dependencies automatically; parent and existing keywords.",
+     "limitation": "Decompiling JSON to Bicep is best-effort and can need clean-up.",
+     "dependency": "The Bicep CLI: the Azure CLI installs it; Azure PowerShell needs it installed separately.",
+     "validate": "az bicep build compiles cleanly; what-if before deploying."
+    }
+   ],
+   "takeaway": "Same engine, two languages. Read both; convert with az bicep decompile; export from the portal as either."
+  }
+ ]
+}

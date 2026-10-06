@@ -80,6 +80,14 @@
           var heads = parsed.body.match(/^#{2,4}\s+.*$/gm);
           if (heads) bits.push(heads.join(' '));
 
+          /* Beginners search for words, not headings: index the terms from
+             each lesson's "Words you need to know" table. */
+          var words = /^##\s+Words you need to know\s*$([\s\S]*?)(?=^##\s|(?![\s\S]))/m.exec(parsed.body);
+          if (words) {
+            var terms = words[1].match(/^\|[^|\n]+\|/gm);
+            if (terms) bits.push(terms.join(' ').replace(/[|*`]/g, ' '));
+          }
+
           deep[entry.kind + ':' + entry.id] = bits.join(' ').toLowerCase();
 
           /* Keep the prose too, so a hit can show the line it matched on.

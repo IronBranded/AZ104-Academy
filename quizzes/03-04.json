@@ -20,7 +20,8 @@
     "Slots run in the same plan and share its instances.",
     null,
     "Integration affects outbound networking, not compute sharing."
-   ]
+   ],
+   "clue": "\"share one plan\" and one app \"slows the others\": apps on a plan share its instances."
   },
   {
    "id": "03-04-q2",
@@ -39,7 +40,8 @@
     null,
     "Shared doesn't support TLS bindings either.",
     "Standard supports it, but Basic is the lowest tier that does."
-   ]
+   ],
+   "clue": "\"lowest tier\" for a custom domain with an SNI binding: Basic."
   },
   {
    "id": "03-04-q3",
@@ -58,7 +60,8 @@
     "Basic supports manual scale-out only.",
     "Free has no dedicated instances to scale.",
     "Premium v3 supports it, but Standard is the minimum for rule-based autoscale."
-   ]
+   ],
+   "clue": "\"automatically\" and \"using rules\": rule-based autoscale starts at Standard."
   },
   {
    "id": "03-04-q4",
@@ -77,7 +80,8 @@
     "Isolation changes the environment, not how scaling is triggered.",
     "That runs 20 instances all the time instead of scaling with traffic.",
     null
-   ]
+   ],
+   "clue": "\"Premium v3\" and \"without anyone writing autoscale rules\": automatic scaling."
   },
   {
    "id": "03-04-q5",
@@ -96,7 +100,8 @@
     null,
     "Tier isn't the constraint; location, resource group and OS are.",
     "Neither is required for the move."
-   ]
+   ],
+   "clue": "\"move a web app to another plan\": same resource group, region and operating system."
   },
   {
    "id": "03-04-q6",
@@ -115,7 +120,8 @@
     "App Service apps use azurewebsites.net and run on the plan's managed instances.",
     "An app runs in its plan's region.",
     "Every app gets a public azurewebsites.net name by default."
-   ]
+   ],
+   "clue": "\"default URL\" for contoso-shop: <name>.azurewebsites.net, running on the plan's instances."
   },
   {
    "id": "03-04-q7",
@@ -134,7 +140,8 @@
     "Key Vault certificates can be bound with SNI, and they aren't free.",
     "A self-signed PFX can be bound, but it isn't free-and-managed or trusted by browsers.",
     null
-   ]
+   ],
+   "clue": "\"free\" and \"renews automatically\": an App Service managed certificate, which has limits."
   },
   {
    "id": "03-04-q8",
@@ -153,7 +160,8 @@
     "HTTPS Only doesn't change the binding type, and Free has no TLS bindings.",
     null,
     "The TLS version isn't the issue; SNI support is."
-   ]
+   ],
+   "clue": "\"doesn't support SNI\": an IP-based binding, which costs more and needs Standard or higher."
   },
   {
    "id": "03-04-q9",
@@ -172,7 +180,8 @@
     "Root domains use an A record in the documented procedure.",
     "Never configure both for the same name; they conflict.",
     "The TXT record verifies ownership; a mapping record is still required."
-   ]
+   ],
+   "clue": "\"root domain\": a CNAME can't sit at the apex, so an A record plus the asuid TXT record."
   },
   {
    "id": "03-04-q10",
@@ -191,7 +200,8 @@
     null,
     "The TXT record doesn't affect resolution of the app's name.",
     "It applies to every custom domain mapping."
-   ]
+   ],
+   "clue": "\"strongly recommend the TXT asuid record\": it proves ownership and prevents subdomain takeover."
   },
   {
    "id": "03-04-q11",
@@ -210,7 +220,8 @@
     "Custom retention is 0-30 days or indefinite; 90 isn't an option.",
     null,
     "App Service backup is configured on the app, not as a plan-level Azure Backup item."
-   ]
+   ],
+   "clue": "\"every 4 hours\", \"90 days\" and \"download\": custom backups to your own storage account."
   },
   {
    "id": "03-04-q12",
@@ -229,7 +240,8 @@
     "Restores are supported in Basic and higher.",
     "Restoring to a new app is supported.",
     null
-   ]
+   ],
+   "clue": "\"restoring into a new app\" and HTTPS on the custom domain fails: domains and bindings aren't restored."
   },
   {
    "id": "03-04-q13",
@@ -248,7 +260,8 @@
     "The default is allow only while there are no rules.",
     "Access restrictions don't have an allow-and-log mode.",
     "Rules don't redirect."
-   ]
+   ],
+   "clue": "\"one Allow rule\" and \"no unmatched action set\": adding a rule makes unmatched traffic denied."
   },
   {
    "id": "03-04-q14",
@@ -267,7 +280,8 @@
     null,
     "Access restrictions filter inbound requests to the app.",
     "That's a TLS binding type, not network access."
-   ]
+   ],
+   "clue": "\"call\" a resource \"inside a virtual network\" and \"the app can stay public\": outbound VNet integration."
   },
   {
    "id": "03-04-q15",
@@ -286,7 +300,8 @@
     "DB is a deployment slot setting, so production keeps prod-db.",
     null,
     "FEATURE_X isn't sticky, so staging's value moves into production."
-   ]
+   ],
+   "clue": "\"sticky\" settings stay with their slot; non-sticky settings move with the swap."
   },
   {
    "id": "03-04-q16",
@@ -305,7 +320,8 @@
     null,
     "Auto swap swaps after each deployment without a pause.",
     "Traffic routing doesn't apply production's slot settings to staging."
-   ]
+   ],
+   "clue": "\"test staging with production's settings\" and \"be able to cancel\": swap with preview."
   }
  ]
 }

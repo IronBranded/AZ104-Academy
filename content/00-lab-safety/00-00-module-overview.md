@@ -1,7 +1,7 @@
 ---
 objective: "(Project prerequisite - not an AZ-104 exam objective)"
 sub_objectives: []
-domain: "Lab Safety and Environment Setup"
+domain: "Safe Lab Foundations"
 domain_weight: "n/a"
 status: GA
 prerequisites: []
@@ -99,6 +99,42 @@ Microsoft Entra ID P2 and isn't part of the AZ-104 skills outline; it belongs to
 identity-administrator study. The AZ-104 habit is simpler and exam-relevant: hold
 only the roles the current lab needs, at the narrowest scope that works, and
 remove them when you finish. Module 01-02 teaches the role model behind it.
+
+## Choosing the subscription and the region
+
+Two choices come before the first lab, and getting either wrong is expensive to undo.
+
+**The subscription.** Use a subscription that exists only for this study: never one that runs anything real. Every
+lab deletes resource groups and changes subscription-scope settings, and the budget in
+[00-01](./00-01-cost-guardrails-and-budgets.md) is set per subscription. Before every lab, confirm where commands will
+land; a wrong context is the most common way a lab ends up somewhere it shouldn't:
+
+```powershell
+Get-AzContext | Select-Object Account, Subscription, Tenant      # Azure PowerShell
+az account show --query "{user:user.name, subscription:name, tenant:tenantId}" -o table   # Azure CLI
+
+Set-AzContext -Subscription '<lab-subscription-id>'              # switch if it's wrong
+az account set --subscription '<lab-subscription-id>'
+```
+
+**The region.** Pick one region close to you and use it for every lab, so resources can reach each other and nothing is
+left behind in a region you forgot about. Check three things before you commit:
+
+- **Availability zones.** Several labs place resources in zones or use zone-redundant storage. Choose a region that
+  supports zones ([0A-02](../0A-foundations/0A-02-regions-and-availability.md)).
+- **VM sizes.** Small sizes aren't offered in every region, and a size can be restricted for your subscription:
+
+  ```powershell
+  az vm list-skus --location <region> --size Standard_B --output table
+  ```
+
+- **Quota.** New subscriptions start with modest vCPU quotas per region:
+
+  ```powershell
+  az vm list-usage --location <region> --output table
+  ```
+
+Labs that need a second region, such as the Site Recovery failover in 05-02, say so in their prerequisites.
 
 ## Naming convention
 

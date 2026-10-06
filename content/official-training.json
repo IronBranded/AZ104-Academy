@@ -1,4 +1,316 @@
 {
- "_note": "Official Microsoft training mapped to AZ-104 objectives. Deliberately empty: the SC-500 mapping was removed, and the AZ-104 learning paths have not yet been verified against Microsoft's Learn source. With no 'course' key the site hides the official-training panel rather than showing unverified links.",
- "verified": null
+ "_note": "Microsoft Learn training for AZ-104, retrieved through the Microsoft Learn MCP server. Course, path and module titles and URLs are Microsoft's. Which Academy lessons each module serves ('lessons') is this Academy's mapping, made from the module titles and descriptions, not a Microsoft statement. Microsoft's lab exercises are not listed: they were not verified in this pass.",
+ "verified": "2026-10-06",
+ "course": {
+  "code": "AZ-104T00-A",
+  "title": "Microsoft Azure Administrator",
+  "url": "https://learn.microsoft.com/en-us/training/courses/az-104t00"
+ },
+ "paths": [
+  {
+   "title": "AZ-104: Prerequisites for Azure administrators",
+   "url": "https://learn.microsoft.com/en-us/training/paths/az-104-administrator-prerequisites/",
+   "modules": 5,
+   "objectives": [],
+   "module_list": [
+    {
+     "title": "Manage services with the Azure portal",
+     "url": "https://learn.microsoft.com/en-us/training/modules/tour-azure-portal/",
+     "lessons": [
+      "0A-12"
+     ]
+    },
+    {
+     "title": "Introduction to Azure Cloud Shell",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-cloud-shell/",
+     "lessons": [
+      "0A-12"
+     ]
+    },
+    {
+     "title": "Introduction to Bash",
+     "url": "https://learn.microsoft.com/en-us/training/modules/bash-introduction/",
+     "lessons": [
+      "0A-12"
+     ]
+    },
+    {
+     "title": "Introduction to PowerShell",
+     "url": "https://learn.microsoft.com/en-us/training/modules/introduction-to-powershell/",
+     "lessons": [
+      "0A-12"
+     ]
+    },
+    {
+     "title": "Deploy Azure infrastructure by using JSON ARM templates",
+     "url": "https://learn.microsoft.com/en-us/training/modules/create-azure-resource-manager-template-vs-code/",
+     "lessons": [
+      "0A-11",
+      "03-01"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "AZ-104: Manage identities and governance in Azure",
+   "url": "https://learn.microsoft.com/en-us/training/paths/az-104-manage-identities-governance/",
+   "modules": 6,
+   "objectives": [
+    "Manage Microsoft Entra users and groups",
+    "Manage access to Azure resources",
+    "Manage Azure subscriptions and governance"
+   ],
+   "module_list": [
+    {
+     "title": "Understand Microsoft Entra ID",
+     "url": "https://learn.microsoft.com/en-us/training/modules/understand-azure-active-directory/",
+     "lessons": [
+      "0A-05",
+      "01-01"
+     ]
+    },
+    {
+     "title": "Create, configure, and manage identities",
+     "url": "https://learn.microsoft.com/en-us/training/modules/create-configure-manage-identities/",
+     "lessons": [
+      "01-01"
+     ]
+    },
+    {
+     "title": "Describe the core architectural components of Azure",
+     "url": "https://learn.microsoft.com/en-us/training/modules/describe-core-architectural-components-of-azure/",
+     "lessons": [
+      "0A-02",
+      "0A-03",
+      "01-03"
+     ]
+    },
+    {
+     "title": "Azure Policy initiatives",
+     "url": "https://learn.microsoft.com/en-us/training/modules/sovereignty-policy-initiatives/",
+     "lessons": [
+      "01-03"
+     ]
+    },
+    {
+     "title": "Secure your Azure resources with Azure role-based access control (Azure RBAC)",
+     "url": "https://learn.microsoft.com/en-us/training/modules/secure-azure-resources-with-rbac/",
+     "lessons": [
+      "01-02"
+     ]
+    },
+    {
+     "title": "Allow users to reset their password with Microsoft Entra self-service password reset",
+     "url": "https://learn.microsoft.com/en-us/training/modules/allow-users-reset-their-password/",
+     "lessons": [
+      "01-01"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "AZ-104: Implement and manage storage in Azure",
+   "url": "https://learn.microsoft.com/en-us/training/paths/az-104-manage-storage/",
+   "modules": 4,
+   "objectives": [
+    "Configure access to storage",
+    "Configure and manage storage accounts",
+    "Configure Azure Files and Azure Blob Storage"
+   ],
+   "module_list": [
+    {
+     "title": "Configure storage accounts",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-storage-accounts/",
+     "lessons": [
+      "0A-08",
+      "02-02"
+     ]
+    },
+    {
+     "title": "Configure Azure Blob Storage",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-blob-storage/",
+     "lessons": [
+      "02-03",
+      "02-02"
+     ]
+    },
+    {
+     "title": "Configure Azure Storage security",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-storage-security/",
+     "lessons": [
+      "02-01"
+     ]
+    },
+    {
+     "title": "Configure Azure Files",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-azure-files-file-sync/",
+     "lessons": [
+      "02-03"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "AZ-104: Deploy and manage Azure compute resources",
+   "url": "https://learn.microsoft.com/en-us/training/paths/az-104-manage-compute-resources/",
+   "modules": 5,
+   "objectives": [
+    "Automate deployment of resources by using Azure Resource Manager (ARM) templates or Bicep files",
+    "Create and configure virtual machines",
+    "Provision and manage containers in the Azure portal",
+    "Create and configure Azure App Service"
+   ],
+   "module_list": [
+    {
+     "title": "Introduction to Azure virtual machines",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-virtual-machines/",
+     "lessons": [
+      "0A-06",
+      "03-02"
+     ]
+    },
+    {
+     "title": "Configure virtual machine availability",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-virtual-machine-availability/",
+     "lessons": [
+      "03-02"
+     ]
+    },
+    {
+     "title": "Configure Azure App Service plans",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-app-service-plans/",
+     "lessons": [
+      "03-04"
+     ]
+    },
+    {
+     "title": "Configure Azure App Service",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-azure-app-services/",
+     "lessons": [
+      "03-04"
+     ]
+    },
+    {
+     "title": "Configure Azure Container Instances",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-azure-container-instances/",
+     "lessons": [
+      "03-03"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "AZ-104: Configure and manage virtual networks for Azure administrators",
+   "url": "https://learn.microsoft.com/en-us/training/paths/az-104-manage-virtual-networks/",
+   "modules": 8,
+   "objectives": [
+    "Configure and manage virtual networks in Azure",
+    "Configure secure access to virtual networks",
+    "Configure name resolution and load balancing"
+   ],
+   "module_list": [
+    {
+     "title": "Configure virtual networks",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-virtual-networks/",
+     "lessons": [
+      "0A-07",
+      "04-01"
+     ]
+    },
+    {
+     "title": "Configure network security groups",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-network-security-groups/",
+     "lessons": [
+      "04-02"
+     ]
+    },
+    {
+     "title": "Host your domain on Azure DNS",
+     "url": "https://learn.microsoft.com/en-us/training/modules/host-domain-azure-dns/",
+     "lessons": [
+      "04-03"
+     ]
+    },
+    {
+     "title": "Configure Azure Virtual Network peering",
+     "url": "https://learn.microsoft.com/en-us/training/modules/configure-vnet-peering/",
+     "lessons": [
+      "04-01"
+     ]
+    },
+    {
+     "title": "Manage and control traffic flow in your Azure deployment with routes",
+     "url": "https://learn.microsoft.com/en-us/training/modules/control-network-traffic-flow-with-routes/",
+     "lessons": [
+      "04-01"
+     ]
+    },
+    {
+     "title": "Introduction to Azure Load Balancer",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-load-balancer/",
+     "lessons": [
+      "04-03"
+     ]
+    },
+    {
+     "title": "Introduction to Azure Application Gateway",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-application-gateway/",
+     "lessons": [
+      "04-03"
+     ]
+    },
+    {
+     "title": "Introduction to Azure Network Watcher",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-network-watcher/",
+     "lessons": [
+      "04-01",
+      "05-01"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "AZ-104: Monitor and back up Azure resources",
+   "url": "https://learn.microsoft.com/en-us/training/paths/az-104-monitor-backup-resources/",
+   "modules": 4,
+   "objectives": [
+    "Monitor resources in Azure",
+    "Implement backup and recovery"
+   ],
+   "module_list": [
+    {
+     "title": "Introduction to Azure Backup",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-backup/",
+     "lessons": [
+      "0A-10",
+      "05-02"
+     ]
+    },
+    {
+     "title": "Protect your virtual machines by using Azure Backup",
+     "url": "https://learn.microsoft.com/en-us/training/modules/protect-virtual-machines-with-azure-backup/",
+     "lessons": [
+      "05-02"
+     ]
+    },
+    {
+     "title": "Introduction to Azure Monitor",
+     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-monitor/",
+     "lessons": [
+      "0A-09",
+      "05-01"
+     ]
+    },
+    {
+     "title": "Improve incident response with Azure Monitor alerts",
+     "url": "https://learn.microsoft.com/en-us/training/modules/incident-response-with-alerting-on-azure/",
+     "lessons": [
+      "05-01"
+     ]
+    }
+   ]
+  }
+ ],
+ "labs": [],
+ "module_list_note": "The Azure Policy initiatives module URL is the one Microsoft lists on the learning path page."
 }

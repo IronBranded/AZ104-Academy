@@ -12,7 +12,7 @@ objective_ids: ["sto.data.file-share", "sto.data.blob-container", "sto.data.tier
 domain: "Implement and manage storage"
 domain_weight: "15-20%"
 status: GA
-prerequisites: ["02-02"]
+prerequisites: ["0A-08", "0A-10", "02-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing"
@@ -50,7 +50,11 @@ free_practice_available: false
 - Configure blob lifecycle management
 - Configure blob versioning
 
-## Why this exists
+## The administrative problem
+
+The data is in. Now it has to be organized, kept affordable as it ages, and recoverable when someone deletes
+or overwrites it. Last year's logs shouldn't cost as much to keep as today's. A user who deletes a shared folder by
+mistake, or a script that overwrites a report, shouldn't mean the data is gone.
 
 02-01 controlled who reaches the data, and 02-02 chose where it lives. This module is about the
 data itself over time: **where** it sits (containers and file shares), **how much it costs to
@@ -60,6 +64,85 @@ overwrites it (soft delete, versioning and snapshots).
 Most questions here are about **which protection covers which mistake**. Blob soft delete doesn't
 bring back a deleted container. Share soft delete doesn't bring back a deleted file. Nothing on
 this page protects against deleting the storage account itself; that's a lock (01-03).
+
+## In plain English
+
+Inside a storage account, data lives in two main places:
+
+- **Blob containers** hold blobs: files of any kind, stored as objects and reached by URL.
+- **File shares** (Azure Files) hold folders and files you mount like a network drive.
+
+Blobs can sit in **access tiers**: **hot** for frequent use, **cool** and **cold** for less, and **archive** for data
+you rarely need, which is cheapest to keep but offline until you **rehydrate** it. **Lifecycle management** rules move
+or delete blobs automatically as they age.
+
+For mistakes, each kind of data has its own safety net:
+
+- **Blob soft delete** keeps deleted blobs for a set number of days; **container soft delete** does the same for
+  whole containers.
+- **Blob versioning** keeps the previous version every time a blob is overwritten.
+- **Share snapshots** are read-only point-in-time copies of a file share; **share soft delete** keeps a deleted share.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Blob container** | A folder-like container for blobs inside a storage account. |
+| **File share** | An Azure Files share, mounted over SMB or NFS like a network drive. |
+| **Access tier** | Hot, cool, cold or archive: the trade-off between storage price and access price for a blob. |
+| **Rehydration** | Bringing an archived blob back online by moving it to an online tier. It takes hours. |
+| **Lifecycle management** | Rules that move blobs to cooler tiers or delete them as they age. |
+| **Blob soft delete** | Deleted blobs are kept for a retention period and can be undeleted. |
+| **Container soft delete** | A deleted container is kept for a retention period and can be restored. |
+| **Blob versioning** | Every overwrite keeps the previous version, so you can restore it. |
+| **Share snapshot** | A read-only point-in-time copy of an entire file share. |
+| **Share soft delete** | A deleted file share is kept for a retention period and can be restored. |
+
+## Mental model
+
+```mermaid
+flowchart TD
+  accTitle: Which safety net covers which mistake
+  accDescr: For blobs, an overwritten blob is recovered from blob versioning, a deleted blob from blob soft delete, and a deleted container from container soft delete. For Azure Files, a changed or deleted file is recovered from a share snapshot, and a deleted share from share soft delete. Deleting the whole storage account is not covered by any of these; a resource lock prevents it.
+  M1["Blob overwritten"] --> V["Blob versioning"]:::d02
+  M2["Blob deleted"] --> SD["Blob soft delete"]:::d02
+  M3["Container deleted"] --> CSD["Container soft delete"]:::d02
+  M4["File changed or deleted"] --> SS["Share snapshot"]:::d02
+  M5["File share deleted"] --> SSD["Share soft delete"]:::d02
+  M6["Storage account deleted"] --> LK["None of these: use a lock (01-03)"]
+```
+
+Name the mistake first, then pick the feature. Each net catches one kind of fall, and none of them catches
+the deletion of the whole account. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A desk drawer, a filing cabinet, an off-site archive box | Hot, cool and archive tiers |
+| A rule to move old folders to the archive every quarter | Lifecycle management policy |
+| The recycle bin | Soft delete |
+| "Previous versions" of a document | Blob versioning |
+| A photo of a whole shared drive at noon | Share snapshot |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Containers and file shares |
+| --- | --- |
+| What contains it? | A storage account. Blobs live in containers; files live in shares. |
+| What does it depend on? | The storage account's type: archive needs LRS, GRS or RA-GRS; premium block blob accounts don't use tiers. |
+| What depends on it? | Apps and users reading the data; lifecycle rules and replication policies that target it. |
+| Who can manage it? | Storage Account Contributor for settings; data roles, SAS or keys for the data. |
+| How is it networked? | Through the account's endpoints and firewall; SMB uses TCP port 445. |
+| How is it monitored? | Capacity and transaction metrics per service; resource logs through a diagnostic setting. |
+| How is it protected? | Soft delete, versioning, share snapshots, and a lock on the account. |
+| How is it recovered? | Undelete blobs and containers, restore previous versions, restore from share snapshots or undelete shares. |
+| What does it cost? | Capacity per tier, transactions, early-deletion charges, and the extra versions and snapshots you keep. |
+| How is it removed safely? | Check retention: soft-deleted and versioned data still bills until it expires or is purged. |
+
+See it with its neighbours on the [resource map](#/map/storage).
 
 ## How it works under the hood
 
@@ -287,6 +370,32 @@ az storage blob set-tier --account-name "<account>" --container-name "<container
 | Rehydration priority | **Standard** | Change tier | High is faster, costs more |
 | Lifecycle policy frequency | Once a day | Lifecycle management | Can't rehydrate |
 
+## Worked example
+
+**Requirement.** Logs must stay cheap after 30 days, be kept for a year, then disappear. Reports that are
+accidentally overwritten must be recoverable.
+
+1. **Decide.** Age-based tiering and deletion is a **lifecycle management** rule. Recovering an overwrite is **blob
+   versioning**, not soft delete.
+2. **Configure.** A lifecycle rule for the `logs/` prefix: move to cool after 30 days since modification, delete after
+   365. Turn on versioning, and blob soft delete for deletions.
+3. **Observe.** Lifecycle rules run in the background, so tier changes don't appear the moment you save the rule.
+4. **Validate.** Check the policy and data protection settings, then test a restore, as below.
+
+## Validate the result
+
+```powershell
+$p = Get-AzStorageBlobServiceProperty -ResourceGroupName <rg> -StorageAccountName <account>
+$p.DeleteRetentionPolicy.Enabled, $p.ContainerDeleteRetentionPolicy.Enabled, $p.IsVersioningEnabled   # True True True
+(Get-AzStorageAccountManagementPolicy -ResourceGroupName <rg> -StorageAccountName <account>).Policy.Rules.Name
+Get-AzRmStorageShare -ResourceGroupName <rg> -StorageAccountName <account> -Name <share> | Select-Object Name, AccessTier, QuotaGiB
+```
+
+- Overwrite a test blob, then list its versions: the old content is there.
+- Delete a test blob and undelete it. Delete a test container and restore it.
+- Take a share snapshot, change a file, and read the old file from the snapshot.
+- A setting that is on but has never been used to recover anything is not yet validated.
+
 ## Common failure modes
 
 1. **"Blob soft delete is on, but the deleted container is gone for good."** Blob soft delete doesn't
@@ -346,6 +455,14 @@ negligible.
    deleted?
 5. Why can't you archive blobs in a GZRS account, and what would you have to do before converting an
    LRS account that holds archived blobs to ZRS?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain hot, cool, cold and archive using where you keep things at home.
+- Explain which feature recovers an overwritten blob, a deleted container and a deleted share.
+- Explain why archive isn't the right tier for something read every month.
 
 ## Key takeaways
 

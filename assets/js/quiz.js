@@ -229,6 +229,13 @@
         fb.appendChild(wl);
       }
 
+      /* The phrase in the scenario that decides the answer. Learning to spot
+         it is the transferable skill; the answer itself is not. */
+      if (q.clue) {
+        fb.appendChild(node('h4', 'kc__h', 'Scenario clue'));
+        fb.appendChild(node('p', 'kc__clue', q.clue));
+      }
+
       if (q.misconception) {
         var mc = node('p', 'kc__misconception');
         mc.appendChild(node('strong', null, 'Misconception tested: '));

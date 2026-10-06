@@ -9,7 +9,7 @@ objective_ids: ["cmp.containers.acr", "cmp.containers.aci", "cmp.containers.aca"
 domain: "Deploy and manage Azure compute resources"
 domain_weight: "20-25%"
 status: GA
-prerequisites: ["01-02", "03-02"]
+prerequisites: ["0A-05", "0A-06", "01-02", "03-02"]
 ms_learn_source: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
 product_docs:
   - "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus"
@@ -42,7 +42,11 @@ free_practice_available: false
 - Provision a container by using Azure Container Apps
 - Manage sizing and scaling for containers, including Azure Container Instances and Azure Container Apps
 
-## Why this exists
+## The administrative problem
+
+A development team hands you an application packaged as a container image. You need a private place to keep their
+images, a simple way to run a container for a nightly job, and a platform for a web API that should scale with traffic
+and cost nothing when idle. You don't want to run servers or a Kubernetes cluster to do any of it.
 
 A container packages an application with everything it needs to run. Azure gives an administrator
 three pieces to manage, and AZ-104 asks about each:
@@ -56,6 +60,78 @@ three pieces to manage, and AZ-104 asks about each:
 
 AKS (Kubernetes) isn't in the current AZ-104 outline. The exam's container questions are about choosing
 between ACI and Container Apps, sizing and scaling them, and letting them pull from a private registry.
+
+## In plain English
+
+A **container** packages an application with everything it needs to run, so it runs the same anywhere. The package
+is an **image**; a running copy is a **container**.
+
+Azure gives an administrator three pieces for AZ-104:
+
+- **Azure Container Registry (ACR)** stores your images privately, in your subscription.
+- **Azure Container Instances (ACI)** runs a container, or a small **container group**, on demand. You set the CPU and
+  memory, and it runs. It doesn't scale by rules.
+- **Azure Container Apps** runs containerized apps on a managed platform with **ingress** (a web endpoint),
+  **revisions** (versions you can split traffic between) and **scale rules**, including scaling to zero.
+
+Whatever runs the image must be allowed to **pull** it from the registry, usually through a managed identity with a
+pull role, rather than the registry's shared admin account.
+
+## Words you need to know
+
+| Term | In plain English |
+| --- | --- |
+| **Container image** | A packaged application and its dependencies, stored in a registry. |
+| **Container registry** | A private store for images. Azure Container Registry is Azure's. |
+| **Login server** | The registry's address, <name>.azurecr.io. |
+| **Container group** | One or more containers in ACI that share a host, network and lifecycle. |
+| **Restart policy** | What ACI does when a container exits: Always, OnFailure or Never. |
+| **Container app** | An app in Azure Container Apps, with ingress, revisions and scale rules. |
+| **Revision** | An immutable version of a container app; traffic can be split between revisions. |
+| **Scale rule** | A rule that adds or removes replicas, for example by HTTP traffic. Can scale to zero. |
+| **Managed identity** | An identity Azure manages for a resource, used here to pull images without a password. |
+
+## Mental model
+
+```mermaid
+flowchart LR
+  accTitle: Registry, and two ways to run what's in it
+  accDescr: Images are pushed to Azure Container Registry. Azure Container Instances pulls an image and runs it at a fixed size with a restart policy and no scale rules. Azure Container Apps pulls an image and runs it with ingress, revisions and scale rules, including scale to zero. Both pull using an identity that holds a pull role on the registry.
+  DEV["Image built by developers"] -- "push" --> ACR["Azure Container Registry<br/>private images"]:::d03
+  ACR -- "pull" --> ACI["Container Instances<br/>fixed size · restart policy"]
+  ACR -- "pull" --> ACA["Container Apps<br/>ingress · revisions · scale rules"]
+```
+
+The registry stores; the other two run. Choose between them by asking whether the workload needs to scale by
+rules, receive web traffic through ingress, or roll out revisions. If not, Container Instances is the simpler fit. This is a conceptual teaching model, not a complete architecture.
+
+**Azure translation**
+
+| Everyday idea | Azure name |
+| --- | --- |
+| A sealed lunchbox with everything for the meal | Container image |
+| A private pantry for the lunchboxes | Azure Container Registry |
+| Heating one lunchbox on demand | Azure Container Instances |
+| A canteen that opens more counters when the queue grows | Azure Container Apps |
+
+## Where it fits
+
+The ten questions to ask about any resource ([0A-13](../0A-foundations/0A-13-how-resources-fit-together.md)), answered for the main resource in this lesson.
+
+| Question | Container registry |
+| --- | --- |
+| What contains it? | A resource group. The registry name is globally unique. |
+| What does it depend on? | A tier: Basic, Standard or Premium. |
+| What depends on it? | Container groups and container apps that pull its images. |
+| Who can manage it? | Contributor for the registry; pull and push roles for images. |
+| How is it networked? | A public login server, <name>.azurecr.io; private endpoints with Premium. |
+| How is it monitored? | Registry metrics and resource logs. |
+| How is it protected? | Admin user disabled; Microsoft Entra identities with pull roles. |
+| How is it recovered? | Re-push or import images; geo-replication with Premium. |
+| What does it cost? | A daily rate by tier, plus storage. |
+| How is it removed safely? | Deleting the registry deletes every image in it: check what still pulls from it. |
+
+See it with its neighbours on the [resource map](#/map/acr).
 
 ## How it works under the hood
 
@@ -218,6 +294,31 @@ az containerapp ingress traffic set --name "<app>" --resource-group "<rg>" --rev
 | ACA HTTP concurrency | **10** | Scale rule | Any rule triggers scale-out |
 | ACA revision mode | **Single** | Revision management | Multiple for traffic splitting |
 
+## Worked example
+
+**Requirement.** A web API must scale with HTTP traffic and cost nothing overnight when nobody uses it. A separate
+nightly job runs one container for ten minutes. Both use images from your private registry, without passwords.
+
+1. **Decide.** Web traffic, scaling and scale to zero: **Container Apps**. A short job with a fixed size and no scaling:
+   **Container Instances** with restart policy **Never** or **OnFailure**.
+2. **Configure.** Give each one an identity with a pull role on the registry. For ACI, that must be a **user-assigned**
+   managed identity; Container Apps can use either type.
+3. **Observe.** The container app scales to zero replicas when idle; the container group runs and stops.
+4. **Validate.** Check the registry's admin user, the container app's scale settings and the job's state, as below.
+
+## Validate the result
+
+```powershell
+az acr show --name <registry> --query adminUserEnabled                         # false
+az containerapp show --name <app> --resource-group <rg> `
+  --query "{mode:properties.configuration.activeRevisionsMode, min:properties.template.scale.minReplicas, max:properties.template.scale.maxReplicas}" -o table
+az container show --name <group> --resource-group <rg> --query "{state:instanceView.state, restart:restartPolicy}" -o table
+```
+
+- A minimum of **0** replicas is what lets the app scale to zero.
+- A container group that pulled its image without registry credentials in its definition proves the identity works.
+- Send requests to the app's URL and watch the replica count rise in its metrics.
+
 ## Common failure modes
 
 1. **"The container group can't pull from ACR with its managed identity."** It's using the system-assigned
@@ -268,6 +369,14 @@ for minutes, and a container app that scales to zero, all deleted the same day.
 4. A container app has minimum replicas 0, maximum 5 and an HTTP rule of 10 concurrent requests. Describe
    what happens overnight, and at 9 a.m. when 45 concurrent requests arrive.
 5. When would you pick Container Instances over Container Apps, even for an HTTP app?
+
+## Teach it back
+
+Answer out loud or in writing, without notes, as if to someone who has never used Azure. Where you hesitate is what to re-read.
+
+- Explain the difference between an image, a registry and a running container.
+- Explain when you'd pick Container Instances over Container Apps, and the reverse.
+- Explain why the registry's admin user should stay disabled.
 
 ## Key takeaways
 
