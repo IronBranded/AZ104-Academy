@@ -3,7 +3,7 @@
 
    Every surface that names an exam domain - dashboard cards, the sidebar, the
    lesson header, search results, review results, the coverage matrix - builds
-   its domain mark here, so the four domains look identical everywhere and a
+   its domain mark here, so each domain looks identical everywhere and a
    change is made once.
 
    A domain mark is always three things together, never colour alone:

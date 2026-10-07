@@ -21,7 +21,7 @@
    - WHAT YOU NEED TO KNOW: the verbatim sub-objectives with their outline ids
      and a per-objective knowledge-check state, plus the lesson's prerequisites
      with whether each has been studied
-   - IMPORTANT DISTINCTIONS: the appendix A6 comparisons that name this module,
+   - IMPORTANT DISTINCTIONS: the appendix A2 comparisons that name this module,
      rendered inline with the trap visible and the full table one click away
    - the EXAM LENS: "How this is tested", framed as one recognisable
      component
@@ -258,7 +258,7 @@
     var distHead = node('h2', null, 'Important distinctions');
     distHost.appendChild(distHead);
     distHost.appendChild(node('p', 'lede',
-      'What this lesson is most easily confused with. Side-by-side comparisons come first; the appendix A6 entries after them name the trap, the nearly-right answer a scenario relies on.'));
+      'What this lesson is most easily confused with. Side-by-side comparisons come first; the appendix A2 entries after them name the trap, the nearly-right answer a scenario relies on.'));
     var distList = node('div', 'distinctions__list');
     distHost.appendChild(distList);
     dist.appendChild(distHost);
@@ -272,7 +272,7 @@
       lh.dataset.exam = window.AcademyExam.code;   // shown as the chip before the title
       lens.appendChild(lh);
       lens.appendChild(node('p', 'exam-lens__sub',
-        'How this is tested. For ' + window.AcademyExam.code + ', make sure you can recognise the deciding constraint in a scenario and select the control it points to.'));
+        'How this is tested. For ' + window.AcademyExam.code + ', make sure you can spot the deciding requirement in a scenario and choose the Azure resource, setting or scope it points to.'));
       byPlace.lens.nodes.forEach(function (n) { lens.appendChild(n); });
       dist.appendChild(lens);
     }
@@ -630,7 +630,7 @@
     host.appendChild(ul);
     var note = node('p', 'field__note',
       'Microsoft\u2019s course and this guide cover the same objective from different angles; use both. ' +
-      (L.officialLabs ? 'Microsoft\u2019s labs deploy real resources too: apply this guide\u2019s Module 0 budget and teardown rules to them.' : 'Microsoft publishes no lab for this lesson\u2019s topics; this guide\u2019s lab covers them.'));
+      (L.officialLabs ? 'Microsoft\u2019s labs deploy real resources too: apply this Academy\u2019s Module 0B budget and teardown habits to them.' : 'Microsoft publishes no lab for this lesson\u2019s topics; this guide\u2019s lab covers them.'));
     host.appendChild(note);
   }
 
@@ -659,7 +659,7 @@
     items.forEach(function (x) { list.appendChild(comparison(x, model, L, parse)); });
   }
 
-  /* The comparison component. Input is one A6 section: a table whose first
+  /* The comparison component. Input is one A2 section: a table whose first
      column names the options, facts, and a "> **The trap.**" blockquote.
      The trap stays visible - it is the point - and the full comparison opens
      on demand. On narrow screens the table becomes one card per option. */
@@ -683,7 +683,7 @@
       art.appendChild(also);
     }
 
-    if (!parse) { art.appendChild(node('p', null, 'Open appendix A6 to read this comparison.')); return art; }
+    if (!parse) { art.appendChild(node('p', null, 'Open appendix A2 to read this comparison.')); return art; }
 
     var tmp = node('div');
     tmp.innerHTML = parse(x.markdown, { mangle: false, headerIds: false });
@@ -711,7 +711,7 @@
     if (global.AcademyApp && global.AcademyApp.enhance) global.AcademyApp.enhance(body, model.a6Path);
 
     if (model.a6Index >= 0) {
-      art.appendChild(link('Open in appendix A6 \u2192', '#/appendix/a6', 'cmp__src'));
+      art.appendChild(link('Open in appendix A2 \u2192', '#/appendix/a2', 'cmp__src'));
     }
     return art;
   }
@@ -807,7 +807,7 @@
     }
     if (L.objectiveId) model.objectiveById[L.objectiveId].lessonIds.forEach(function (id) { add(id, 'same objective'); });
     model.distinctions.forEach(function (x) {
-      if (x.modules.indexOf(L.id) !== -1) x.modules.forEach(function (id) { add(id, 'compared in A6'); });
+      if (x.modules.indexOf(L.id) !== -1) x.modules.forEach(function (id) { add(id, 'compared in A2'); });
     });
     L.prerequisites.forEach(function (id) { add(id, 'prerequisite'); });
 
@@ -855,7 +855,7 @@
     root.insertBefore(banner, h1);
     var eyebrow = node('p', 'lab-head__mode');
     eyebrow.appendChild(node('span', 'lab-head__pill', 'LAB MODE'));
-    eyebrow.appendChild(document.createTextNode(' Hands-on in your test tenant. Real resources, real cost, mandatory teardown.'));
+    eyebrow.appendChild(document.createTextNode(' Hands-on in your lab subscription. Real resources, real cost, mandatory teardown.'));
     banner.appendChild(eyebrow);
     banner.appendChild(h1);
 
@@ -997,7 +997,7 @@
     return true;
   }
 
-  /* For the domain review: render one A6 distinction outside a lesson. */
+  /* For the domain review: render one A2 distinction outside a lesson. */
   function distinction(x, model) {
     var parse = global.marked ? (global.marked.parse || global.marked) : null;
     return comparison(x, model, { id: null }, parse);

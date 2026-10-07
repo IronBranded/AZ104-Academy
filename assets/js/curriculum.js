@@ -8,7 +8,7 @@
      module front matter                sub_objectives (verbatim bullets),
                                         prerequisites, status, last_verified
      quizzes/<id>.json                  questions, each tagged with sub_skill
-     appendix A6                        comparison sections, each naming the
+     appendix A2                        comparison sections, each naming the
                                         modules it belongs to
      content/official-training.json     Microsoft Learn learning paths and
                                         Microsoft's own labs, per objective
@@ -30,9 +30,9 @@
   'use strict';
 
   var SNAPSHOT = 'docs/SKILLS-MEASURED-SNAPSHOT.md';
-  /* A6 is looked up in the manifest first, by its title. The fallback is the
+  /* A2 is looked up in the manifest first, by its title. The fallback is the
      file's own path, in case the title in the manifest is ever reworded. */
-  var A6_FALLBACK = 'content/appendix/a6-choosing-between-options.md';
+  var A6_FALLBACK = 'content/appendix/a2-choosing-between-options.md';
 
   var model = null, job = null;
 
@@ -97,7 +97,7 @@
     return domains.length ? domains : null;
   }
 
-  /* ------------------------------------------------------------ A6 parser */
+  /* ------------------------------------------------------------ A2 parser */
 
   /* Each "## N. Title" section opens with "**Module(s) 01-01, 03-02.**". That
      line is the join; a section without it is general and belongs to no
@@ -161,7 +161,7 @@
       bulletById: {},
       bulletByNorm: {},
       lessons: {},          // '01-01' -> lesson
-      order: [],            // lesson ids in manifest (study) order, Module 0 included
+      order: [],            // lesson ids in manifest (study) order, Modules 0A and 0B included
       questions: {},        // qid -> question with lessonId, bulletId, domainId
       distinctions: parseDistinctions(a6Md),
       a6Index: a6Index,     // index into manifest.appendix, or -1
@@ -382,7 +382,7 @@
       d.modules.forEach(function (mod) {
         ids.push(mod.id);
         tasks.push(getText(mod.content).then(function (t) { texts[mod.id] = t; }));
-        /* Module 0 has no knowledge check by design; do not request one. */
+        /* Modules 0A and 0B have no knowledge check by design; do not request one. */
         if (d.weight && d.weight !== 'n/a') {
           tasks.push(getJson('quizzes/' + mod.id + '.json').then(function (q) { if (q) quizzes[mod.id] = q; }));
         }
@@ -391,7 +391,7 @@
 
     var a6Index = -1;
     (manifest.appendix || []).forEach(function (a, i) {
-      if (/\/a6-[^/]+\.md$/.test(a.content)) a6Index = i;
+      if (/\/a2-[^/]+\.md$/.test(a.content)) a6Index = i;
     });
     var a6Path = a6Index >= 0 ? manifest.appendix[a6Index].content : A6_FALLBACK;
 

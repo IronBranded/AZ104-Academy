@@ -65,7 +65,7 @@
     out.push({ kind: 'View', label: 'Flashcards', sub: 'Distinctions, spaced repetition', href: '#/cards' });
     out.push({ kind: 'View', label: 'Cost planner', sub: 'What can I afford to run', href: '#/cost' });
     out.push({ kind: 'View', label: 'Readiness', sub: 'What to study next', href: '#/readiness' });
-    out.push({ kind: 'View', label: 'Verification watchlist', sub: 'Preview features and stale verification dates', href: '#/preview' });
+    out.push({ kind: 'View', label: 'Content freshness', sub: 'When each lesson was last checked against Microsoft Learn', href: '#/freshness' });
     out.push({ kind: 'View', label: 'Resource map', sub: 'What contains, depends on and protects each resource', href: '#/map' });
     out.push({ kind: 'View', label: 'Compare options', sub: 'Side-by-side comparisons of easily confused services', href: '#/compare' });
     out.push({ kind: 'View', label: 'Glossary', sub: 'Every term the lessons define, in plain English', href: '#/glossary' });
@@ -76,7 +76,7 @@
     return out;
   }
 
-  /* The 87 sub-objectives, so you can search by what the exam actually asks. */
+  /* The official sub-objectives, so you can search by what the exam actually asks. */
   function loadObjectives() {
     if (loaded) return Promise.resolve();
     loaded = true;

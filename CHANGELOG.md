@@ -3,6 +3,61 @@
 Notable changes to AZ104 Academy, newest first. Content corrections that change a
 factual claim are listed with the lesson id. Routine `last_verified` bumps are not.
 
+## [Unreleased] - AZ-104 only: Module 0B, README and interface (2026-10-07)
+
+The README, Module 0B and parts of the interface still followed the shape of a different
+certification. Everything below is now written for AZ-104. Record:
+[docs/CURRICULUM-AUDIT-2026-10-06.md, section 8](docs/CURRICULUM-AUDIT-2026-10-06.md).
+
+### Changed
+
+- **Module 0B rebuilt** in the foundation anatomy (problem, plain English, words, mental model,
+  where it shows up in AZ-104, check yourself, teach it back, key takeaways), every fact checked
+  against Microsoft Learn:
+  - **00-00 Your Lab Subscription and Conventions:** subscription and region choice, naming and
+    tagging, least-privilege access in the labs, and why Global Administrator can't see Azure
+    resources.
+  - **00-01 Budgets and Cost Alerts:** what a budget does and doesn't do, cost categories (billed
+    while running, while existing, while protected, by volume), budget timing and limits, and
+    spending limits.
+  - **00-02 Teardown and Verification:** verify before deleting (context, contents, locks, a
+    `-WhatIf` rehearsal), the four teardown buckets, and the verification sweep.
+  - **Lab 00-01:** a resource group, an action group (portal, CLI and PowerShell, with email
+    verification), a budget created in the portal, a tested notification, and a cost view grouped
+    by the lab tag.
+- **README** rewritten for AZ-104: who it's for, a study route, the Microsoft Learn course and its
+  six learning paths, the curriculum, the labs, the study tools and what to check before exam day.
+- **Retention review** (`#/review`) now uses the same *Retained* definition as the lesson headers
+  and the dashboard, instead of a separate 21-day module rule.
+- **Content freshness** (`#/freshness`) replaces the verification watchlist. `#/preview` still works.
+- **Appendix A6 is now A2**, since there are only two appendices. `#/appendix/a6` still works.
+- Interface text: the Exam Lens now asks for the Azure resource, setting or scope a scenario points
+  to; labs say *lab subscription*; *read* became *studied*; counts that described another exam (four
+  domains, 87 sub-objectives, fifteen comparisons) are gone or computed.
+- The mock exam no longer claims a 120-minute exam length, which Microsoft doesn't publish for
+  AZ-104. Its pacing is labelled as the Academy's own.
+- `tools/New-Module.ps1` is now a working scaffold for a new lesson and lab.
+- The validator holds Module 0B to the foundation anatomy.
+
+### Removed
+
+- The automated "compute brake" (an Automation runbook that deallocated lab VMs when a budget
+  fired), `scripts/00-lab-safety/Stop-LabCompute.ps1`, and the references to it in labs 03-02 and
+  04-01 and lesson 03-02. A budget is an alarm; teardown is the control.
+- Emergency-access accounts, Privileged Identity Management and Conditional Access from Module 0B
+  and the resource map. They belong to other exams.
+
+### Fixed
+
+- **Deleted users don't reserve their user principal name** (00-02, labs 01-01 and 01-02). A new user
+  can take the name; restoring the old one then conflicts and needs a new name.
+- **Key vaults (00-02):** no lab creates one. The lesson had said the storage encryption lab did.
+- **Action group email (00-01, lab 00-01):** new addresses must be verified with a one-time passcode
+  within 30 minutes, and alerts can come from three sender addresses, not one.
+- **Bastion (00-01):** only the dedicated SKUs bill hourly; the Developer SKU is free.
+- **Elevate access (00-00):** the portal path is Microsoft Entra ID > Manage > Properties.
+- **Compare page:** comparison titles skipped a heading level (accessibility).
+
 ## [Unreleased] - Beginner-first, certification-first pass (2026-10-06)
 
 The Academy now teaches the infrastructure before it expects you to administer it. Full record:

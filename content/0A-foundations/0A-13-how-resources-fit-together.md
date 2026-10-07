@@ -134,7 +134,7 @@ Every lesson in this Academy answers these for the resources it teaches, in a se
   where NSGs attach ([04-02 Secure Access to Virtual Networks](../04-networking/04-02-secure-access.md)).
 - Scopes for roles, policy and locks ([01-02 Azure Role-Based Access Control](../01-identities-governance/01-02-azure-rbac.md),
   [01-03 Subscriptions and Governance](../01-identities-governance/01-03-subscriptions-and-governance.md)).
-- Teardown order in every lab ([00-02 Reusable Teardown Checklist](../00-lab-safety/00-02-teardown-checklist-template.md)).
+- Teardown order in every lab ([00-02 Teardown and Verification](../00-lab-safety/00-02-teardown-checklist-template.md)).
 
 ## Check yourself
 

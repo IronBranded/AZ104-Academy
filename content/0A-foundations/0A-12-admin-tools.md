@@ -114,7 +114,7 @@ Before you run anything, check where it will land: `Get-AzContext` in PowerShell
 
 ## Where this shows up in AZ-104
 
-- Every lab gives PowerShell or CLI commands and portal paths ([00-00 Module Overview: Lab Topology and Conventions](../00-lab-safety/00-00-module-overview.md)).
+- Every lab gives PowerShell or CLI commands and portal paths ([00-00 Your Lab Subscription and Conventions](../00-lab-safety/00-00-module-overview.md)).
 - Interpreting, modifying, deploying, exporting and converting templates ([03-01 ARM Templates and Bicep](../03-compute/03-01-arm-and-bicep.md)).
 - AzCopy and Storage Explorer, two more data tools ([02-02 Storage Accounts](../02-storage/02-02-storage-accounts.md)).
 

@@ -87,7 +87,7 @@ This is a teaching model; the number of zones and whether a region is paired var
 - **VM availability:** zones versus availability sets ([03-02 Virtual Machines](../03-compute/03-02-virtual-machines.md)).
 - **Networking:** a virtual network lives in one region; Standard public IPs can be zone-redundant ([04-01 Virtual Networks](../04-networking/04-01-virtual-networks.md)).
 - **Disaster recovery:** Site Recovery replicates VMs to another region ([05-02 Backup and Recovery](../05-monitor/05-02-backup-and-recovery.md)).
-- **Lab setup:** pick a home region that offers zones and the VM sizes the labs use ([00-00 Module Overview: Lab Topology and Conventions](../00-lab-safety/00-00-module-overview.md)).
+- **Lab setup:** pick a home region that offers zones and the VM sizes the labs use ([00-00 Your Lab Subscription and Conventions](../00-lab-safety/00-00-module-overview.md)).
 
 ## Check yourself
 

@@ -168,7 +168,7 @@ $ContentSections = @(
     '## Common failure modes', '## How this is tested', '## Hands-on',
     '## Check yourself', '## Teach it back', '## Key takeaways', '## Sources'
 )
-# Module 0A foundation primers: concise, skippable, beginner-first.
+# Foundation lessons (Modules 0A and 0B): concise, skippable, beginner-first.
 $FoundationSections = @(
     '## The problem', '## In plain English', '## Words you need to know',
     '## Mental model', '## Where this shows up in AZ-104', '## Check yourself',
@@ -328,10 +328,9 @@ foreach ($f in $contentFiles) {
     $isExamModule = $d.domain_weight -ne 'n/a'
 
     # Gap 1: required sections were never checked.
-    # The exam-module skeleton applies to exam modules only. Module 0 is a
-    # project prerequisite with its own structure; holding it to the exam
-    # skeleton produced 22 errors on every run and kept CI permanently red,
-    # which made the gate useless for catching real regressions.
+    # The exam-lesson skeleton applies to exam modules only. Modules 0A
+    # (Understanding Azure) and 0B (Safe Lab Foundations) are foundation lessons:
+    # concise, skippable and held to the shorter foundation anatomy below.
     if ($isExamModule) {
         foreach ($sec in $ContentSections) {
             if ($fm.Body -notmatch ('(?m)^' + [regex]::Escape($sec) + '\s*$')) {
@@ -347,10 +346,10 @@ foreach ($f in $contentFiles) {
         $fitRows = @($fits.Groups[1].Value -split "`r?`n" | Where-Object { $_ -match '^\|' -and $_ -notmatch '^\|\s*-' })
         if ($fitRows.Count -lt 11) { Add-Issue Error $rel "Where it fits: expected the ten-question table (found $([Math]::Max(0, $fitRows.Count - 1)) rows)." }
     }
-    elseif ($rel -like 'content/0A-*') {
+    elseif ($rel -like 'content/0A-*' -or $rel -like 'content/00-*') {
         foreach ($sec in $FoundationSections) {
             if ($fm.Body -notmatch ('(?m)^' + [regex]::Escape($sec) + '\s*$')) {
-                Add-Issue Error $rel "Missing required primer section: $sec"
+                Add-Issue Error $rel "Missing required foundation section: $sec"
             }
         }
     }

@@ -67,7 +67,8 @@
     var home = (c.modules || []).map(function (id) { return model.lessons[id]; }).filter(Boolean)[0];
     if (home) D().paint(art, home.domainId);
 
-    art.appendChild(node('h3', 'cmp__title', c.title));
+    /* h3 inside a lesson section; h2 on the compare page, which has no section headings. */
+    art.appendChild(node(opts.level || 'h3', 'cmp__title', c.title));
     if (c.question) art.appendChild(node('p', 'cmp__q', c.question));
 
     var wrap = node('div', 'table-scroll');
@@ -145,7 +146,7 @@
     C().load().then(function (model) {
       var list = model.comparisons || [];
       if (!list.length) { host.appendChild(node('p', 'empty', 'data/comparisons.json did not load.')); return; }
-      var cards = list.map(function (c) { var el = render(c, model, {}); host.appendChild(el); return el; });
+      var cards = list.map(function (c) { var el = render(c, model, { level: 'h2' }); host.appendChild(el); return el; });
       var current = 'all';
       function apply() {
         cards.forEach(function (el) { el.hidden = current !== 'all' && el.dataset.domain !== current; });

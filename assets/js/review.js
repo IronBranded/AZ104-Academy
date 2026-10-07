@@ -114,7 +114,7 @@
       });
       if (ds.length && global.AcademyLesson) {
         var s2 = section(root, 'Important distinctions', 'dr-dist');
-        s2.appendChild(node('p', 'lede', 'The comparisons from appendix A6 that involve this domain\u2019s lessons. Read the trap; open the table if the trap does not feel obvious.'));
+        s2.appendChild(node('p', 'lede', 'The comparisons from appendix A2 that involve this domain\u2019s lessons. Read the trap; open the table if the trap does not feel obvious.'));
         var list = node('div', 'distinctions__list');
         ds.forEach(function (x) { list.appendChild(global.AcademyLesson.distinction(x, model)); });
         s2.appendChild(list);
@@ -230,7 +230,7 @@
        ['partial', counts.partial, 'Partial', 'lesson, no questions yet'],
        ['missing', counts.missing, 'Missing', 'no lesson lists it'],
        ['info', labN, 'With a lab', 'the rest: lab not applicable'],
-       ['info', distN, 'With an A6 comparison', 'via one of their lessons']
+       ['info', distN, 'With an A2 comparison', 'via one of their lessons']
       ].forEach(function (x) {
         var d = node('div', 'cov-sum__item');
         d.dataset.status = x[0];
@@ -354,8 +354,8 @@
       var fresh = node('p', 'field__note');
       var nVis = Object.keys(model.lessons).filter(function (k) { return model.lessons[k].hasVisual; }).length;
       fresh.appendChild(document.createTextNode('Visual explanations: ' + nVis +
-        (nVis === 1 ? ' lesson contains a diagram' : ' lessons contain a diagram') + '. Verification dates and preview status: see the '));
-      fresh.appendChild(link('verification watchlist', '#/preview'));
+        (nVis === 1 ? ' lesson contains a diagram' : ' lessons contain a diagram') + '. When each lesson was last checked against Microsoft Learn: see '));
+      fresh.appendChild(link('content freshness', '#/freshness'));
       fresh.appendChild(document.createTextNode('.'));
       root.appendChild(fresh);
     });
@@ -461,7 +461,7 @@
         set = prioritise(set);
       } else if (filter === 'mixed') {
         title = 'Mixed set';
-        note = 'Twelve questions across all four domains, weighted by exam weight, least certain first within each domain. For a timed attempt use the mock exam.';
+        note = 'Twelve questions across every exam domain, weighted by exam weight, least certain first within each domain. For a timed attempt use the mock exam.';
         set = mixed(model, 12);
       } else {
         body.appendChild(node('div', 'empty', 'Unknown review filter.'));
@@ -598,7 +598,7 @@
     [['Mock exam', '#/exam', 'Timed and weighted like the real outline. Raw score only.'],
      ['Flashcards', '#/cards', 'The distinctions deck, on a spaced-repetition schedule.'],
      ['Retention', '#/review', 'Which knowledge checks are due for a re-test.'],
-     ['Choosing between controls', model.a6Index >= 0 ? '#/appendix/' + model.a6Index : '#/coverage', 'Appendix A6: fifteen comparisons and their traps.']
+     ['Choosing between similar options', model.a6Index >= 0 ? '#/appendix/' + model.a6Index : '#/coverage', 'Appendix A2: side-by-side choices and the trap in each.']
     ].forEach(function (x) {
       var a = link('', x[1], 'tool');
       a.appendChild(node('span', 'tool__name', x[0]));

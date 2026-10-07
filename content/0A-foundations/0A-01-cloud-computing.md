@@ -76,7 +76,7 @@ belongings and the keys you hand out are always your responsibility.
 | A managed place to run a web app | Azure App Service (PaaS), [03-04 Azure App Service](../03-compute/03-04-app-service.md) |
 | A managed place to run containers | Container Instances and Container Apps, [03-03 Containers: Registry, Container Instances and Container Apps](../03-compute/03-03-containers.md) |
 | The organization's sign-in and address book | Microsoft Entra ID, [01-01 Microsoft Entra Users and Groups](../01-identities-governance/01-01-entra-users-and-groups.md) |
-| The bill | Your subscription's costs, [00-01 Cost Guardrails and Budget Alerts](../00-lab-safety/00-01-cost-guardrails-and-budgets.md) |
+| The bill | Your subscription's costs, [00-01 Budgets and Cost Alerts](../00-lab-safety/00-01-cost-guardrails-and-budgets.md) |
 
 This is a teaching simplification: each Azure service documents precisely which parts Microsoft manages.
 
@@ -84,7 +84,7 @@ This is a teaching simplification: each Azure service documents precisely which 
 
 - **IaaS:** virtual machines are yours to size, patch and protect ([03-02 Virtual Machines](../03-compute/03-02-virtual-machines.md)).
 - **PaaS:** App Service and Container Apps are managed platforms; you manage plans, scaling and settings, not the OS ([03-03 Containers: Registry, Container Instances and Container Apps](../03-compute/03-03-containers.md), [03-04 Azure App Service](../03-compute/03-04-app-service.md)).
-- **Consumption pricing:** why every lab ends in a teardown, and why budgets and alerts are an exam objective ([00-02 Reusable Teardown Checklist](../00-lab-safety/00-02-teardown-checklist-template.md), [01-03 Subscriptions and Governance](../01-identities-governance/01-03-subscriptions-and-governance.md)).
+- **Consumption pricing:** why every lab ends in a teardown, and why budgets and alerts are an exam objective ([00-02 Teardown and Verification](../00-lab-safety/00-02-teardown-checklist-template.md), [01-03 Subscriptions and Governance](../01-identities-governance/01-03-subscriptions-and-governance.md)).
 
 ## Check yourself
 

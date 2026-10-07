@@ -91,7 +91,7 @@ adds the network and compute pieces.
 
 - **Assigning roles at different scopes** is choosing a level in this tree ([01-02 Azure Role-Based Access Control](../01-identities-governance/01-02-azure-rbac.md)).
 - **Policy, locks, tags, resource groups, subscriptions and management groups** are a whole functional group ([01-03 Subscriptions and Governance](../01-identities-governance/01-03-subscriptions-and-governance.md)).
-- **Every lab** creates its own resource group so teardown is one delete ([00-00 Module Overview: Lab Topology and Conventions](../00-lab-safety/00-00-module-overview.md)).
+- **Every lab** creates its own resource group so teardown is one delete ([00-00 Your Lab Subscription and Conventions](../00-lab-safety/00-00-module-overview.md)).
 
 ## Check yourself
 

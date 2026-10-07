@@ -34,7 +34,7 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
   });
   (manifest.appendix || []).forEach((a, i) => routes.push('#/appendix/' + i));
   routes.push('#/map', '#/map/vm', '#/glossary', '#/compare', '#/coverage', '#/prep',
-              '#/prep/needs-review', '#/exam', '#/cards', '#/review', '#/readiness', '#/cost', '#/preview');
+              '#/prep/needs-review', '#/exam', '#/cards', '#/review', '#/readiness', '#/cost', '#/freshness', '#/preview');
 
   const errors = [];
   const vc = new VirtualConsole();

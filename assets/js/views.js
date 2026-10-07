@@ -52,8 +52,8 @@
   function costView(root, manifest) {
     root.appendChild(node('h1', null, 'Cost planner'));
     root.appendChild(node('p', null,
-      'Every lab, ordered by what it will cost you to run. Azure pay-as-you-go has no spending cap, ' +
-      'so this is a planning tool rather than a guarantee — the control is teardown discipline.'));
+      'Every lab, ordered by what it will cost you to run. A pay-as-you-go subscription has no spending limit and ' +
+      'a budget only alerts, so this is a planning tool rather than a guarantee: the control is same-day teardown (00-02).'));
 
     var wrap = node('div', 'plan');
     root.appendChild(wrap);
@@ -113,7 +113,7 @@
       root.appendChild(node('p', 'field__note',
         total + ' labs, of which ' + (total - paid) + ' cost nothing in Azure and ' +
         Object.keys(METERED).length + ' carry an hourly meter. ' +
-        'The six meters are the only ones that can run away while you are not watching.'));
+        'Hourly meters keep billing while you are not watching, and disks, public IPs and stored data bill until they are deleted.'));
     });
   }
 
@@ -180,9 +180,9 @@
         });
 
       var s2 = node('section', 'ready__block');
-      s2.appendChild(node('h2', null, 'Not yet read, heaviest domains first'));
+      s2.appendChild(node('h2', null, 'Not yet studied, heaviest domains first'));
       if (!todo.length) {
-        s2.appendChild(node('div', 'empty', 'Every module is marked read. Work through the knowledge checks next.'));
+        s2.appendChild(node('div', 'empty', 'Every lesson is marked studied. Work through the knowledge checks next.'));
       } else {
         todo.forEach(function (r) {
           var a = node('a', 'ready__row');
@@ -203,14 +203,14 @@
       }
       wrap.appendChild(s2);
 
-      /* Labs left undone on modules already read - the gap between having read
-         about a control and having configured one. */
+      /* Labs left undone on lessons already studied - the gap between having
+         read about a resource and having configured and validated one. */
       var gap = rows.filter(function (r) {
         return r.hasLab && P.isComplete('module', r.id) && !P.isComplete('lab', r.id);
       });
       if (gap.length) {
         var s3 = node('section', 'ready__block');
-        s3.appendChild(node('h2', null, 'Read, but the lab is unfinished'));
+        s3.appendChild(node('h2', null, 'Studied, but the lab is unfinished'));
         gap.forEach(function (r) {
           var st = P.pageStats({ kind: 'lab', moduleId: r.id });
           var a = node('a', 'ready__row');

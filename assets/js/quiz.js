@@ -22,7 +22,7 @@
      why_not        array aligned with options (null for the correct ones), or
                     an object keyed by option index: why each distractor fails
      difficulty     "foundation" | "applied" | "scenario"
-     concept        short label, e.g. "Conditional Access evaluation"
+     concept        short label, e.g. "Role assignment scope"
      misconception  the wrong belief the question is built to expose
 
    Options stay in file order on the lesson page, because several explanations
@@ -328,7 +328,7 @@
     }).catch(function () { /* a lesson with no quiz says nothing */ });
   }
 
-  /* Module 0 and appendices have no quiz by design. Say nothing there. For an
+  /* Modules 0A and 0B and the appendices have no quiz by design. Say nothing there. For an
      exam lesson with no questions yet, the coverage view reports the gap. */
   function noQuiz() {}
 

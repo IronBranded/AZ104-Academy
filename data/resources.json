@@ -103,7 +103,7 @@
     "manage": "Microsoft Entra roles, such as Global Administrator and User Administrator.",
     "network": "Not applicable: sign-in happens against Microsoft Entra ID.",
     "monitor": "Microsoft Entra sign-in and audit logs.",
-    "protect": "Least-privilege Entra roles, MFA, Conditional Access, two emergency access accounts.",
+    "protect": "Least-privilege Microsoft Entra role assignments, and tenant-wide user settings such as self-service password reset.",
     "recover": "Deleted users and Microsoft 365 groups can be restored for 30 days.",
     "cost": "Microsoft Entra ID Free is included; P1 and P2 are per-user licences.",
     "remove": "Outside AZ-104. Every subscription that trusts it must be moved or canceled first."
@@ -231,7 +231,7 @@
     "manage": "User Administrator, Groups Administrator, Guest Inviter.",
     "network": "Not networked.",
     "monitor": "Sign-in and audit logs.",
-    "protect": "MFA, Conditional Access, self-service password reset.",
+    "protect": "Strong sign-in such as multifactor authentication, and self-service password reset so users can recover access.",
     "recover": "Deleted users and Microsoft 365 groups: restorable for 30 days.",
     "cost": "Free objects; licences are per user.",
     "remove": "Check what the group grants (roles, licences, apps) before deleting it."

@@ -3,12 +3,13 @@
 
      #/exam     a weighted, timed mock exam sampled across every quiz file
      #/cards    flashcards over the distinctions the exam tests, Leitner-boxed
-     #/review   what has decayed, and what to re-test, per module
+     #/review   which knowledge checks are due for a re-test, per lesson
 
-   Why this exists: a reader can score full marks on 22 module quizzes without
-   once being asked to choose between controls taught in different files, which
-   is most of what the exam does. The mock exam mixes the pool, so a question
-   from 02-01 arrives next to one from 04-02 with no heading to prime you.
+   Why this exists: a reader can score full marks on every lesson's knowledge
+   check without once being asked to choose between services taught in
+   different lessons, which is much of what the exam does. The mock exam mixes
+   the pool, so a question from 02-01 arrives next to one from 04-02 with no
+   heading to prime you.
 
    No new data is required. The pool is quizzes/<module-id>.json, which already
    exist, and the domain weighting comes from content/manifest.json. Options are
@@ -23,7 +24,6 @@
 
   var EXAM_KEY = (window.AcademyExam.slug + ':exam:v1');
   var CARD_KEY = (window.AcademyExam.slug + ':cards:v1');
-  var RETEST_DAYS = 21;
   var BOX_DAYS = [1, 3, 7, 16, 35];
   var DAY = 86400000;
 
@@ -258,7 +258,7 @@
     [
       'Questions are sampled across every module and weighted to the official domain percentages, so the mix matches the exam rather than the repository.',
       'Options are shuffled unless a question opts out, so a retake tests reasoning rather than a layout you remember.',
-      'The clock runs at about two and a half minutes a question, capped at the exam\u2019s 120 minutes, and submits automatically at zero.',
+      'The clock runs at about two and a half minutes a question and submits automatically at zero. That pacing is the Academy\u2019s practice setting, not the real exam\u2019s timing: check the exam page on Microsoft Learn for the current format.',
       'Mark questions for review and come back to them, as you can in the real interface.',
       'Leaving this page ends the attempt. Nothing is recorded until you submit.'
     ].forEach(function (t) { ul.appendChild(node('li', null, t)); });
@@ -347,7 +347,7 @@
   }
 
   function startExam(host, items, n) {
-    var minutes = Math.min(120, Math.max(15, Math.round(n * 2.5)));
+    var minutes = Math.max(15, Math.round(n * 2.5));   // the Academy's own pacing, not the exam's
     exam = {
       qs: sample(items, n).map(prepare),
       idx: 0,
@@ -768,91 +768,116 @@
 
   /* ------------------------------------------------------------- review --- */
 
-  function moduleVerdict(id) {
-    var P = global.AcademyProgress;
-    var q = (P && P.readQuiz) ? P.readQuiz({ kind: 'module', moduleId: id }) : null;
+  /* #/review uses the same RETAINED definition as the lesson pills and the
+     dashboard (progress.js): a question is retained when it is answered
+     correctly again at least retainDays after it was first answered
+     correctly, with no wrong answer in between; a lesson is retained when
+     80% of its questions are. One definition everywhere, so the three views
+     never disagree about the same lesson. */
 
-    if (!q || !q.at) return { rank: 0, label: 'Never tested', score: null };
-    if (q.pct < 80) return { rank: 1, label: 'Re-test \u2014 scored ' + q.pct + '%', score: q.pct, at: q.at };
+  var RET_ORDER = { due: 0, none: 1, wait: 2, retained: 3 };
 
-    var age = Math.floor((Date.now() - Date.parse(q.at)) / DAY);
-    if (isNaN(age)) return { rank: 1, label: 'Re-test', score: q.pct };
-    if (age >= RETEST_DAYS) return { rank: 2, label: 'Overdue by ' + (age - RETEST_DAYS) + ' d', score: q.pct, at: q.at, over: age - RETEST_DAYS };
-    return { rank: 3, label: 'Due in ' + (RETEST_DAYS - age) + ' d', score: q.pct, at: q.at };
+  function retentionLabel(r) {
+    if (r.state === 'due') return 'Re-test now';
+    if (r.state === 'wait') return 'Re-test from ' + r.dueAt;
+    if (r.state === 'retained') return 'Retained';
+    return 'Not knowledge-checked yet';
   }
 
   function mountReview(root, manifest) {
     clear(root);
-    root.appendChild(node('h1', null, 'What to study next'));
+    root.appendChild(node('h1', null, 'Retention review'));
 
     var host = node('div', 'pr');
     root.appendChild(host);
 
-    var P = global.AcademyProgress;
-    if (!P || !P.readQuiz) {
-      emptyBox(host, 'Progress tracking is unavailable.', 'assets/js/progress.js did not load, so there is nothing to compute decay from.');
+    var P = global.AcademyProgress, C = global.AcademyCurriculum;
+    if (!P || !P.retention || !C) {
+      emptyBox(host, 'Progress tracking is unavailable.', 'assets/js/progress.js or assets/js/curriculum.js did not load, so there is nothing to compute retention from.');
       return;
     }
 
     host.appendChild(node('p', 'field__note',
-      'A module counts as retained if its knowledge check scored 80% or better within the last ' + RETEST_DAYS + ' days. Anything older has decayed on paper, whatever it feels like. Ordering puts never-tested first, then overdue, then heaviest domain.'));
+      'Which knowledge checks to take again, and when. A lesson counts as retained when at least 80% of its questions ' +
+      'were answered correctly again ' + P.retainDays + ' or more days after you first got them right, with no wrong ' +
+      'answer in between. Re-tests that are due come first, then lessons not yet checked, heaviest exam domain first. ' +
+      'Nothing here predicts an exam result.'));
 
-    var rows = [];
-    manifest.domains.forEach(function (d) {
-      var mid = weightMid(d.weight);
-      if (!mid) return;
-      d.modules.forEach(function (m) {
-        var v = moduleVerdict(m.id);
-        rows.push({
-          id: m.id, title: m.title, domain: d.name, weight: d.weight, mid: mid,
-          read: P.isComplete ? P.isComplete('module', m.id) : false,
-          lab: (P.isComplete && m.lab) ? P.isComplete('lab', m.id) : false,
-          v: v
-        });
+    var wait = node('p', 'loading', 'Loading the curriculum\u2026');
+    host.appendChild(wait);
+
+    C.load(manifest).then(function (model) {
+      if (wait.parentNode) wait.parentNode.removeChild(wait);
+
+      var rows = [];
+      model.order.forEach(function (id) {
+        var l = model.lessons[id];
+        if (!l || !l.exam || !l.questionIds.length) return;
+        rows.push({ l: l, r: P.retention(l.questionIds), mid: weightMid(l.weight) });
       });
+      if (!rows.length) {
+        emptyBox(host, 'No knowledge checks found.', 'Serve the site rather than opening it from the file system.');
+        return;
+      }
+
+      rows.sort(function (a, b) {
+        var oa = RET_ORDER[a.r.state], ob = RET_ORDER[b.r.state];
+        if (oa !== ob) return oa - ob;
+        if (a.mid !== b.mid) return b.mid - a.mid;
+        return a.l.id < b.l.id ? -1 : 1;
+      });
+
+      var count = { due: 0, none: 0, wait: 0, retained: 0 };
+      rows.forEach(function (x) { if (count[x.r.state] != null) count[x.r.state]++; });
+
+      var summary = node('div', 'field');
+      summary.appendChild(node('h2', 'field__title',
+        count.due + ' due for a re-test \u00b7 ' + count.retained + ' of ' + rows.length + ' lessons retained'));
+      summary.appendChild(node('p', 'field__note',
+        count.none + ' not knowledge-checked yet; ' + count.wait + ' waiting for their re-test date.'));
+      var links = node('div', 'field__links');
+      links.appendChild(link('Exam prep', '#/prep'));
+      links.appendChild(link('Take a mock exam', '#/exam'));
+      links.appendChild(link('Flashcards', '#/cards'));
+      summary.appendChild(links);
+      host.appendChild(summary);
+
+      var wrap = node('div', 'table-scroll');
+      wrap.setAttribute('tabindex', '0');
+      wrap.setAttribute('role', 'region');
+      wrap.setAttribute('aria-label', 'Retention by lesson');
+      var tbl = node('table', 'pr__table');
+      var thead = node('thead'), hr = node('tr');
+      ['Lesson', 'Domain', 'Weight', 'Retained questions', 'Status'].forEach(function (t) {
+        var th = node('th', null, t);
+        th.setAttribute('scope', 'col');
+        hr.appendChild(th);
+      });
+      thead.appendChild(hr); tbl.appendChild(thead);
+
+      var tb = node('tbody');
+      rows.forEach(function (x) {
+        var tr = node('tr');
+        tr.dataset.rank = String(RET_ORDER[x.r.state]);
+
+        var td = node('td');
+        td.appendChild(link(x.l.id, '#/module/' + x.l.id, 'pr__ref'));
+        td.appendChild(document.createTextNode(' ' + x.l.title));
+        tr.appendChild(td);
+
+        tr.appendChild(node('td', null, x.l.domainName));
+        tr.appendChild(node('td', null, x.l.weight));
+        tr.appendChild(node('td', null, (x.r.kept || 0) + ' / ' + x.l.questionIds.length));
+        tr.appendChild(node('td', 'pr__status', retentionLabel(x.r)));
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      wrap.appendChild(tbl);
+      host.appendChild(wrap);
+    }).catch(function () {
+      if (wait.parentNode) wait.parentNode.removeChild(wait);
+      emptyBox(host, 'The curriculum could not be loaded.', 'Serve the site rather than opening it from the file system.');
     });
-
-    rows.sort(function (a, b) {
-      if (a.v.rank !== b.v.rank) return a.v.rank - b.v.rank;
-      if (a.mid !== b.mid) return b.mid - a.mid;
-      return a.id < b.id ? -1 : 1;
-    });
-
-    var dueNow = rows.filter(function (r) { return r.v.rank <= 2; }).length;
-
-    var summary = node('div', 'field');
-    summary.appendChild(node('h2', 'field__title', dueNow + ' of ' + rows.length + ' modules need attention'));
-    var links = node('div', 'field__links');
-    links.appendChild(link('Take a mock exam', '#/exam'));
-    links.appendChild(link('Flashcards', '#/cards'));
-    summary.appendChild(links);
-    host.appendChild(summary);
-
-    var tbl = node('table', 'pr__table');
-    var thead = node('thead'), hr = node('tr');
-    ['Module', 'Domain', 'Weight', 'Read', 'Lab', 'Status'].forEach(function (t) { hr.appendChild(node('th', null, t)); });
-    thead.appendChild(hr); tbl.appendChild(thead);
-
-    var tb = node('tbody');
-    rows.forEach(function (r) {
-      var tr = node('tr');
-      tr.dataset.rank = String(r.v.rank);
-
-      var td = node('td');
-      td.appendChild(link(r.id, '#/module/' + r.id, 'pr__ref'));
-      td.appendChild(document.createTextNode(' ' + r.title));
-      tr.appendChild(td);
-
-      tr.appendChild(node('td', null, r.domain));
-      tr.appendChild(node('td', null, r.weight));
-      tr.appendChild(node('td', null, r.read ? '\u2713' : '\u2014'));
-      tr.appendChild(node('td', null, r.lab ? '\u2713' : '\u2014'));
-      tr.appendChild(node('td', 'pr__status', r.v.label));
-
-      tb.appendChild(tr);
-    });
-    tbl.appendChild(tb);
-    host.appendChild(tbl);
   }
 
   /* --------------------------------------------------------------- wiring - */

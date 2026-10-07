@@ -38,9 +38,11 @@ has moved.
 
 ## Authoring a module
 
-1. **Copy an existing module of similar shape.** 02-01 for an access-control
-   module, 03-04 for a many-bullet one, 04-03 for one that pairs two services, and
-   any 0A primer for a foundation lesson.
+1. **Start from the scaffold, then read a module of similar shape.**
+   `./tools/New-Module.ps1 -Id <id> -Title '<title>' [-WithLab]` writes the front
+   matter and every required heading, and prints the manifest entry to add. Then
+   read 02-01 for an access-control module, 03-04 for a many-bullet one, 04-03 for
+   one that pairs two services, and any 0A or 0B lesson for a foundation lesson.
 2. **Write the front matter first**, all seventeen required keys, plus
    `objective_ids` from `data/objectives/`. It drives the site's field
    card, so an empty `licensing` or a wrong `lab_cost_estimate` is visible to the
@@ -50,7 +52,7 @@ has moved.
    service yet. Then follow the lesson anatomy in STYLE-GUIDE §2, in order.
 4. **Write the lab second**, and actually run it. Every cmdlet in this repository
    was either executed or explicitly flagged as version-sensitive.
-5. **Add the module's comparisons** to `content/appendix/a6-choosing-between-options.md`,
+5. **Add the module's comparisons** to `content/appendix/a2-choosing-between-options.md`,
    each opening with a `**Modules NN-NN.**` line so lessons can find them.
 6. **Add the quiz** at `quizzes/<id>.json`. Scenario questions, one deciding
    constraint each, tagged with a verbatim `sub_skill`. Every question in the
@@ -84,7 +86,7 @@ has moved.
 Checks front-matter schema, `domain_weight` and `status` values, `last_verified`
 format and age, internal relative links, and that `manifest.json` points at files
 that exist. Since the 2026-10-06 pass it also requires the full lesson anatomy
-(docs/STYLE-GUIDE.md, section 2), the primer anatomy for Module 0A, a validation
+(docs/STYLE-GUIDE.md, section 2), the foundation anatomy for Modules 0A and 0B, a validation
 checklist and a teardown checklist in every lab, a `clue` on every question, and
 ids in `data/comparisons.json` and `data/resources.json` that resolve.
 
@@ -94,7 +96,7 @@ Weekly, or before a release:
 .\tools\Test-GuideContent.ps1 -CheckExternalLinks
 ```
 
-This HEADs roughly 120 Microsoft Learn URLs. A 404 usually means a page moved
+This HEADs every Microsoft Learn URL the content cites (the validator prints the count). A 404 usually means a page moved
 rather than a claim being wrong — find the new page and update the Sources block.
 A redirect chain is fine.
 
@@ -222,7 +224,7 @@ The README is written for learners. This is the map for maintainers.
 | --- | --- |
 | `content/` | Lesson files: Module 0A (13 foundation primers), Module 0B (3 lab-safety lessons) and one module per AZ-104 functional group (15). Theory only - the problem, where it fits, how it works, how it is tested |
 | `labs/` | One lab per exam lesson: numbered steps, portal and PowerShell, validation, and a mandatory teardown |
-| `content/appendix/` | Exam information (A1) and the comparisons appendix (A6) |
+| `content/appendix/` | Exam information (A1) and the comparisons appendix (A2) |
 | `content/manifest.json` | The only file that defines the site's structure. Patched by hand |
 | `content/official-training.json` | Course AZ-104T00-A and its six learning paths, mapped to lessons |
 | `quizzes/` | One knowledge check per exam lesson, each question tagged with the official sub-objective it tests |
@@ -254,8 +256,12 @@ Do not "fix" these without discussing them first:
 - **Walkthrough labs** where hands-on practice would be expensive. Each says why and
   is recorded as a walkthrough, never merged with hands-on practice.
 - **Portal-only steps** where the cmdlet surface is unstable. See STYLE-GUIDE §5.
-- **`rg-az104-core` is never torn down.** It holds the budget, action group and
-  brake runbook. Lab 00-01 has a deliberately different teardown section for this reason.
+- **`rg-az104-core` is never torn down.** It holds the action group that the
+  subscription budget calls. Lab 00-01 has a deliberately different teardown section
+  for this reason.
+- **No automated "spending brake".** Module 0B uses a budget alert plus same-day
+  teardown. A budget never stops spend, and an unattended runbook that deallocates or
+  deletes resources is outside what AZ-104 teaches; don't add one.
 - **No readiness percentage, no pass prediction.** The dashboard reports
   observable counts per official sub-objective. Do not add a blended score.
 - **Two kinds of objective id.** Stable semantic ids (`id.users.sspr`) live in

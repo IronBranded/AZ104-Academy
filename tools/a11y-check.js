@@ -70,7 +70,7 @@ const ROUTES = [
   '#/exam',                  // mock exam (practice.js)
   '#/appendix/0',            // exam information page
   '#/appendix/1',            // comparison appendix
-  '#/preview',               // verification watchlist
+  '#/freshness',             // content freshness
   '#/cost'                   // cost planner
 ]
 const THEMES = ['dark', 'light'];

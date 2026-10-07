@@ -110,21 +110,21 @@
    "modules": [
     {
      "id": "00-00",
-     "title": "Module Overview: Lab Topology and Conventions",
+     "title": "Your Lab Subscription and Conventions",
      "objective": "(Project prerequisite - not an AZ-104 exam objective)",
      "content": "content/00-lab-safety/00-00-module-overview.md",
      "lab": null
     },
     {
      "id": "00-01",
-     "title": "Cost Guardrails and Budget Alerts",
+     "title": "Budgets and Cost Alerts",
      "objective": "(Project prerequisite - not an AZ-104 exam objective)",
      "content": "content/00-lab-safety/00-01-cost-guardrails-and-budgets.md",
      "lab": "labs/00-lab-safety/00-01-lab.md"
     },
     {
      "id": "00-02",
-     "title": "Reusable Teardown Checklist",
+     "title": "Teardown and Verification",
      "objective": "(Project prerequisite - not an AZ-104 exam objective)",
      "content": "content/00-lab-safety/00-02-teardown-checklist-template.md",
      "lab": null
@@ -284,7 +284,7 @@
   },
   {
    "title": "Choosing Between Similar Options",
-   "content": "content/appendix/a6-choosing-between-options.md"
+   "content": "content/appendix/a2-choosing-between-options.md"
   }
  ]
 }

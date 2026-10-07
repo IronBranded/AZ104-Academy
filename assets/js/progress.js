@@ -401,7 +401,7 @@
     oBar.setAttribute('role', 'progressbar');
     oBar.setAttribute('aria-valuenow', String(pct));
 
-    /* The second drilldown: coverage across the 87 sub-objectives. Optional -
+    /* The second drilldown: coverage across the official sub-objectives. Optional -
        the dashboard still works if objectives.js is absent. */
     if (global.AcademyObjectives) global.AcademyObjectives.mount(root, manifest);
 

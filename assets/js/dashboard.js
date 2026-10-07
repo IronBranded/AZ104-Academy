@@ -430,7 +430,7 @@
       model.domains.forEach(function (d) { grid.appendChild(domainCard(model, d)); });
       ds.appendChild(grid);
 
-      /* Module 0 sits above the domains until it is done - unless the
+      /* Module 0B sits above the domains until it is done - unless the
          Continue card is already pointing into it, which says the same. */
       var r = recommend(model);
       var zeroFirst = m0 && m0.dataset.done !== 'true' && !(r && !r.lesson.exam);

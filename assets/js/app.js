@@ -283,7 +283,7 @@
     }
   }
 
-  /* Links and tables for HTML rendered outside the page pipeline (A6
+  /* Links and tables for HTML rendered outside the page pipeline (A2
      distinctions inside a lesson, for instance). */
   function enhance(root, basePath) {
     rewriteLinks(root, basePath);
@@ -413,10 +413,10 @@
   /* Views registered by views.js, practice.js, watchlist.js and review.js.
      A view listed here but missing at runtime shows a clear message instead
      of silently falling back to the dashboard - which is what #/exam,
-     #/cards, #/review and #/preview did before this list existed. */
+     #/cards, #/review and #/freshness did before this list existed. */
   var VIEWS = {
     cost: 'Cost planner', readiness: 'Readiness', exam: 'Mock exam', cards: 'Flashcards',
-    review: 'Retention review', preview: 'Verification watchlist', coverage: 'Objective coverage',
+    review: 'Retention review', freshness: 'Content freshness', preview: 'Content freshness', coverage: 'Objective coverage',
     prep: 'Exam prep', domain: 'Domain review', map: 'Resource map', glossary: 'Glossary', compare: 'Compare options'
   };
 
@@ -430,10 +430,11 @@
     return { kind: 'dashboard' };
   }
 
-  /* #/appendix/5 (position) keeps working; #/appendix/a6 (file prefix) is
+  /* #/appendix/5 (position) keeps working; #/appendix/a2 (file prefix) is
      stable when appendices are reordered. */
   function appendixIndex(key) {
     if (/^\d+$/.test(String(key))) return parseInt(key, 10);
+    if (String(key).toLowerCase() === 'a6') key = 'a2';   // the comparisons appendix was A6 until 2026-10-07
     var list = (manifest && manifest.appendix) || [];
     for (var i = 0; i < list.length; i++) {
       if (new RegExp('/' + key + '-[^/]*\\.md$', 'i').test(list[i].content)) return i;
@@ -549,7 +550,7 @@
     contentEl.appendChild(h1);
     contentEl.appendChild(node('p', null,
       'Modules and labs for Exam ' + window.AcademyExam.code + ', built from Microsoft Learn documentation. ' +
-      'Start with Module 0 - budget guardrails and teardown discipline - before creating any billable resource.'));
+      'Start with Module 0B - your lab subscription, a budget alert and the teardown habit - before creating any billable resource.'));
 
     if (global.AcademyProgress && global.AcademyProgress.mountDashboard) {
       global.AcademyProgress.mountDashboard(contentEl, manifest);

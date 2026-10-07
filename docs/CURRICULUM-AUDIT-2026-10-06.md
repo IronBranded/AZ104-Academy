@@ -120,3 +120,49 @@ and still caught a module deliberately removed from the corrected file.
 learning paths were confirmed by the path pages above. The weekly Validate run checks every URL;
 it can also be started from the Actions tab with *check external links* ticked.
 
+## 8. AZ-104-only pass (2026-10-07)
+
+Prompted by the learner's report that the README and curriculum still felt geared to another
+exam. Method: a sentence-level comparison with the other exam's repository, a review of every
+interface string in `assets/js`, and a fresh check of each Module 0B fact against Microsoft Learn,
+followed by an independent fact-check of the rewritten module.
+
+**Objective drift.** The study guide still shows *Skills measured as of April 17, 2026*; no newer
+version. Domain weights unchanged.
+
+**Classification.**
+
+| Material | Was | Now |
+| --- | --- | --- |
+| 00-00, 00-01, 00-02, lab 00-01 | NEEDS UPDATE: an automated spending brake, emergency-access accounts and PIM, none of them AZ-104 | FOUNDATION, rebuilt |
+| `scripts/00-lab-safety/Stop-LabCompute.ps1` | BEYOND THE EXAM | Removed |
+| README | NEEDS UPDATE | CURRENT, rewritten |
+| `#/review`, `#/preview` views | NEEDS UPDATE: a second retention rule; a preview-first watchlist | CURRENT: shared *Retained* model; content freshness |
+| Lessons 01-01 to 05-02, quizzes, flashcards | CURRENT | CURRENT (two lab teardown sentences corrected) |
+
+**Factual corrections.**
+
+| Claim | Correction | Source |
+| --- | --- | --- |
+| A deleted user keeps its user principal name reserved for 30 days (00-02, labs 01-01, 01-02) | The name is free for a new user; restoring the old user then conflicts and needs a new name | Restore deleted item (directory object); Restore a user in the Microsoft 365 admin center |
+| The storage encryption lab creates a key vault (00-02) | It doesn't: customer-managed keys are a walkthrough because purge protection can't be turned off | Lab 02-02; Customer-managed keys overview |
+| Add `azure-noreply@microsoft.com` to safe senders | Action group emails can come from three addresses, and new addresses need one-time passcode verification within 30 minutes | Action groups |
+| Azure Bastion bills hourly | Dedicated SKUs do; the Developer SKU is free | Azure Bastion SKU comparison |
+| The mock exam is capped at "the exam's 120 minutes" | Microsoft doesn't publish an AZ-104 duration on the study guide; the pacing is now labelled as the Academy's own | AZ-104 study guide |
+| Elevate access: Entra admin center > Roles & admins | Microsoft Entra ID > Manage > Properties > Access management for Azure resources | Elevate access to manage all Azure subscriptions and management groups |
+
+**Verification performed.**
+
+| Check | Result |
+| --- | --- |
+| `tools/Test-GuideContent.ps1` (now enforcing the foundation anatomy on Module 0B) | PASS, 0 errors, 0 warnings |
+| `tools/smoke-test.js` | 69 of 69 routes render, including `#/freshness` and the `#/preview` alias |
+| `tools/a11y-check.js` | Clean: 37 routes in both themes, after fixing a heading-order violation on `#/compare` |
+| Mermaid | 44 of 44 diagrams parse |
+| Leftovers from another exam, by name or topic | None outside this changelog and audit history |
+
+**Needs verification.** The Azure CLI reference for `az monitor action-group create` gives both
+*Global* and the resource group's location as the default for `--location`; lab 00-01 passes
+`--location Global` explicitly. Whether `az consumption budget show` reports Forecasted versus Actual
+on each alert condition wasn't confirmed, so lab 00-01 validates the alert types in the portal.
+

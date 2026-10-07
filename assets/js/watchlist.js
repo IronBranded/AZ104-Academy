@@ -1,14 +1,14 @@
 /* watchlist.js - Academy engine
-   #/preview - the verification watchlist.
+   #/freshness - content freshness (#/preview is kept as an alias for old links).
 
-   Two facts already live in every module's front matter and are invisible
-   unless you open the file: whether it depends on a preview feature, and when
-   its claims were last checked against the product documentation.
+   Every lesson's front matter records when its claims were last checked
+   against Microsoft Learn (last_verified) and whether it depends on a preview
+   feature (status). Both are invisible unless you open the file.
 
-   Azure moves. Agents retire, defaults change and portal blades are renamed,
-   and a module verified in September describing a setting that changed in
-   October looks exactly like one that is still correct. The only defence is knowing which
-   files to re-read first, which is what this view answers.
+   Azure moves. Defaults change, features retire and portal pages are renamed,
+   and a lesson verified in September describing a setting that changed in
+   October looks exactly like one that is still correct. The only defence is
+   knowing which lessons to re-check first, which is what this view answers.
 
    Windows match the validator: the GA window is 90 days, preview is half of it
    with a floor of 30. Change one and change the other. */
@@ -78,7 +78,7 @@
     return job;
   }
 
-  /* Preview first, then the most overdue, then everything else. */
+  /* Preview (if any) first, then the most overdue, then everything else. */
   function rank(r) {
     if (r.status === 'Preview') return 0;
     if (r.over != null && r.over > 0) return 1;
@@ -129,7 +129,7 @@
 
   function mount(root, manifest) {
     clear(root);
-    root.appendChild(node('h1', null, 'Verification watchlist'));
+    root.appendChild(node('h1', null, 'Content freshness'));
 
     var host = node('div', 'pr');
     root.appendChild(host);
@@ -159,17 +159,20 @@
 
       var summary = node('div', 'field');
       summary.appendChild(node('h2', 'field__title',
-        preview.length + ' preview, ' + overdue.length + ' past its window'));
+        overdue.length + ' of ' + list.length + ' lessons past their ' + GA_WINDOW + '-day review window' +
+        (preview.length ? ' \u00b7 ' + preview.length + ' on a preview feature' : '')));
       summary.appendChild(node('p', 'field__note',
-        'Preview modules are listed first whatever their age, because a preview feature that changed last week looks identical to one that did not. ' +
-        '"Verified" is the date someone re-read the product documentation - not the date the prose was last edited.'));
+        'Azure changes: defaults move, features retire and portal pages are renamed. Every lesson records the date its ' +
+        'claims were last checked against Microsoft Learn. Lessons past their window are listed first; if you are about ' +
+        'to follow a lab step from one of them, compare it with the Microsoft Learn page it cites. ' +
+        '"Verified" is the date the documentation was re-read, not the date the prose was last edited.'));
       host.appendChild(summary);
 
       if (preview.length) {
         var pb = node('div', 'field');
-        pb.appendChild(node('h2', 'field__title', 'What the preview modules claim'));
+        pb.appendChild(node('h2', 'field__title', 'Lessons that depend on a preview feature'));
         pb.appendChild(node('p', 'field__note',
-          'These are the sub-objectives whose behaviour is most likely to have moved. Re-read these bullets against Microsoft Learn before trusting a lab step.'));
+          'Preview features change without notice, so these sub-objectives are the most likely to have moved. Re-check them first.'));
         var ul = node('ul', 'pr__list');
         preview.forEach(function (r) {
           r.subs.forEach(function (s) {
@@ -188,10 +191,11 @@
       table(host, sorted);
 
       host.appendChild(node('p', 'field__note',
-        'Bumping last_verified records a verification. Editing prose does not. If you re-check and nothing has changed, bump it anyway \u2014 that is the verification you want recorded.'));
+        'For maintainers: bumping last_verified records a verification; editing prose does not. If you re-check and nothing has changed, bump it anyway \u2014 that is the verification you want recorded.'));
     });
   }
 
   global.AcademyViews = global.AcademyViews || {};
-  global.AcademyViews.preview = mount;
+  global.AcademyViews.freshness = mount;
+  global.AcademyViews.preview = mount;     // old links to #/preview keep working
 })(window);

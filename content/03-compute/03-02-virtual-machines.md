@@ -163,7 +163,7 @@ Creating a VM creates several resources, and they live separately:
 | **Network interface** | Attaches the VM to a subnet; the VM's virtual network can't be changed later |
 | Public IP, network security group | Optional; the portal offers to create them |
 
-**Billing follows the power state** (Module 0): a VM **stopped from inside the OS** still bills for
+**Billing follows the power state** ([00-01](../00-lab-safety/00-01-cost-guardrails-and-budgets.md)): a VM **stopped from inside the OS** still bills for
 compute, and a **deallocated** VM doesn't. Disks bill in both states.
 
 ### Sizes
@@ -413,8 +413,8 @@ az disk list -g <rg> --query "[].{name:name, sku:sku.name, size:diskSizeGB, stat
 ## Hands-on
 
 See [03-02 lab](../../labs/03-compute/03-02-lab.md). It runs one small VM for about an hour, deallocating
-it between parts, and creates a scale set with zero instances. It's tagged for the Module 0 compute
-brake. Region moves are a walkthrough.
+it between parts, and creates a scale set with zero instances. Every resource carries the `az104-module`
+tag, so its cost shows in your Module 0B cost view. Region moves are a walkthrough.
 
 ## Check yourself
 

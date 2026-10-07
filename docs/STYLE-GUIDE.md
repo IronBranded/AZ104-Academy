@@ -97,11 +97,13 @@ headings; the lesson engine (`assets/js/lesson.js`) groups them into stages.
 | `## Key takeaways` | Review | 3 to 5 points |
 | `## Sources` | Review | Microsoft Learn pages the lesson was checked against |
 
-**Foundation primer (Module 0A):** `## The problem`, `## In plain English`,
+**Foundation lesson (Modules 0A and 0B):** `## The problem`, `## In plain English`,
 `## Words you need to know`, `## Mental model`, `## Where this shows up in AZ-104`,
 `## Check yourself`, `## Teach it back`, `## Key takeaways`, `## Sources`. Primers
 teach prerequisite knowledge only to the depth an AZ-104 lesson needs, stay
-skippable, and never turn into AZ-900.
+skippable, and never turn into AZ-900. Module 0B lessons may add sections between
+`## Mental model` and `## Where this shows up in AZ-104` for the lab conventions they
+set, such as naming tables or the teardown template.
 
 **Lab file:**
 
@@ -170,7 +172,7 @@ that". No "in this module we will explore". No filler transitions.
 section. If a page has thirty bold phrases, none of them work.
 
 **Tables over prose for comparisons.** Any "X versus Y" gets a table, or an entry in
-`data/comparisons.json`. Appendix A6 is organised entirely this way because the exam is.
+`data/comparisons.json`. Appendix A2 is organised entirely this way because the exam is.
 
 **Second person for instructions, third for mechanism.** "You assign the role";
 "the storage firewall evaluates the request before authorization does".
@@ -188,13 +190,12 @@ Every lab part that can be done both ways shows both:
 
 **Portal-only is acceptable in exactly two cases**, and you must say which:
 
-1. **The cmdlet can't express the setting.** `New-AzConsumptionBudget` creates
-   `Actual` notifications only, so lab 00-01 adds the forecasted notification in the
-   portal and says so:
+1. **The command line can't do it reliably.** Microsoft documents that budgets
+   created with PowerShell don't send notifications, so lab 00-01 creates its budget
+   in the portal and says why in the step itself:
 
-   > **Forecasted notifications.** `New-AzConsumptionBudget` exposes threshold and
-   > contact settings but not the `thresholdType` field, so it creates `Actual`
-   > notifications only.
+   > Create the budget in the **portal**. Microsoft documents that budgets created
+   > with PowerShell don't send notifications.
 
 2. **The cmdlet surface is unstable.** Say so, and tell the reader to check
    `Get-Help <cmdlet> -Parameter *` against their installed module version.
@@ -225,9 +226,9 @@ words:
 **Anything that bills hourly gets a callout.** State it in the header, name the
 meter, and list it in `metered` in `data/exam.js` so the cost planner flags it:
 
-> **This lab has an hourly meter.** Complete **Module 0** first, so the budget and
-> the compute brake exist. Every VM here is tagged `az104-module = 03-02`, which is
-> the tag the brake deallocates.
+> **This lab has an hourly meter.** Complete **Module 0B** first, so your budget alert
+> exists. Every VM here is tagged `az104-module = 03-02`, so its cost shows under that
+> tag in cost analysis.
 
 **Build cheap things first.** Virtual networks, NSGs, storage — then the VM or the
 App Service plan last, so its meter runs for the shortest possible time. Deallocate
@@ -237,14 +238,15 @@ VMs between parts.
 
 Every lab's `## Teardown` uses this structure, from `content/00-lab-safety/00-02`:
 
-1. **Resources** — locks this lab created, then the resource group, and anything
-   that must go first (Site Recovery replication, backup protection)
+1. **Resources** — verify the context and the resource group's contents first, then
+   locks this lab created, then the resource group, and anything that must go first
+   (Site Recovery replication, backup protection)
 2. **Subscription scope** — policy assignments, role assignments, subscription
    diagnostic settings
 3. **Directory scope** — users, groups and guests, and any tenant-wide setting
    restored to the value you recorded
 4. **Soft-deleted remains** — backup items held by soft delete, and deleted users
-   whose names you need again
+   (restorable for 30 days)
 5. **Access** — the roles you gave your working account for this lab
 6. **Verify** — a `- [ ]` checklist of commands that prove it, plus a Cost
    Management check

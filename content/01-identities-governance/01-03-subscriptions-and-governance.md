@@ -338,7 +338,7 @@ them.
 
 ### Costs: alerts, budgets and Advisor
 
-**Budgets** are covered in depth in Module 0, [00-01](../00-lab-safety/00-01-cost-guardrails-and-budgets.md).
+**Budgets** are introduced in Module 0B, [00-01](../00-lab-safety/00-01-cost-guardrails-and-budgets.md).
 In summary:
 
 - **A budget notifies; it doesn't cap.** Resources keep running.

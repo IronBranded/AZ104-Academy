@@ -8,8 +8,8 @@
      4 domains    colour + icon + short name + exam weight; each lesson is one
                   row with its lab as a small link on the same row (the old
                   tree listed every title twice); ends with the domain review
-     Module 0     lab safety, neutral colour, visibly not an exam domain
-     Practice     mock exam, flashcards, retention, cost, watchlist
+     Module 0B    safe lab foundations, neutral colour, visibly not an exam domain
+     Practice     mock exam, flashcards, retention, readiness, cost, content freshness
      Appendices
 
    Completed lessons show a check mark and a hidden "(studied)" for screen
@@ -156,7 +156,7 @@
       simpleLink('review', 'Retention review', '#/review'),
       simpleLink('readiness', 'Readiness', '#/readiness'),
       simpleLink('cost', 'Cost planner', '#/cost'),
-      simpleLink('preview', 'Verification watchlist', '#/preview')
+      simpleLink('freshness', 'Content freshness', '#/freshness')
     ]));
 
     if (manifest.appendix && manifest.appendix.length) {
