@@ -57,7 +57,7 @@ log describes the April 17, 2026 changes as minor; they were already in the stor
 | Sidebar kept only the last non-exam domain | Adding Module 0A would have hidden Module 0B | Every non-exam group is rendered, before the exam domains |
 | Lab checklist section detection walked siblings | Validation and Teardown are wrapped in `<section>` by `sections.js`, so no item was ever recorded as a validation check (found by the smoke test) | Detection uses document order |
 | Validator assumed numeric module ids | It crashed on `0A-*` files | Module id pattern accepts `0A` |
-| `content/official-training.json` was empty | No link to Microsoft's own training | Filled from Microsoft Learn: course AZ-104T00-A, all six learning paths and their 32 modules |
+| `content/official-training.json` was empty | No link to Microsoft's own training | Filled from Microsoft Learn: course AZ-104T00-A and all six learning paths. Corrected in the revalidation below to 28 modules |
 
 ## 5. Verification performed
 
@@ -80,3 +80,43 @@ log describes the April 17, 2026 changes as minor; they were already in the stor
   comparison view.
 - **Bicep and ARM template compilation** (`tools/check-templates.sh`) needs the Bicep CLI, which
   wasn't available here. The `bicep` workflow runs it on push. No template changed in this pass.
+
+## 7. Revalidation of the published repository (2026-10-06, evening)
+
+Run against commit `7d4c812` as published on GitHub, which is byte-identical to the build
+that was delivered.
+
+| Check | Result |
+| --- | --- |
+| Study guide, re-retrieved through the Microsoft Learn MCP server | Still *Skills measured as of April 17, 2026*. 5 domains, 15 functional groups and 82 bullets match the objectives data, the skills snapshot and the manifest weights, verbatim and in order |
+| GitHub Actions on `7d4c812` | Validate and Accessibility passed. Bicep runs only on changes under `labs/`; no template changed since its last pass. Pages deployed |
+| Live site | Serves the current build (service worker cache `v3`); the deleted design record returns 404 |
+| `tools/Test-GuideContent.ps1` | PASS, 0 errors, 0 warnings |
+| `tools/smoke-test.js` | 68 of 68 routes render with no script errors |
+| Mermaid | 41 of 41 diagrams parse |
+| Leftovers from another exam | None, by name or by topic |
+
+**Corrected: two learning paths in `content/official-training.json`.** Microsoft's rendered
+path pages and its path definitions in the public `MicrosoftDocs/learn` repository agree, and
+both disagreed with the Academy:
+
+| Path | Was | Now (Microsoft) |
+| --- | --- | --- |
+| AZ-104: Prerequisites for Azure administrators | 5 modules, including the portal tour, Bash and PowerShell introductions | 2: Introduction to Azure Cloud Shell; Deploy Azure infrastructure by using JSON ARM templates |
+| AZ-104: Monitor and back up Azure resources | 4: two backup modules, Introduction to Azure Monitor, Improve incident response with alerts | 3: the two backup modules and Monitor your Azure virtual machines with Azure Monitor |
+
+The course page doesn't list modules, so whether Microsoft changed these paths or the first
+capture was wrong can't be determined. The other four paths matched module for module. All
+28 modules now carry Microsoft's `uid`.
+
+**Corrected: the outline-drift workflow could not have compared modules.** It compares each
+stored module's `uid` with Microsoft's path definitions, and the file stored no `uid`, so every
+module would have been reported as added. Run locally against Microsoft's definitions, the
+workflow's own logic reported 14 changes for the published file and none for the corrected one,
+and still caught a module deliberately removed from the corrected file.
+
+**Not checked here: external links.** This environment can't reach learn.microsoft.com, so the
+65 Microsoft Learn URLs added on 2026-10-06 haven't been HEAD-checked. The ones that come from
+learning paths were confirmed by the path pages above. The weekly Validate run checks every URL;
+it can also be started from the Actions tab with *check external links* ticked.
+

@@ -75,6 +75,15 @@ certification, not AZ-104. None of it was in a lesson, lab, question or flashcar
 - A design record written for another exam.
 - Style and contributing guides rewritten with AZ-104 examples throughout.
 
+### Revalidation corrections
+
+- **Official training:** two learning paths disagreed with Microsoft. *Prerequisites for Azure
+  administrators* now lists 2 modules (was 5) and *Monitor and back up Azure resources* lists 3
+  (was 4, now including *Monitor your Azure virtual machines with Azure Monitor*). Checked
+  against both the rendered path pages and Microsoft's path definitions; 28 modules in total.
+- **Outline drift:** every module in `content/official-training.json` now carries Microsoft's
+  `uid`. Without it the weekly drift check reported every module as added.
+
 ### Validator
 
 - Requires the new lesson, primer and lab sections, a validation and a teardown checklist in every

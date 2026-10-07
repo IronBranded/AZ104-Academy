@@ -1,5 +1,5 @@
 {
- "_note": "Microsoft Learn training for AZ-104, retrieved through the Microsoft Learn MCP server. Course, path and module titles and URLs are Microsoft's. Which Academy lessons each module serves ('lessons') is this Academy's mapping, made from the module titles and descriptions, not a Microsoft statement. Microsoft's lab exercises are not listed: they were not verified in this pass.",
+ "_note": "Microsoft Learn training for AZ-104, retrieved through the Microsoft Learn MCP server. Course, path and module titles and URLs are Microsoft's. Which Academy lessons each module serves ('lessons') is this Academy's mapping, made from the module titles and descriptions, not a Microsoft statement. Microsoft's lab exercises are not listed: they were not verified in this pass. Module uids are Microsoft's, from the path definitions in the public MicrosoftDocs/learn repository; the outline-drift workflow compares them weekly.",
  "verified": "2026-10-06",
  "course": {
   "code": "AZ-104T00-A",
@@ -10,33 +10,13 @@
   {
    "title": "AZ-104: Prerequisites for Azure administrators",
    "url": "https://learn.microsoft.com/en-us/training/paths/az-104-administrator-prerequisites/",
-   "modules": 5,
+   "modules": 2,
    "objectives": [],
    "module_list": [
     {
-     "title": "Manage services with the Azure portal",
-     "url": "https://learn.microsoft.com/en-us/training/modules/tour-azure-portal/",
-     "lessons": [
-      "0A-12"
-     ]
-    },
-    {
      "title": "Introduction to Azure Cloud Shell",
      "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-cloud-shell/",
-     "lessons": [
-      "0A-12"
-     ]
-    },
-    {
-     "title": "Introduction to Bash",
-     "url": "https://learn.microsoft.com/en-us/training/modules/bash-introduction/",
-     "lessons": [
-      "0A-12"
-     ]
-    },
-    {
-     "title": "Introduction to PowerShell",
-     "url": "https://learn.microsoft.com/en-us/training/modules/introduction-to-powershell/",
+     "uid": "learn.intro-to-azure-cloud-shell",
      "lessons": [
       "0A-12"
      ]
@@ -44,6 +24,7 @@
     {
      "title": "Deploy Azure infrastructure by using JSON ARM templates",
      "url": "https://learn.microsoft.com/en-us/training/modules/create-azure-resource-manager-template-vs-code/",
+     "uid": "learn.azure.create-resource-manager-template-vs-code",
      "lessons": [
       "0A-11",
       "03-01"
@@ -64,6 +45,7 @@
     {
      "title": "Understand Microsoft Entra ID",
      "url": "https://learn.microsoft.com/en-us/training/modules/understand-azure-active-directory/",
+     "uid": "learn.wwl.understand-azure-active-directory",
      "lessons": [
       "0A-05",
       "01-01"
@@ -72,6 +54,7 @@
     {
      "title": "Create, configure, and manage identities",
      "url": "https://learn.microsoft.com/en-us/training/modules/create-configure-manage-identities/",
+     "uid": "learn.wwl.create-configure-manage-identities",
      "lessons": [
       "01-01"
      ]
@@ -79,6 +62,7 @@
     {
      "title": "Describe the core architectural components of Azure",
      "url": "https://learn.microsoft.com/en-us/training/modules/describe-core-architectural-components-of-azure/",
+     "uid": "learn.wwl.describe-core-architectural-components-of-azure",
      "lessons": [
       "0A-02",
       "0A-03",
@@ -88,6 +72,7 @@
     {
      "title": "Azure Policy initiatives",
      "url": "https://learn.microsoft.com/en-us/training/modules/sovereignty-policy-initiatives/",
+     "uid": "learn-bizapps.sovereignty-policy-initiatives",
      "lessons": [
       "01-03"
      ]
@@ -95,6 +80,7 @@
     {
      "title": "Secure your Azure resources with Azure role-based access control (Azure RBAC)",
      "url": "https://learn.microsoft.com/en-us/training/modules/secure-azure-resources-with-rbac/",
+     "uid": "learn.secure-azure-resources-with-rbac",
      "lessons": [
       "01-02"
      ]
@@ -102,6 +88,7 @@
     {
      "title": "Allow users to reset their password with Microsoft Entra self-service password reset",
      "url": "https://learn.microsoft.com/en-us/training/modules/allow-users-reset-their-password/",
+     "uid": "learn.azure.allow-users-to-reset-their-password",
      "lessons": [
       "01-01"
      ]
@@ -121,6 +108,7 @@
     {
      "title": "Configure storage accounts",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-storage-accounts/",
+     "uid": "learn.wwl.configure-storage-accounts",
      "lessons": [
       "0A-08",
       "02-02"
@@ -129,6 +117,7 @@
     {
      "title": "Configure Azure Blob Storage",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-blob-storage/",
+     "uid": "learn.wwl.configure-blob-storage",
      "lessons": [
       "02-03",
       "02-02"
@@ -137,6 +126,7 @@
     {
      "title": "Configure Azure Storage security",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-storage-security/",
+     "uid": "learn.wwl.configure-storage-security",
      "lessons": [
       "02-01"
      ]
@@ -144,6 +134,7 @@
     {
      "title": "Configure Azure Files",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-azure-files-file-sync/",
+     "uid": "learn.wwl.configure-azure-files-file-sync",
      "lessons": [
       "02-03"
      ]
@@ -164,6 +155,7 @@
     {
      "title": "Introduction to Azure virtual machines",
      "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-virtual-machines/",
+     "uid": "learn.introduction-to-azure-virtual-machines",
      "lessons": [
       "0A-06",
       "03-02"
@@ -172,6 +164,7 @@
     {
      "title": "Configure virtual machine availability",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-virtual-machine-availability/",
+     "uid": "learn.wwl.configure-virtual-machine-availability",
      "lessons": [
       "03-02"
      ]
@@ -179,6 +172,7 @@
     {
      "title": "Configure Azure App Service plans",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-app-service-plans/",
+     "uid": "learn.wwl.configure-app-service-plans",
      "lessons": [
       "03-04"
      ]
@@ -186,6 +180,7 @@
     {
      "title": "Configure Azure App Service",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-azure-app-services/",
+     "uid": "learn.wwl.configure-azure-app-services",
      "lessons": [
       "03-04"
      ]
@@ -193,6 +188,7 @@
     {
      "title": "Configure Azure Container Instances",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-azure-container-instances/",
+     "uid": "learn.wwl.configure-azure-container-instances",
      "lessons": [
       "03-03"
      ]
@@ -212,6 +208,7 @@
     {
      "title": "Configure virtual networks",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-virtual-networks/",
+     "uid": "learn.wwl.configure-virtual-networks",
      "lessons": [
       "0A-07",
       "04-01"
@@ -220,6 +217,7 @@
     {
      "title": "Configure network security groups",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-network-security-groups/",
+     "uid": "learn.wwl.configure-network-security-groups",
      "lessons": [
       "04-02"
      ]
@@ -227,6 +225,7 @@
     {
      "title": "Host your domain on Azure DNS",
      "url": "https://learn.microsoft.com/en-us/training/modules/host-domain-azure-dns/",
+     "uid": "learn.azure.host-domain-azure-dns",
      "lessons": [
       "04-03"
      ]
@@ -234,6 +233,7 @@
     {
      "title": "Configure Azure Virtual Network peering",
      "url": "https://learn.microsoft.com/en-us/training/modules/configure-vnet-peering/",
+     "uid": "learn.wwl.configure-vnet-peering",
      "lessons": [
       "04-01"
      ]
@@ -241,6 +241,7 @@
     {
      "title": "Manage and control traffic flow in your Azure deployment with routes",
      "url": "https://learn.microsoft.com/en-us/training/modules/control-network-traffic-flow-with-routes/",
+     "uid": "learn.control-network-traffic-flow-with-routes",
      "lessons": [
       "04-01"
      ]
@@ -248,6 +249,7 @@
     {
      "title": "Introduction to Azure Load Balancer",
      "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-load-balancer/",
+     "uid": "learn.azure.intro-to-azure-load-balancer",
      "lessons": [
       "04-03"
      ]
@@ -255,6 +257,7 @@
     {
      "title": "Introduction to Azure Application Gateway",
      "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-application-gateway/",
+     "uid": "learn.azure.intro-to-azure-application-gateway",
      "lessons": [
       "04-03"
      ]
@@ -262,6 +265,7 @@
     {
      "title": "Introduction to Azure Network Watcher",
      "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-network-watcher/",
+     "uid": "learn.azure.intro-to-azure-network-watcher",
      "lessons": [
       "04-01",
       "05-01"
@@ -272,7 +276,7 @@
   {
    "title": "AZ-104: Monitor and back up Azure resources",
    "url": "https://learn.microsoft.com/en-us/training/paths/az-104-monitor-backup-resources/",
-   "modules": 4,
+   "modules": 3,
    "objectives": [
     "Monitor resources in Azure",
     "Implement backup and recovery"
@@ -281,6 +285,7 @@
     {
      "title": "Introduction to Azure Backup",
      "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-backup/",
+     "uid": "learn.introduction-to-azure-backup",
      "lessons": [
       "0A-10",
       "05-02"
@@ -289,22 +294,17 @@
     {
      "title": "Protect your virtual machines by using Azure Backup",
      "url": "https://learn.microsoft.com/en-us/training/modules/protect-virtual-machines-with-azure-backup/",
+     "uid": "learn.protect-virtual-machines-with-azure-backup",
      "lessons": [
       "05-02"
      ]
     },
     {
-     "title": "Introduction to Azure Monitor",
-     "url": "https://learn.microsoft.com/en-us/training/modules/intro-to-azure-monitor/",
+     "title": "Monitor your Azure virtual machines with Azure Monitor",
+     "url": "https://learn.microsoft.com/en-us/training/modules/monitor-azure-vm-using-diagnostic-data/",
+     "uid": "learn.azure.monitor-azure-vm-using-diagnostic-data",
      "lessons": [
       "0A-09",
-      "05-01"
-     ]
-    },
-    {
-     "title": "Improve incident response with Azure Monitor alerts",
-     "url": "https://learn.microsoft.com/en-us/training/modules/incident-response-with-alerting-on-azure/",
-     "lessons": [
       "05-01"
      ]
     }
@@ -312,5 +312,5 @@
   }
  ],
  "labs": [],
- "module_list_note": "The Azure Policy initiatives module URL is the one Microsoft lists on the learning path page."
+ "module_list_note": "Module lists re-verified 2026-10-06 against both the rendered learning-path pages and Microsoft's path definitions. The Azure Policy initiatives module URL is the one Microsoft lists on the learning path page."
 }
