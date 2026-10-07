@@ -7,7 +7,7 @@
 
      DESTRUCTIVE AND BILLABLE TOKENS ARE MARKED IN THE COST COLOUR.
 
-   -Force, Remove-*, --yes, -PricingTier 'Standard', az group delete. A reader
+   -Force, Remove-*, --yes, az vm create, az group delete. A reader
    skimming a teardown block should see the irreversible parts before they read
    the line, and a reader skimming a lab should see what starts the meter. */
 
@@ -21,14 +21,13 @@
   /* Tokens that delete, overwrite, or begin billing. Matched after the normal
      pass so they win. */
   var DANGER = new RegExp([
-    '\\bRemove-Az[A-Za-z]*', '\\bRemove-Mg[A-Za-z]*', '\\bRemove-SPO[A-Za-z]*',
+    '\\bRemove-Az[A-Za-z]*', '\\bRemove-Mg[A-Za-z]*',
     '\\bStop-AzVM\\b', '\\bClear-\\w+', '\\bReset-\\w+',
     '-Force\\b', '-Confirm:\\$false', '-WhatIf\\b',
     '--yes\\b', '--force\\b', '\\bdelete\\b',
-    '-InRemovedState\\b', '-PurgeKeyVaults\\b',
-    "-PricingTier\\s+'Standard'", '--tier\\s+Standard\\b',
-    '\\bNew-AzFirewall\\b', '\\bNew-AzBastion\\b', '\\bNew-AzApiManagement\\b',
-    '\\baz\\s+aks\\s+create\\b', '\\bpurge\\b'
+    '-InRemovedState\\b',
+    '\\bNew-AzVM\\b', '\\baz\\s+vm\\s+create\\b', '\\baz\\s+appservice\\s+plan\\s+create\\b',
+    '\\bNew-AzBastion\\b', '\\bpurge\\b'
   ].join('|'), 'g');
 
   var LANGS = {
@@ -86,8 +85,8 @@
   };
 
   var ALIAS = {
-    ps: 'powershell', ps1: 'powershell', pwsh: 'powershell',
-    sh: 'bash', shell: 'bash', console: 'bash',
+    powershell: 'powershell', ps: 'powershell', ps1: 'powershell', pwsh: 'powershell',
+    bash: 'bash', sh: 'bash', shell: 'bash', console: 'bash',
     kql: 'kusto', kusto: 'kusto',
     js: 'json', json: 'json',
     bicep: 'bicep', xml: 'xml', html: 'xml',

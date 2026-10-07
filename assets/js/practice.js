@@ -8,7 +8,7 @@
    Why this exists: a reader can score full marks on 22 module quizzes without
    once being asked to choose between controls taught in different files, which
    is most of what the exam does. The mock exam mixes the pool, so a question
-   from 02-04 arrives next to one from 04-01 with no heading to prime you.
+   from 02-01 arrives next to one from 04-02 with no heading to prime you.
 
    No new data is required. The pool is quizzes/<module-id>.json, which already
    exist, and the domain weighting comes from content/manifest.json. Options are
@@ -76,8 +76,9 @@
     return a;
   }
 
-  /* "25-30%" -> 27.5, "20-25%" -> 22.5, "n/a" -> 0. Module 0 carries n/a and is
-     excluded from the exam, which is correct: lab safety is not exam content. */
+  /* "20-25%" -> 22.5, "10-15%" -> 12.5, "n/a" -> 0. Modules 0A and 0B carry n/a
+     and are excluded from the exam, which is correct: they are foundations, not
+     exam content. */
   function weightMid(w) {
     var s = String(w || '');
     var range = s.match(/(\d+)\s*[-\u2013\u2014]\s*(\d+)/);

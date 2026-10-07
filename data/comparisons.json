@@ -24,7 +24,7 @@
    "options": [
     {
      "name": "Microsoft Entra roles",
-     "purpose": "Administer the directory: users, groups, licences, app registrations and tenant settings.",
+     "purpose": "Administer the directory: users, groups, licences, external users and tenant settings.",
      "scope": "The tenant, or narrower directory scopes such as an administrative unit.",
      "layer": "Identity plane: Microsoft Entra ID.",
      "when": "Someone must create users, reset passwords, assign licences or change tenant settings.",

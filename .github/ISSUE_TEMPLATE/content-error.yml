@@ -12,8 +12,8 @@ body:
     id: where
     attributes:
       label: Where
-      description: Lesson or lab id, question id, or the site route (for example 02-04, 02-04-q3, or #/module/02-04).
-      placeholder: 02-04
+      description: Lesson or lab id, question id, or the site route (for example 03-02, 03-02-q3, or #/module/03-02).
+      placeholder: 03-02
     validations:
       required: true
   - type: textarea

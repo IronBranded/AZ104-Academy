@@ -129,7 +129,6 @@
   /* --- callouts ------------------------------------------------------------ */
   --call-exam:     #4ca8f7;   /* Azure blue: heavily tested */
   --call-warn:     #f1707b;   /* Fluent danger: misconfiguration, cost, irreversible */
-  --call-tactical: #54b054;   /* Fluent success: how it lands in an investigation */
   --call-note:     #a19f9d;
 
   /* --- type ---------------------------------------------------------------- */
@@ -217,7 +216,6 @@
 
   --call-exam:     #0078d4;
   --call-warn:     #c50f1f;
-  --call-tactical: #107c10;
   --call-note:     #605e5c;
 
   color-scheme: light;
@@ -243,7 +241,7 @@
     --syn-comment: #6e6e6e; --syn-string: #0451a5; --syn-keyword: #5c2e91;
     --syn-fn: #0f6b73; --syn-variable: #a4501b; --syn-param: #484644;
     --syn-number: #107c10; --syn-danger: #c50f1f;
-    --call-exam: #0078d4; --call-warn: #c50f1f; --call-tactical: #107c10; --call-note: #605e5c;
+    --call-exam: #0078d4; --call-warn: #c50f1f; --call-note: #605e5c;
     color-scheme: light;
   }
 }

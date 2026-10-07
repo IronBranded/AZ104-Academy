@@ -910,10 +910,6 @@ h3.bucket::before {
   background: color-mix(in srgb, var(--call-warn) 12%, var(--paper-raise));
 }
 .content blockquote[data-callout="warn"] strong:first-child { color: var(--call-warn); }
-.content blockquote[data-callout="tactical"] {
-  border-left-color: var(--call-tactical);
-  background: color-mix(in srgb, var(--call-tactical) 12%, var(--paper-raise));
-}
 
 /* A standing label, so the type is named rather than merely coloured. */
 .content blockquote[data-callout]::before {
@@ -929,7 +925,6 @@ h3.bucket::before {
 }
 .content blockquote[data-callout="exam"]::before     { content: "Exam focus";     color: var(--call-exam); }
 .content blockquote[data-callout="warn"]::before     { content: "Warning";        color: var(--call-warn); }
-.content blockquote[data-callout="tactical"]::before { content: "In an investigation"; color: var(--call-tactical); }
 .content blockquote[data-callout="note"]::before     { content: none; }
 .content blockquote[data-label]::before              { content: attr(data-label); }
 

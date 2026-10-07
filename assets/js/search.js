@@ -106,21 +106,21 @@
 
   /* Acronyms learners type, mapped to the words the content actually uses.
      An acronym matches as a whole word ("ca" must not match "location") or
-     through its expansion. Standard Microsoft product and security acronyms
-     only; add to this list rather than guessing at runtime. */
+     through its expansion. AZ-104 terms only, and only expansions that appear
+     in the lessons, labs or questions; add to this list rather than guessing
+     at runtime. */
   var ACRONYMS = {
-    pim: 'privileged identity management', ca: 'conditional access', mfa: 'multifactor authentication',
-    sspr: 'self-service password reset', tap: 'temporary access pass', rbac: 'role-based access control',
-    abac: 'attribute-based access control', mi: 'managed identit', kv: 'key vault', hsm: 'hsm',
-    cmk: 'customer-managed key', tde: 'transparent data encryption', sas: 'shared access signature',
-    nsg: 'network security group', asg: 'application security group', avnm: 'virtual network manager',
-    waf: 'web application firewall', ddos: 'ddos', pe: 'private endpoint', jit: 'just-in-time',
-    aks: 'kubernetes service', acr: 'container registry', apim: 'api management',
-    cspm: 'posture management', cwpp: 'workload protection', mdvm: 'vulnerability management',
-    easm: 'external attack surface', ama: 'azure monitor agent', dcr: 'data collection rule',
-    cef: 'common event format', wef: 'windows event forwarding', dspm: 'dspm',
-    scu: 'security compute unit', iac: 'infrastructure as code', ade: 'azure disk encryption',
-    xdr: 'defender xdr', siem: 'sentinel', dlp: 'data loss prevention'
+    rbac: 'role-based access control', mfa: 'multifactor authentication',
+    sspr: 'self-service password reset', ca: 'conditional access',
+    mg: 'management group', rg: 'resource group', arm: 'resource manager', iac: 'infrastructure as code',
+    mi: 'managed identit', kv: 'key vault', cmk: 'customer-managed key', sas: 'shared access signature',
+    zrs: 'zone-redundant', grs: 'geo-redundant', ragrs: 'ra-grs',
+    vm: 'virtual machine', vmss: 'scale set', eah: 'encryption at host', ade: 'azure disk encryption',
+    vnet: 'virtual network', udr: 'user-defined route', nsg: 'network security group',
+    asg: 'application security group', pe: 'private endpoint', lb: 'load balancer', pip: 'public ip',
+    acr: 'container registry', aci: 'container instances', aca: 'container apps', asp: 'app service plan',
+    ama: 'azure monitor agent', dcr: 'data collection rule', law: 'log analytics workspace', kql: 'kusto',
+    rsv: 'recovery services vault', asr: 'site recovery', crr: 'cross region restore'
   };
 
   function hasTerm(text, t) {
@@ -144,7 +144,7 @@
       if (!inShallow && !inDeep) return 0;          // every term must appear
       total += (inTitle ? 6 : 0) + (inShallow ? 3 : 0) + (inDeep ? 1 : 0);
     }
-    if (entry.id.toLowerCase().indexOf(terms[0]) === 0) total += 8;   // "02-04"
+    if (entry.id.toLowerCase().indexOf(terms[0]) === 0) total += 8;   // "03-02"
     return total;
   }
 
@@ -216,7 +216,7 @@
       e.appendChild(node('strong', null, 'No module matches “' + q + '”.'));
       e.appendChild(document.createTextNode(
         deepState === 'ready'
-          ? ' Try a service name, a plan name, or a module number such as 02-04.'
+          ? ' Try a service name, a resource type, or a module number such as 03-02.'
           : ' Full-text search is still loading; try again in a moment.'));
       panel.appendChild(e);
       return;

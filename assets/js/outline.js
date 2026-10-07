@@ -1,12 +1,12 @@
 /* outline.js - Academy engine
    In-page navigation for long modules.
 
-   03-04 carries nine sub-objectives and runs to a dozen sections; 03-05's lab
-   has seven parts. Scrolling to find "Teardown" is the most repeated action in
+   03-04 carries eight sub-objectives and runs to a dozen sections; 03-02's lab
+   has eight parts. Scrolling to find "Teardown" is the most repeated action in
    the whole guide, so it gets a permanent affordance.
 
    Also gives every heading a stable id and a hover anchor, so a reader can link
-   a colleague straight to "Common failure modes" in 02-04. */
+   a colleague straight to "Common failure modes" in 04-02. */
 
 (function (global) {
   'use strict';

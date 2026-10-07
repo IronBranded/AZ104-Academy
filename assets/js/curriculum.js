@@ -30,9 +30,9 @@
   'use strict';
 
   var SNAPSHOT = 'docs/SKILLS-MEASURED-SNAPSHOT.md';
-  /* A6 is looked up in the manifest first. The fallback path exists only
-     because A6 predates its manifest entry; see MANIFEST_PATCH_NOTES. */
-  var A6_FALLBACK = 'content/appendix/a6-choosing-between-controls.md';
+  /* A6 is looked up in the manifest first, by its title. The fallback is the
+     file's own path, in case the title in the manifest is ever reworded. */
+  var A6_FALLBACK = 'content/appendix/a6-choosing-between-options.md';
 
   var model = null, job = null;
 

@@ -1,9 +1,10 @@
 # Style Guide
 
 The conventions this repository actually follows. Every rule here is descriptive
-rather than aspirational — it was extracted from the 22 modules and 5 appendices
-after they were written, so a new module that follows this guide will look like
-the existing ones.
+rather than aspirational — it was extracted from the 31 modules (13 foundation
+primers, 3 lab-safety lessons and 15 exam lessons), 16 labs and 2 appendices after
+they were written, so a new module that follows this guide will look like the
+existing ones.
 
 If you disagree with a rule, change it here first, then change the content. A
 convention that lives only in one author's head is not a convention.
@@ -17,10 +18,10 @@ the AZ-104 study guide, and Microsoft Learn training modules. Nothing else.
 
 Third-party material — courses, blogs, practice-question vendors, forum posts —
 may be used **only** to sanity-check structure and emphasis: *is this topic
-weighted the way I think it is?* It is never the source of a claim. While writing
-the SC-500 guide this engine came from, four prep sites were found contradicting
-each other and the official page on an exam's duration and question count. That is the failure mode this
-rule exists to prevent.
+weighted the way I think it is?* It is never the source of a claim. Prep sites
+routinely contradict each other, and the official page, on an exam's length and
+question count; appendix A1 says what Microsoft publishes instead of repeating them.
+That is the failure mode this rule exists to prevent.
 
 **Every module ends with a Sources block** listing the specific pages it draws
 from, as inline autolinks:
@@ -29,7 +30,7 @@ from, as inline autolinks:
 ## Sources
 
 - Microsoft Learn - AZ-104 skills measured: <https://learn.microsoft.com/...>
-- Azure Firewall rule processing logic: <https://learn.microsoft.com/azure/firewall/rule-processing>
+- Azure Storage redundancy: <https://learn.microsoft.com/azure/storage/common/storage-redundancy>
 ```
 
 Only list pages you actually read. A Sources block padded with plausible URLs is
@@ -46,8 +47,9 @@ constructing an `en-us` URL you have not opened.
   literal thing the exam is built from, and paraphrasing them loses the mapping.
 - **Everything else is written in our own words.** Do not reproduce paragraphs of
   Microsoft documentation. Explain the mechanism, then cite the page.
-- Short exact strings that matter — a cmdlet, a plan name, an alert name such as
-  `AI.Azure_CredentialTheftAttempt`, a policy element — are quoted as code.
+- Short exact strings that matter — a cmdlet, a role name such as
+  `Storage Blob Data Reader`, a SKU such as `Standard_RAGRS`, a log table such as
+  `AzureActivity` — are quoted as code.
 
 ---
 
@@ -57,7 +59,7 @@ constructing an `en-us` URL you have not opened.
 
 | File | Answers |
 | --- | --- |
-| `content/<domain>/<id>-<slug>.md` | Why this control exists and how it works |
+| `content/<domain>/<id>-<slug>.md` | Why the resource or setting exists, where it fits, and how it works |
 | `labs/<domain>/<id>-lab.md` | How to configure it, prove it, and remove it |
 
 Theory never contains numbered configuration steps. Labs never contain the
@@ -122,44 +124,44 @@ licence must still be able to finish the lab honestly.
 
 ## 3. Front matter schema
 
-All eighteen keys are required on every content file; `Test-GuideContent.ps1`
-fails the build otherwise. Empty is fine; missing is not.
+All seventeen keys below are required on every content file; `Test-GuideContent.ps1`
+fails the build otherwise. Empty is fine; missing is not. Exam lessons also carry
+`objective_ids`.
 
 | Key | Type | Notes |
 | --- | --- | --- |
 | `objective` | string | Verbatim from the study guide |
-| `sub_objectives` | list | Verbatim. Empty list for appendices |
+| `sub_objectives` | list | Verbatim. Empty list for foundation lessons |
 | `domain` | string | Must match `manifest.json` |
-| `domain_weight` | string | `20-25%`, `25-30%`, or `n/a` — **validated** |
-| `status` | `GA` \| `Preview` | **Validated.** Use `Preview` if any sub-objective is preview |
-| `prerequisites` | list of module ids | Rendered as links in the field card |
-| `ms_learn_source` | url | The study guide |
+| `domain_weight` | string | `20-25%`, `15-20%`, `10-15%`, or `n/a` for Modules 0A and 0B — **validated** |
+| `status` | `GA` \| `Preview` | **Validated.** Use `Preview` if any sub-objective depends on a preview feature |
+| `prerequisites` | list of module ids | Rendered as links in the lesson header |
+| `ms_learn_source` | url | The study guide, or the main page a primer was checked against |
 | `product_docs` | list of urls | The pages you actually read |
 | `last_verified` | `YYYY-MM-DD` | **Validated**; warns after 60 days |
 | `portal` | string | Where the work happens |
 | `powershell_module` | string | Comma-separated; rendered as code chips |
 | `az_cli_command` | string | One representative command, or empty |
-| `kql_tables` | list | Tables the module teaches |
+| `kql_tables` | list | Log tables the module queries, such as `AzureActivity` in 05-01 |
 | `licensing` | string | State gaps plainly — see §7 |
 | `azure_resources` | list | ARM types |
 | `lab_cost_estimate` | string | Drives the cost chip — see §6 |
 | `free_practice_available` | bool | Can this be practised at no cost |
-| `forensic_relevance` | string | What this control means in an investigation |
-
-`forensic_relevance` is not decoration. It is the one field that makes this guide
-different from a certification cram, and it should say something an investigator
-would care about — usually what evidence exists, or fails to.
+| `objective_ids` | list | Exam lessons only: the stable ids from `data/objectives/` for exactly this lesson's bullets — **validated** |
 
 ---
 
 ## 4. Voice and explanation
 
-**First principles before product names.** The `Why this exists` section should be
-readable by someone who has never used Azure. Name the threat or failure mode, then
-the control. If the first sentence contains a Microsoft product name, rewrite it.
+**The problem before the product.** `## The administrative problem` must be
+readable by someone who has never used Azure. Name the operational requirement,
+then the service that meets it. If the first sentence contains a Microsoft product
+name, rewrite it.
 
-**One analogy at most, and only if it pays its way.** An analogy that needs its own
-explanation is worse than the plain mechanism. Most modules have none.
+**One analogy per lesson, in its place.** The `## Mental model` section carries the
+lesson's analogy and its everyday-idea to Azure-name table. Don't add others
+elsewhere: an analogy that needs its own explanation is worse than the plain
+mechanism.
 
 **Say the thing.** Prefer "the exam will use this" to "it is worth being aware
 that". No "in this module we will explore". No filler transitions.
@@ -167,11 +169,11 @@ that". No "in this module we will explore". No filler transitions.
 **Bold carries load.** Bold the claim a reader must not miss — typically one per
 section. If a page has thirty bold phrases, none of them work.
 
-**Tables over prose for comparisons.** Any "X versus Y" gets a table. The glossary
-(A3) is organised entirely this way because the exam is.
+**Tables over prose for comparisons.** Any "X versus Y" gets a table, or an entry in
+`data/comparisons.json`. Appendix A6 is organised entirely this way because the exam is.
 
 **Second person for instructions, third for mechanism.** "You assign the role";
-"the firewall evaluates DNAT rules first".
+"the storage firewall evaluates the request before authorization does".
 
 ---
 
@@ -186,23 +188,23 @@ Every lab part that can be done both ways shows both:
 
 **Portal-only is acceptable in exactly two cases**, and you must say which:
 
-1. **The cmdlet surface is unstable.** Recovery Services immutability, Defender
-   plan extensions, Foundry model deployment. Say so and tell the reader to check
-   `-Syntax`:
+1. **The cmdlet can't express the setting.** `New-AzConsumptionBudget` creates
+   `Actual` notifications only, so lab 00-01 adds the forecasted notification in the
+   portal and says so:
 
-   > Immutability state and MUA wiring are portal-driven above because the cmdlet
-   > surface for them moves between `Az.RecoveryServices` and `Az.DataProtection`
-   > versions.
+   > **Forecasted notifications.** `New-AzConsumptionBudget` exposes threshold and
+   > contact settings but not the `thresholdType` field, so it creates `Actual`
+   > notifications only.
 
-2. **No cmdlet exists.** Sample alerts, some Defender configuration.
+2. **The cmdlet surface is unstable.** Say so, and tell the reader to check
+   `Get-Help <cmdlet> -Parameter *` against their installed module version.
 
 **Never invent a cmdlet.** If you are not certain a parameter exists, either verify
-it or route the step through the portal and say why. Every such flag is also logged
-in appendix A1 §6.
+it or route the step through the portal and say why in the step itself.
 
 **Resolve identifiers at runtime.** No hardcoded GUIDs for role definitions,
-permission scopes, or authentication strengths — look them up by display name. The
-only literal GUID in this repository is the Microsoft Graph application ID.
+subscriptions or tenants — look them up by display name. There is no literal GUID
+in this repository.
 
 ---
 
@@ -214,55 +216,65 @@ words:
 
 | Contains | Chip | Use for |
 | --- | --- | --- |
-| `$0` or `free` | green `$0` | M365-only, or no billable resource |
+| `$0` or `free` | green `$0` | Directory objects only, or no billable resource |
 | `Low` | muted green | Pennies |
 | `Medium` | ochre | Real but small |
-| `HIGH` (incl. `Medium-HIGH`) | brick | Hourly meters |
-| `HIGHEST` | deep brick | Security Copilot |
+| `High` (incl. `Medium-High`) | brick | Several hours of metered compute, such as lab 05-02 |
+| `Highest` | deep brick | Reserved. No AZ-104 lab uses it |
 
-**Anything that bills hourly gets a clock.** State it in the header, tell the
-reader to start a timer when provisioning completes, and build the free parts
-first:
+**Anything that bills hourly gets a callout.** State it in the header, name the
+meter, and list it in `metered` in `data/exam.js` so the cost planner flags it:
 
-> **Start a timer when the firewall finishes deploying.** Deployment takes 10-20
-> minutes and billing starts the moment it lands, not when you start testing.
+> **This lab has an hourly meter.** Complete **Module 0** first, so the budget and
+> the compute brake exist. Every VM here is tagged `az104-module = 03-02`, which is
+> the tag the brake deallocates.
 
-**Build cheap things first.** Firewall policies, VNets, storage — then the metered
-resource last, so its clock runs for the shortest possible time.
+**Build cheap things first.** Virtual networks, NSGs, storage — then the VM or the
+App Service plan last, so its meter runs for the shortest possible time. Deallocate
+VMs between parts.
 
 ### Teardown: the six buckets
 
-Every lab's `## Teardown` uses this structure, from `content/00-lab-safety/00-03`:
+Every lab's `## Teardown` uses this structure, from `content/00-lab-safety/00-02`:
 
-1. **Resources** — the resource group, and anything expensive deleted *first*
-2. **Subscription scope** — Defender plans, policy assignments, role assignments
-3. **Directory scope** — app registrations, CA policies, groups, consent grants
-4. **Soft-deleted remains** — vaults, workspaces, sites, app registrations
-5. **Access** — deactivate PIM, discard credentials
-6. **Verify** — commands that prove it, plus a Cost Management check
+1. **Resources** — locks this lab created, then the resource group, and anything
+   that must go first (Site Recovery replication, backup protection)
+2. **Subscription scope** — policy assignments, role assignments, subscription
+   diagnostic settings
+3. **Directory scope** — users, groups and guests, and any tenant-wide setting
+   restored to the value you recorded
+4. **Soft-deleted remains** — backup items held by soft delete, and deleted users
+   whose names you need again
+5. **Access** — the roles you gave your working account for this lab
+6. **Verify** — a `- [ ]` checklist of commands that prove it, plus a Cost
+   Management check
 
-**Name what the teardown script cannot see.** It knows nothing about Bastion hosts,
-Azure Firewalls, `MC_*` node resource groups, orphaned disks, Sentinel connectors,
-or Security Copilot capacity. If your lab creates one, bucket 1 or 6 says so
-explicitly.
+**Name what the teardown script cannot see.** `Remove-LabResourceGroup.ps1` sees the
+lab resource group and resources tagged with the lab's module id. It knows nothing
+about what Azure creates elsewhere on your behalf: connection monitors in
+`NetworkWatcherRG`, Site Recovery's `*-asr` resource groups, restore points in
+`AzureBackupRG*`, or backup items held by soft delete. If your lab creates one,
+bucket 1 or 6 says so explicitly.
 
 ---
 
 ## 7. Preview status and licensing gaps
 
 **Set `status: Preview`** if any sub-objective depends on a preview feature, and
-open the module with a callout telling the reader to re-verify. 03-02 is the
-worked example.
+open the module with a callout telling the reader to re-verify. No AZ-104 lesson is
+currently in preview. The verification watchlist (`#/preview`) lists every file by
+the age of its `last_verified`, so the oldest are re-checked first.
 
-**State licensing gaps plainly and give a written deliverable instead.** Three
-objectives cannot be fully built on the stated M365 E5 lab tenant. None of them is
-skipped or glossed:
+**State licensing gaps plainly.** Almost all of AZ-104 needs only an Azure
+subscription and Microsoft Entra ID Free. Where a part needs more, the lab header
+says which parts and which licence, as 01-01 does:
 
-> **Licensing gate.** Conditional Access for agents requires **Microsoft Agent 365**
-> licensing per user on top of Entra ID P1/P2. Microsoft 365 E5 provides neither.
+> **Licensing required:** Microsoft Entra ID Free for Parts 1, 2, 3 and 5. Part 4
+> needs any licence to assign. Part 2b needs Entra ID P1.
 
-The lab then splits into *build-if-licensed* and *design-if-not*, where the design
-output is the same prose the exam asks for anyway.
+Licence-gated parts are marked in their headings, such as **(P1)**, and are never
+items in the validation checklist, so a learner without the licence can still
+finish the lab honestly.
 
 ---
 
@@ -282,8 +294,8 @@ renamed.
 hash routes using `manifest.json`, so they work both on GitHub and on the site:
 
 ```markdown
-See [01-02 lab](../../labs/01-identity-access-governance/01-02-lab.md).
-Covered in [00-03](../00-lab-safety/00-03-teardown-checklist-template.md).
+See [01-02 lab](../../labs/01-identities-governance/01-02-lab.md).
+Covered in [00-02](../00-lab-safety/00-02-teardown-checklist-template.md).
 ```
 
 A relative link the site cannot resolve renders with a dotted underline and a
@@ -305,7 +317,7 @@ editing a question never touches content.
   "schema": 1,
   "questions": [{
     "id": "01-01-q1",
-    "sub_skill": "Implement and configure managed identities for Azure resources",
+    "sub_skill": "Create users and groups",
     "prompt": "...",
     "options": ["...", "..."],
     "answer": 1,

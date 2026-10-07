@@ -18,7 +18,7 @@
     to make deletion a deliberate act. Both are reported instead.
 
 .PARAMETER LabId
-    Module identifier, e.g. '02-04'. Matches the rg-az104-lab-<LabId> convention
+    Module identifier, e.g. '03-02'. Matches the rg-az104-lab-<LabId> convention
     and the az104-module tag.
 
 .PARAMETER SweepOnly
@@ -26,7 +26,7 @@
     subscription and report anything outstanding.
 
 .EXAMPLE
-    .\Remove-LabResourceGroup.ps1 -LabId '02-04' -WhatIf
+    .\Remove-LabResourceGroup.ps1 -LabId '03-02' -WhatIf
 
 .EXAMPLE
     .\Remove-LabResourceGroup.ps1 -SweepOnly

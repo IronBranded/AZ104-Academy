@@ -109,14 +109,13 @@
 
   /* Callout typing.
 
-     The content already writes its warnings as blockquotes opening with a bold
-     lead - "**Cost warning, read before clicking.**", "**Licensing gate.**",
-     "**Exam note.**" (and the SC-500 era "**AZ-500 divergence.**"). Rather than asking every file to adopt a new syntax,
-     detect the lead and colour-code what is already there. */
+     The content writes its warnings as blockquotes opening with a bold lead -
+     "**This lab has an hourly meter.**", "**Dated change.**", "**Exam note.**".
+     Rather than asking every file to adopt a new syntax, detect the lead and
+     colour-code what is already there. Anything else is a plain note. */
   var CALLOUTS = [
     { kind: 'warn',     test: /^(cost|warning|caution|danger|licensing gate|cost gate|cost warning|cost box|mandatory|do not|never)\b/i },
-    { kind: 'exam',     test: /^(az-500 divergence|exam note|exam|on the exam|changing default|dated change|naming|status:|portal transition)\b/i },
-    { kind: 'tactical', test: /^(forensic|in an investigation|tactical|note that|detail worth|one-glance)\b/i }
+    { kind: 'exam',     test: /^(exam note|exam|on the exam|changing default|dated change|naming|status:|portal transition)\b/i }
   ];
 
   function tagCallouts(root) {

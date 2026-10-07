@@ -153,10 +153,8 @@ $RequiredKeys = @(
     'portal', 'powershell_module', 'az_cli_command', 'kql_tables', 'licensing',
     'azure_resources', 'lab_cost_estimate', 'free_practice_available'
 )
-# forensic_relevance was required by the SC-500 guide this engine came from. It
-# is optional here: AZ-104 is an administrator exam, and the engine renders the
-# field only when a lesson sets it.
-$ValidWeights = @('10-15%', '15-20%', '20-25%', '25-30%', 'n/a')
+# The AZ-104 weight bands, plus n/a for the foundation modules (0A and 0B).
+$ValidWeights = @('10-15%', '15-20%', '20-25%', 'n/a')
 $ValidStatus  = @('GA', 'Preview')
 
 # The exam-lesson anatomy (docs/STYLE-GUIDE.md): problem and plain English
@@ -365,9 +363,8 @@ foreach ($f in $contentFiles) {
 
     foreach ($s in $subs) {
         $n = ConvertTo-Norm $s
-        # A Module 0 lesson may double as practice for an exam bullet (00-02
-        # teaches PIM through the lab-access setup). Only a bullet claimed by
-        # two EXAM modules is ambiguous ownership.
+        # A foundation lesson may list an exam bullet it also prepares for.
+        # Only a bullet claimed by two EXAM modules is ambiguous ownership.
         if (-not $isExamModule) { $allSubObjectives.Add($n); continue }
         if ($subOwner.ContainsKey($n)) {
             Add-Issue Error $rel "Sub-objective also claimed by $($subOwner[$n]): $($n.Substring(0, [Math]::Min(70, $n.Length)))..."

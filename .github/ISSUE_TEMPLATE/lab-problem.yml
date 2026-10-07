@@ -6,14 +6,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing: **run the lab's teardown and the sweep in appendix A2 §6**, so nothing keeps billing while this is looked at.
+        Before filing: **run the lab's teardown and the verification sweep in lesson 00-02**, so nothing keeps billing while this is looked at.
         Never paste tenant IDs, subscription IDs, secrets, keys or tokens. Redact them.
         A step that leaves something **exposed** (public access, standing privilege, an open port) is a security report - use SECURITY.md instead.
   - type: input
     id: lab
     attributes:
       label: Lab
-      placeholder: 02-04, Part 3, step 3.2
+      placeholder: 03-02, Part 3, step 2
     validations:
       required: true
   - type: dropdown

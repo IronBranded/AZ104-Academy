@@ -5,9 +5,9 @@
    unless you open the file: whether it depends on a preview feature, and when
    its claims were last checked against the product documentation.
 
-   Preview surfaces move. This guide's AI modules are half preview, and a module
-   verified in September describing a feature that changed in October looks
-   exactly like one that is still correct. The only defence is knowing which
+   Azure moves. Agents retire, defaults change and portal blades are renamed,
+   and a module verified in September describing a setting that changed in
+   October looks exactly like one that is still correct. The only defence is knowing which
    files to re-read first, which is what this view answers.
 
    Windows match the validator: the GA window is 90 days, preview is half of it

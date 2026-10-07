@@ -22,27 +22,32 @@ Compare-Object (Get-Content .\docs\SKILLS-MEASURED-SNAPSHOT.md) `
 ```
 
 If the diff is empty, delete the `.new` file. If it is not, the outline moved:
-update the affected module's `sub_objectives`, `manifest.json`, `docs/SYLLABUS.md`,
-and the snapshot together, in one commit.
+update the affected module's `sub_objectives` and `objective_ids`,
+`data/objectives/`, `manifest.json` and the snapshot together, in one commit, and
+classify every affected lesson as CURRENT, NEEDS UPDATE, FOUNDATION, BEYOND THE
+EXAM or OBSOLETE in a dated `docs/CURRICULUM-AUDIT-*.md`.
 
 **Then re-verify the product documentation for the module you are touching.** Not
-the study guide — the actual product pages. Several things in this guide changed
-between the scaffold and the writing: authentication method management, Key Vault
-defaults, NSG flow logs, Entra Permissions Management, the Sentinel portal
-retirement date. Assume something has moved.
+the study guide — the actual product pages. Several things this guide teaches
+changed recently: NSG flow logs gave way to virtual network flow logs, the Log
+Analytics agent was retired, Connection monitor (classic) was deprecated, and the
+VM insights Map and its Dependency agent have a retirement date. Assume something
+has moved.
 
 ---
 
 ## Authoring a module
 
-1. **Copy an existing module of similar shape.** 02-01 for a service-hardening
-   module, 03-04 for a many-bullet one, 03-02 for a preview-heavy one.
+1. **Copy an existing module of similar shape.** 02-01 for an access-control
+   module, 03-04 for a many-bullet one, 04-03 for one that pairs two services, and
+   any 0A primer for a foundation lesson.
 2. **Write the front matter first**, all seventeen required keys, plus
    `objective_ids` from `data/objectives/`. It drives the site's field
    card, so an empty `licensing` or a wrong `lab_cost_estimate` is visible to the
    reader.
-3. **Write `Why this exists` before opening any portal.** If you cannot explain the
-   threat without naming a product, you do not understand the control yet.
+3. **Write `The administrative problem` before opening any portal.** If you cannot
+   explain the requirement without naming a product, you do not understand the
+   service yet. Then follow the lesson anatomy in STYLE-GUIDE §2, in order.
 4. **Write the lab second**, and actually run it. Every cmdlet in this repository
    was either executed or explicitly flagged as version-sensitive.
 5. **Add the module's comparisons** to `content/appendix/a6-choosing-between-options.md`,
@@ -56,16 +61,17 @@ retirement date. Assume something has moved.
 7. **Add a diagram only where it beats a paragraph** - decision order, two paths
    that are easy to confuse, a pipeline. Use a ` ```mermaid ` flowchart:
    - put `accTitle:` and `accDescr:` on its first lines;
-   - use `:::d01` to `:::d04` for domain colour, and keep a text label on every
-     node;
+   - use `:::d0A`, `:::d00` and `:::d01` to `:::d05` for domain colour, and keep a
+     text label on every node;
    - draw nothing the lesson text does not already say;
    - prefer top-down; left-to-right diagrams become unreadable on a phone.
 8. **If an objective heading changes**, update `content/official-training.json` in
    the same commit. It joins Microsoft's learning paths and labs to objectives by
    heading text.
-9. **Update `content/manifest.json` and `docs/SYLLABUS.md`** if the module is new.
-10. **Tear down your own lab** before committing. Then run the sweep from
-   `content/appendix/a2-licensing-and-lab-cost-matrix.md` §6.
+9. **Update `content/manifest.json`** if the module is new, and add its resources
+   and comparisons to `data/resources.json` and `data/comparisons.json`.
+10. **Tear down your own lab** before committing. Then run the verification sweep
+   in `content/00-lab-safety/00-02-teardown-checklist-template.md`.
 
 ---
 
@@ -141,21 +147,22 @@ negative-tested - broken on purpose, confirmed to fire, then restored.
 
 | Check | Catches |
 | --- | --- |
-| Front-matter schema | Any of the 18 keys missing; bad `domain_weight` or `status`; malformed or stale `last_verified` |
-| Required sections | A content file missing any of the nine required `##` sections |
-| Lab schema | A lab missing `## Prerequisites`, `## Validation` or `## Teardown`, or with no numbered parts |
+| Front-matter schema | Any of the 17 keys missing; bad `domain_weight` or `status`; malformed or stale `last_verified` |
+| Required sections | An exam lesson missing any section of the lesson anatomy, or a 0A primer missing any primer section (STYLE-GUIDE §2); a *Words you need to know* table with fewer than three terms; a *Where it fits* table without the ten questions |
+| Lab schema | A lab missing any required section, or with no numbered parts; a `## Validation` or `## Teardown` with no `- [ ]` checklist |
 | Outline diff | A bullet in `SKILLS-MEASURED-SNAPSHOT.md` that no module covers, or a `sub_objective` not in the captured outline |
 | Front matter vs body | `sub_objectives` disagreeing with the `## Sub-objectives covered` list |
-| Duplicate ownership | The same sub-objective claimed by two **exam** modules. Module 0 may list one it also practises, as 00-02 does for PIM |
+| Duplicate ownership | The same sub-objective claimed by two **exam** modules. A foundation lesson may list one it also prepares for |
 | Cost parity | A module's `lab_cost_estimate` level disagreeing with its lab's `**Estimated cost:**` header |
-| Quizzes | Malformed JSON, an `answer` index out of range, a `sub_skill` that is not a verbatim sub-objective, duplicate options or ids, fewer than three options, a missing explanation |
+| Quizzes | Malformed JSON, an `answer` index out of range, a `sub_skill` that is not a verbatim sub-objective, duplicate options or ids, fewer than three options, a missing explanation or scenario `clue` |
+| Comparisons and resource map | An id in `data/comparisons.json` or `data/resources.json` that resolves to no module, objective or resource; a comparison option missing any of its nine fields |
 | Manifest | Module *and appendix* paths that do not resolve; a module with no lab or no quiz |
 | Orphans | Markdown on disk that no manifest entry references |
 | Links | Unresolved relative links; with `-CheckExternalLinks`, every `learn.microsoft.com` URL |
 
-Module 0 is exempt from the exam-module rules, since `domain_weight: n/a` marks it
-as lab safety rather than an exam domain: it needs no `sub_objectives`, no lab on
-every file, and no knowledge check.
+Modules 0A and 0B are exempt from the exam-module rules, since `domain_weight: n/a`
+marks them as foundations rather than exam domains: they need no `sub_objectives`,
+no lab on every file, and no knowledge check.
 
 ```powershell
 .\tools\Test-GuideContent.ps1                       # per commit
@@ -196,10 +203,10 @@ a verification, and it is the one you want recorded.
 ## Commit conventions
 
 ```
-content(02-04): private access and network perimeter module and lab
+content(04-02): secure access to virtual networks, lesson and lab
 docs(appendix): exam information page
 feat(site): progress tracking, collapsible depth, search and quiz engine
-fix(01-02): correct Key Vault default permission model
+fix(02-02): correct the redundancy conversion path from ZRS to GRS
 ```
 
 Scope is the module id, `appendix`, `site`, `docs`, or `tools`. One module per
@@ -213,17 +220,17 @@ The README is written for learners. This is the map for maintainers.
 
 | Path | What it holds |
 | --- | --- |
-| `content/` | Lesson files: Module 0 (lab safety) and one module per AZ-104 functional group, 15 when complete. Theory only - why it exists, how it works, how it is tested |
+| `content/` | Lesson files: Module 0A (13 foundation primers), Module 0B (3 lab-safety lessons) and one module per AZ-104 functional group (15). Theory only - the problem, where it fits, how it works, how it is tested |
 | `labs/` | One lab per exam lesson: numbered steps, portal and PowerShell, validation, and a mandatory teardown |
 | `content/appendix/` | Exam information (A1) and the comparisons appendix (A6) |
 | `content/manifest.json` | The only file that defines the site's structure. Patched by hand |
-| `content/official-training.json` | Official Microsoft training mapped to lessons. Empty until the AZ-104 learning paths are verified |
+| `content/official-training.json` | Course AZ-104T00-A and its six learning paths, mapped to lessons |
 | `quizzes/` | One knowledge check per exam lesson, each question tagged with the official sub-objective it tests |
 | `flashcards/` | The distinctions deck |
 | `assets/` | The site: dependency-free HTML, CSS and JavaScript, no build step |
 | `tools/`, `.github/workflows/` | The validator, the accessibility check, and the CI that runs them |
-| `data/` | Exam identity (`exam.js`) and the objectives with stable ids (`objectives/`). The engine reads both and hardcodes neither |
-| `docs/` | This guide, the style guide, the skills-outline snapshot, and `UX-REDESIGN.md`, which records how the site is structured |
+| `data/` | Exam identity (`exam.js`), the objectives with stable ids (`objectives/`), the resource map (`resources.json`) and the comparisons (`comparisons.json`). The engine reads them and hardcodes none of it |
+| `docs/` | This guide, the style guide, the skills-outline snapshot, and the dated curriculum audits |
 
 **The split between `content/` and `labs/` is deliberate.** Theory files contain no
 numbered configuration steps; labs contain no conceptual explanation. A review pass

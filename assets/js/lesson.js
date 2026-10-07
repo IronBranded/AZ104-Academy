@@ -27,8 +27,6 @@
      component
    - a PRACTICE card for the lab, or an explicit "no lab for this objective"
    - NEXT STEP: previous, recommended next, related, and the domain review
-   - the investigation note (forensic_relevance) moved from the top of the page
-     to a collapsed "Beyond the exam" panel at the end: useful, not measured
 
    Labs get a separate, visibly different LAB MODE header and a part tracker. */
 
@@ -331,14 +329,6 @@
     next.setAttribute('aria-label', 'Next step');
     review.appendChild(next);
     if (byPlace.sources) append(review, byPlace.sources);
-    if (fm && fm.forensic_relevance) {
-      var beyond = node('details', 'beyond');
-      var sum = node('summary', null, 'Beyond the exam');
-      beyond.appendChild(sum);
-      beyond.appendChild(node('p', 'field__note', 'Not measured by ' + window.AcademyExam.code + '. Kept for context.'));
-      beyond.appendChild(node('p', null, String(fm.forensic_relevance)));
-      review.appendChild(beyond);
-    }
     article.appendChild(review);
     present.push('review');
 

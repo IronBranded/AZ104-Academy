@@ -4,8 +4,8 @@
    Indexes three different kinds of thing, because they are three different
    questions a reader has:
 
-     modules and labs   "take me to 02-04"
-     sub-objectives     "which module covers just-in-time VM access?"
+     modules and labs   "take me to 03-02"
+     sub-objectives     "which module covers stored access policies?"
      actions            "reset this page", "jump to teardown", "review pass"
 
    Headings on the current page are added live, so "teardown" reaches the
@@ -24,7 +24,7 @@
     return n;
   }
 
-  /* Subsequence match: "02fw" finds "02-04 ... Firewall". Score rewards
+  /* Subsequence match: "04lb" finds "04-03 ... Load Balancing". Score rewards
      contiguity and early matches so exact prefixes win. */
   function fuzzy(needle, hay) {
     var n = needle.toLowerCase(), h = hay.toLowerCase();

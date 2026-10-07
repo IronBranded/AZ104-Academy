@@ -581,16 +581,6 @@ a.outline-badge:hover, a.outline-badge:focus-visible { color: var(--ink); border
 .related { list-style: none; padding: 0; margin: 0 0 var(--s-4); display: grid; gap: var(--s-1); }
 .related__why { margin-left: var(--s-2); font-size: var(--t-xs); color: var(--ink-faint); }
 
-.beyond {
-  margin: var(--s-5) 0 0;
-  padding: 0 var(--s-4);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-lg);
-  font-size: var(--t-sm);
-  max-width: var(--measure);
-}
-.beyond > summary { cursor: pointer; padding: var(--s-3) 0; color: var(--ink-soft); font-weight: 600; }
-
 /* ======================================================================
    Knowledge checks
    ====================================================================== */

@@ -145,24 +145,6 @@
     }
   }
 
-  /* forensic_relevance has been in the front matter of all 27 files since the
-     first module and has never been shown anywhere. It is the one field that
-     separates this guide from a cram sheet, so it gets a callout of its own,
-     directly under the title. */
-  /* Certification-first redesign: the note moved from directly under the
-     title to a collapsed panel at the end. It is useful context and it is not
-     measured by the exam, so it no longer sits between the learner and the
-     objective. Lessons get the same panel from lesson.js. */
-  function tacticalCallout(root, data) {
-    if (!data || !data.forensic_relevance) return;
-    var d = document.createElement('details');
-    d.className = 'beyond';
-    d.appendChild(node('summary', null, 'Beyond the exam'));
-    d.appendChild(node('p', 'field__note', 'Not measured by ' + window.AcademyExam.code + '. Kept for context.'));
-    d.appendChild(node('p', null, String(data.forensic_relevance)));
-    root.appendChild(d);
-  }
-
   /* Mermaid is 3.5 MB and no content file currently contains a diagram, so it
      is loaded on first use instead of on every page. */
   var mermaidJob = null;
@@ -521,7 +503,6 @@
       if (global.AcademyHighlight && global.AcademyHighlight.mount) global.AcademyHighlight.mount(contentEl);
       if (global.AcademyProgress && global.AcademyProgress.mountPage) global.AcademyProgress.mountPage(contentEl, route);
       renderDiagrams(contentEl);
-      if (!asLesson) tacticalCallout(contentEl, parsed.data);
       if (route.kind === 'lab' && L && L.mountLab) {
         fmReady.then(function (fm) { if (parseRoute().moduleId === route.moduleId) L.mountLab(contentEl, route, fm); });
       }

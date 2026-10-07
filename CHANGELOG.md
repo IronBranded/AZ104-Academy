@@ -50,6 +50,30 @@ The Academy now teaches the infrastructure before it expects you to administer i
 - The sidebar rendered only the last non-exam domain.
 - Lab checklist items inside wrapped sections were never recorded as validation checks.
 - The validator crashed on non-numeric module ids.
+- PowerShell and bash code blocks were never syntax-highlighted: the highlighter knew the
+  aliases (`ps1`, `sh`) but not the names the labs use (`powershell`, `bash`). 252 of the
+  260 highlightable blocks were plain text, so delete commands and meter-starting
+  commands never showed in the cost colour. Every syntax colour measures at least
+  4.56:1 on every code background, in both themes.
+
+### Removed: leftovers from another exam
+
+Engine machinery, examples and documentation that belonged to a different
+certification, not AZ-104. None of it was in a lesson, lab, question or flashcard.
+
+- The investigation-note field and its "Beyond the exam" panel, and the "In an
+  investigation" and exam-divergence callout types. No AZ-104 page used them.
+- Search synonyms for products outside AZ-104. Search now expands AZ-104 terms
+  instead: VMSS, UDR, ASG, ACI, ACA, RSV, ASR, AMA, DCR and others.
+- Code highlighting of commands outside AZ-104. It now flags the commands that start an
+  AZ-104 lab meter: `New-AzVM`, `az vm create`, `az appservice plan create`.
+- Module ids that don't exist in AZ-104, in the search hint, the issue templates, the
+  teardown script's examples and lesson 00-00's naming table.
+- References to files that don't exist in this repository, including the appendix A6
+  fallback path, which pointed at the wrong file name; and a weight band AZ-104
+  doesn't use.
+- A design record written for another exam.
+- Style and contributing guides rewritten with AZ-104 examples throughout.
 
 ### Validator
 
@@ -114,7 +138,7 @@ The Academy now teaches the infrastructure before it expects you to administer i
 - Dated changes taught: the Log Analytics agent was retired in August 2024; the VM insights Map and Dependency agent
   retire on June 30, 2028; Connection monitor (classic) is deprecated.
 
-### Fixed (inherited from the SC500 engine)
+### Fixed (engine)
 
 - **Code comments failed WCAG AA contrast in the dark theme.** The syntax token `--syn-comment` (`#8a8886`) measured
   4.38:1 on the code background. It surfaced only when KQL `//` comments produced comment tokens. Now `#979593`
@@ -355,8 +379,7 @@ The Academy now teaches the infrastructure before it expects you to administer i
 - **Orphaned role assignments at resource-group scope were never found.** Five orphan checks
   (the 00-02 sweep, the 00-01 and 01-02 labs, and `Remove-LabResourceGroup.ps1`) called
   `Get-AzRoleAssignment -Scope /subscriptions/...`, which returns assignments at that scope
-  and above only. They now list the whole subscription. The script came from the SC500
-  engine, so SC500-Academy has the same limitation.
+  and above only. They now list the whole subscription.
 
 ### Content notes
 
@@ -388,8 +411,7 @@ The Academy now teaches the infrastructure before it expects you to administer i
 
 ## Phase 2: AZ-104 foundation and first module
 
-Bootstrapped from SC500-Academy@9fa07ce (engine only). Outline targeted: skills measured
-as of April 17, 2026, confirmed current on 2026-09-29.
+Outline targeted: skills measured as of April 17, 2026, confirmed current on 2026-09-29.
 
 ### Added
 
@@ -398,9 +420,9 @@ as of April 17, 2026, confirmed current on 2026-09-29.
 - `data/objectives/az104-2026-04-17.json`: the 82 objectives verbatim, with stable
   semantic ids (`id.users.sspr`) and a planned owner module for each.
 - `docs/SKILLS-MEASURED-SNAPSHOT.md`: the AZ-104 skills-measured section.
-- Five-domain colour system. Networking magenta (`--d-04`) is new; its dark-theme values
-  are computed (`#BF0077` is 2.88:1 on the dark background, below the 3:1 floor).
-  Monitor & Maintain moved to `--d-05`.
+- Five-domain colour system, one colour and one icon per AZ-104 domain. Networking
+  magenta's (`--d-04`) dark-theme values are computed (`#BF0077` is 2.88:1 on the dark
+  background, below the 3:1 floor).
 - Module 01-01, Microsoft Entra users and groups: lesson, free lab, 10-question
   knowledge check, three A6 comparisons, 10 flashcards.
 - Appendix A1, Exam information: outline version, localized-exam timing, scoring,
@@ -411,24 +433,23 @@ as of April 17, 2026, confirmed current on 2026-09-29.
 - Validator checks: objectives data must match the snapshot; lesson `objective_ids`
   must match their bullets; no domain hex outside `tokens.css`; no literal storage keys.
 
-### Changed
-
-- All 19 `SC500*` globals renamed `Academy*`. Storage keys and cache names use the
-  `az104` prefix.
-- Module 0 adapted for AZ-104: PIM lesson removed (Entra ID P2, not in the outline);
-  teardown checklist rewritten around AZ-104 traps (locks, Recovery Services vault soft
-  delete, deallocated disks, tenant-wide Entra settings).
-- Outline-drift workflow: reads the study-guide URL from `data/exam.js`, ignores line
-  wrapping when comparing, and no longer polls the SC-500 practice-assessment sentence.
+- Module 0, lab safety: lab topology and conventions, cost guardrails, and a teardown
+  checklist built around AZ-104 traps (locks, Recovery Services vault soft delete,
+  deallocated disks, tenant-wide Entra settings). PIM is deliberately not used: it needs
+  Entra ID P2 and isn't in the outline.
+- Outline-drift workflow: reads the study-guide URL from `data/exam.js` and ignores line
+  wrapping when comparing.
 - Validator: a bullet owned by a module not yet written is a warning ("planned"); a
-  bullet with no owner is still an error. `forensic_relevance` is optional.
-- Accessibility check: AZ-104 routes, and the theme key read from `data/exam.js`.
+  bullet with no owner is still an error.
+- Accessibility check over the AZ-104 routes, with the theme key read from `data/exam.js`.
+- Storage keys and cache names use the `az104` prefix.
+- `content/official-training.json`, empty until the AZ-104 learning paths are verified.
 
-### Fixed (inherited from the SC500 engine)
+### Fixed (engine)
 
 - Service worker deleted every cache not its own; Cache Storage is per origin, so it
-  evicted other Academies' offline copies. It now deletes only `az104-` caches.
-  **SC500-Academy still has this bug and needs the same one-line fix.**
+  evicted the offline copies of other sites on the same `github.io` origin. It now
+  deletes only `az104-` caches.
 - Lesson section labels were hard-tinted with specific domain colours (always Identity
   blue for "First principles"), and the strong colour failed 4.5:1 as text in dark mode.
   They now use the lesson's own domain ink.
@@ -437,9 +458,3 @@ as of April 17, 2026, confirmed current on 2026-09-29.
 - Tables built in JavaScript (coverage, objective status, exam prep) were scrollable but
   not keyboard-focusable (axe: scrollable-region-focusable).
 - The teardown sweep filtered Entra role assignments by sign-in name instead of object id.
-
-### Removed
-
-- All SC-500 lessons, labs, quizzes, flashcards and appendices, and the SC-500
-  official-training mapping (`content/official-training.json` is empty until the AZ-104
-  learning paths are verified).

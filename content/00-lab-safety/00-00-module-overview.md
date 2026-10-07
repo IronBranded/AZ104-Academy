@@ -142,10 +142,10 @@ Labs that need a second region, such as the Site Recovery failover in 05-02, say
 | --- | --- | --- |
 | Lab resource group | `rg-az104-lab-<moduleId>` | `rg-az104-lab-02-04` |
 | Long-lived resource group | `rg-az104-core` | — |
-| Resource | `<abbrev>-az104-<moduleId>-<n>` | `vm-az104-03-04-1` |
-| Entra object | `az104-<moduleId>-<purpose>` | `az104-01-01-app-reg` |
-| Policy assignment | `az104-<moduleId>-<policy>` | `az104-01-03-require-https` |
-| Tag on every lab resource | `az104-module = <moduleId>` | `az104-module = 02-04` |
+| Resource | `<abbrev>-az104-<moduleId>-<n>` | `vm-az104-03-02-1` |
+| Entra object | `az104-<moduleId>-<purpose>` | `az104-01-01-sales-dynamic` |
+| Policy assignment | `az104-<moduleId>-<policy>` | `az104-01-03-allowed-loc` |
+| Tag on every lab resource | `az104-module = <moduleId>` | `az104-module = 03-02` |
 
 The tag is what makes an orphan hunt possible later. Resource group names cover
 resources; the tag covers the ones that end up somewhere unexpected.

@@ -42,7 +42,7 @@
 
   var ORDER = { none: 0, low: 1, mid: 2, high: 3, max: 4 };
 
-  /* Hourly meters are named in the labs and in appendix A2. Flagging them here
+  /* Hourly meters are named in each lab's header and in data/exam.js. Flagging them here
      matters more than the level chip: a Low lab you forget costs nothing, and a
      HIGH one costs by the hour whether or not you are looking at it. */
   var METERED = window.AcademyExam.metered || {};
