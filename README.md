@@ -233,16 +233,6 @@ Progress is stored only in your browser. Export it from the dashboard to move it
   [AZ-104 practice assessment](https://learn.microsoft.com/en-us/credentials/certifications/exams/az-104/practice/assessment?assessment-type=practice&assessmentId=21).
 - Associate certifications expire annually. You renew with a free online assessment on Microsoft Learn.
 
-## Running it locally
-
-It's a static GitHub Pages site with no build step: every page is Markdown and JSON fetched at runtime by a
-hash router. Serve the folder rather than opening `index.html` from disk:
-
-```powershell
-python -m http.server 8080
-# then open http://localhost:8080/
-```
-
 ## Feedback and contributing
 
 Found something wrong or out of date? Open an issue with the lesson id and the Microsoft Learn page that
